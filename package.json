@@ -1,0 +1,18 @@
+{
+  "name": "ci-jasmine-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "karma start test/karma.conf.js --single-run"
+  },
+  "devDependencies": {
+    "jasmine-core": "*",
+    "karma": "^4.0.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-edge-launcher": "^0.4.2",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-verbose-reporter": "0.0.6"
+  }
+}
