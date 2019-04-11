@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js\utils\shared.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">js/utils/</a> shared.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">73.17% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>30/41</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">60% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>15/25</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>2/2</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">73.17% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>30/41</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">var SHARED = {
+  /**
+   * Parse un string en un objet Location (on peut alors utiliser les attributs host/protocol/...)
+   *
+   * @param {string} stringToParse
+   *  doit impérativement commencer par un protocole ("http://", "https://", "ftp://", etc...)
+   *    SINON
+   *  le string remplacerait le .pathname de l'URI de la page en cours (window.page_location)
+   *    ET
+   *  renvoie alors une exception
+   *
+   * @throws StringIsNotAnUriException
+   * @return {HTMLElement/Location}
+   */
+  stringToLocation: function (stringToParse) {
+    let fakeWindowLocation = document.createElement('a');
+    fakeWindowLocation.href = stringToParse;
+    LoggerModule.info("stringToParse", stringToParse);
+    LoggerModule.log("fakeWindowLocation.href", fakeWindowLocation.href);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (stringToParse.toLowerCase() !== fakeWindowLocation.href) {
+<span class="cstat-no" title="statement not covered" >      throw new EXCEPTIONS.StringIsNotAnUriException("'" + stringToParse + "' wasn\'t parsed to an URI (result: '" + fakeWindowLocation.href + "')");</span>
+    }
+    return fakeWindowLocation;
+  },
+&nbsp;
+  /**
+   * Transforme et stock les paramètres GET d'une URL en un Objet
+   *
+   * @param {object} target
+   *    Objet ParametreUrl cible contenant
+   *      - {string} locationSearch
+   *        chaîne de caractères correspondants aux paramètres
+   *        commençant par un '?' et avec &amp; comme séparateur des paramètres (&amp;a=b)
+   *
+   *      - {boolean} isAlreadyDecoded
+   *        Précise si la chaîne de caractères passée a déjà été décodée ou non
+   *
+   *      - {boolean} isEmptyAllowed
+   *        détermine si l'absence de paramètres doit être considéré comme une exception ou non
+   *
+   * @returns {object}
+   *
+   * @throws "No parameters detected"
+   */
+  getParamsFromPageUri: function (target) {
+    let _pageUri = target.pageUri,
+      _location = target.page_location,
+      _isEmptyAllowed = target.isEmptyAllowed,
+      _isAlreadyDecoded = target.isAlreadyDecoded;
+&nbsp;
+    let parametresUrl = {
+        asRaw: {},
+        asArray: {},
+        locationSearch: ""
+      },
+      parametresSplit = []
+&nbsp;
+    //Vérifier que l'URL contient des paramètres GET
+    //let debutParam = _pageUri.indexOf("?");
+    //if (debutParam &lt; 0) {
+    if (!_location.search) {
+      if (_isEmptyAllowed)
+        return parametresUrl;
+      else
+        throw new EXCEPTIONS.NoParametersDetectedInURI('Query string should start with "?"');
+    }
+    //{string} sous partie de l'URI commençant au "?" (équivaut à window.page_location.search)
+    //parametresUrl.locationSearch = _pageUri.substr(debutParam);
+    parametresUrl.locationSearch = _location.search;
+&nbsp;
+    //EXCEPTIONS: URI vide et/ou sans paramètres GET
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (parametresUrl.locationSearch.indexOf("=") &lt; 0) {
+<span class="cstat-no" title="statement not covered" >      if (_isEmptyAllowed)</span>
+<span class="cstat-no" title="statement not covered" >        return parametresUrl;</span>
+<span class="cstat-no" title="statement not covered" >      throw new EXCEPTIONS.NoParametersDetectedInURI();</span>
+    }
+&nbsp;
+    //Enlever le '?' initial, s'il existe
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (parametresUrl.locationSearch[0] === '?')
+      parametresUrl.locationSearch = parametresUrl.locationSearch.substr(1);
+&nbsp;
+    //Récupérer les paramètres
+    parametresSplit = parametresUrl.locationSearch.split("&amp;"); //Tout derrière le 1er "?" (que l'on supprime) de l'URL --&gt; devient un tableau
+    //Stocker les paramètres comme objet
+    let i = parametresSplit.length;
+    while (i--) {
+      //Ignorer les paramètres vides "&amp;&amp;"
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (!parametresSplit[i].length)
+<span class="cstat-no" title="statement not covered" >        continue;</span>
+&nbsp;
+      let arr = parametresSplit[i].split("="); //arr[0] == clé/paramètre ("mask", "data", ...)
+&nbsp;
+      //Ignorer les faux paramètres "&amp;toto" ou "&amp;tata="
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (arr.length &lt; 2 ||                 //paramètres sans "="
+        !arr[0].length || !arr[1].length)   //paramètres sans valeur après le "="
+<span class="cstat-no" title="statement not covered" >        continue; </span>//ignorer le paramètre
+&nbsp;
+      //Décoder si nécessaire
+      if (!_isAlreadyDecoded)
+        try {
+          arr[1] = decodeURIComponent(arr[1]);
+        } catch (e) {
+<span class="cstat-no" title="statement not covered" >          if (e instanceof URIError) {</span>
+<span class="cstat-no" title="statement not covered" >            _isAlreadyDecoded = true;</span>
+<span class="cstat-no" title="statement not covered" >            parametresUrl.asRaw[arr[0]] = arr[1];</span>
+          } else
+<span class="cstat-no" title="statement not covered" >            throw e;</span>
+        }
+      parametresUrl.asRaw[arr[0]] = arr[1];
+&nbsp;
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (!parametresUrl.asRaw[arr[0]])
+<span class="cstat-no" title="statement not covered" >        LoggerModule.warn("Le paramètre '" + arr[0] + "' n'a pas de valeur");</span>
+&nbsp;
+      parametresUrl.asArray["_" + arr[0]] = (parametresUrl.asRaw[arr[0]]).split(",");
+    }
+    return parametresUrl;
+  }
+&nbsp;
+};</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 11 2019 16:09:44 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

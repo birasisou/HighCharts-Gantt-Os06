@@ -8,7 +8,7 @@ module.exports = function(config) {
     basePath: '',
 
     // plugins starting with karma- are autoloaded
-    plugins: ['karma-chrome-launcher', 'karma-firefox-launcher', 'karma-edge-launcher', 'karma-jasmine', 'karma-verbose-reporter'],
+    plugins: ['karma-chrome-launcher', 'karma-firefox-launcher', 'karma-edge-launcher', 'karma-jasmine', 'karma-verbose-reporter', 'karma-coverage'],
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
@@ -26,12 +26,22 @@ module.exports = function(config) {
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    preprocessors: {},
+    preprocessors: {
+      '../src/**/*.js': 'coverage'
+    },
+
+    coverageReporter: {
+      dir: 'coverage',
+      reporters: [
+        {type: 'html', subdir: 'lcov-report'},
+        {type: 'json', subdir: './', file: 'coverage.json'}
+      ]
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['verbose', 'progress'],
+    reporters: ['verbose', 'progress', 'coverage'],
 
     // web server port
     port: 9876,
@@ -41,7 +51,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
@@ -71,7 +81,7 @@ module.exports = function(config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity
-  }
+  };
 
   //*
   if (process.env.TRAVIS) {

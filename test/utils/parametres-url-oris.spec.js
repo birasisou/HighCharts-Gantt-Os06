@@ -1,8 +1,10 @@
 describe("ParametresUrlOris permet d'initialiser différents paramètres nécessaires à l'interaction avec une BD Oris", function() {
+  LoggerModule.setDebug(false);
 
   describe("Lors de l'initialisation...", function() {
     it("Renvoie une exception si l'un des paramètres obligatoires est absent", function() {
-      let url = window.location.href + "?param1=aze&param2=bbb",
+      let url = "http://XxX_420-Dark-Angel-1337-du-06_XxX:8080/id-000192.168.1.74424011-0/reste/de/l/page_location/index.html"
+        + "?param1=aze&param2=bbb",
         mandatoryParameters = ["data", "id", "start", "end"];
       let parametres_url = new ParametresUrlOris(url);
 
@@ -15,7 +17,7 @@ describe("ParametresUrlOris permet d'initialiser différents paramètres nécess
     });
 
     it("Cas normal", function() {
-      let parametres_url = new ParametresUrlOris("http://XxX_Dark-Angel-1337-du-94_XxX:8080/id-000192.168.1.74424011-0/reste/de/l/page_location/index.html"
+      let parametres_url = new ParametresUrlOris("http://XxX_420-Dark-Angel-1337-du-06_XxX:8080/id-000192.168.1.74424011-0/reste/de/l/page_location/index.html"
           + "?data=.&id=col0&start=col1&end=col2", true, true);
 
       parametres_url.init();

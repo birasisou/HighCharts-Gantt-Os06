@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js\utils\exceptions.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">js/utils/</a> exceptions.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">68.42% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>13/19</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">58.33% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>7/12</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">66.67% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>4/6</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">68.42% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>13/19</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const EXCEPTIONS = {
+  /**
+   * Exception renvoyée si l'URL de la page (passé en argument de la fonction init) ne contient pas de paramètres GET
+   * (commence à "?", sont séparés par des "&amp;" et ont la forme &lt;clé&gt;=&lt;valeur&gt;
+   *
+   * @param {string} msg
+   *   @default undefined
+   *   message complémentaire utilisé pour détailler l'erreur et faciliter le débug
+   *
+   * @constructor
+   */
+  NoParametersDetectedInURI: function (msg) {
+    this.type = "NoParametersDetectedInURI";
+    this.description = "No URI parameters detected";
+    this.message = msg || undefined;
+  },
+&nbsp;
+  /**
+   * Exception renvoyée si un argument passé à une fonction est jugé comme invalide
+   *
+   * @param {string} msg
+   *   @default undefined
+   *   message complémentaire utilisé pour détailler l'erreur et faciliter le débug
+   *
+   * @constructor
+   */
+  InvalidArgumentExcepetion: function (msg) {
+    this.type = "InvalidArgumentExcepetion";
+    this.description = "An invalid argument was passed to a function";
+    this.message = msg || undefined;
+  },
+&nbsp;
+  /**
+   * Exception renvoyée si une fonction non implémentée est appelée.
+   * Elle peut être en cours dedéveloppement
+   * OU
+   * Un objet (interface / class abstraite) a été hérité mais pas correctement implémenté
+   *
+   * @param {string} msg
+   *   @default undefined
+   *   message complémentaire utilisé pour détailler l'erreur et faciliter le débug
+   *
+   * @constructor
+   */
+  NotImplementedException: function (msg) {
+    this.type = "NotImplementedException";
+    this.description = "This function is not yet implemented";
+    this.message = msg || undefined;
+  },
+&nbsp;
+  /**
+   * Exception renvoyée si l'URL de la page (passé en argument de la fonction init)
+   * ne contient pas l'un des paramètres GET obligatoires nécessaire à la communication avec une base
+   * ou celui-ci n'a pas de valeurs
+   *
+   * @param {string} msg
+   *   @default undefined
+   *   message complémentaire utilisé pour détailler l'erreur et faciliter le débug
+   *
+   * @constructor
+   */
+  NoMandatoryUrlParameterDetected: function (msg) {
+    this.type = "NoMandatoryUrlParameterDetected";
+    this.description = "A mandatory GET parameter was missing or has no value";
+    this.message = msg || <span class="branch-1 cbranch-no" title="branch not covered" >undefined;</span>
+  },
+&nbsp;
+  /**
+   * Exception renvoyée si l'host ou l'ID-Oris n'est pas détecté dans l'URI de la page (normalement passé en paramètre au constructeur)
+   * @param msg
+   * @constructor
+   */
+  NoIdOrisOrHostDetected: <span class="fstat-no" title="function not covered" >function (msg) {</span>
+<span class="cstat-no" title="statement not covered" >    this.type = "NoIdOrisOrHostDetected";</span>
+<span class="cstat-no" title="statement not covered" >    this.description = "Erreur lors de la récupération de l'ID-Oris ou de l'host";</span>
+<span class="cstat-no" title="statement not covered" >    this.message = msg || undefined;</span>
+  },
+&nbsp;
+  /**
+   * Exception renvoyée si une string n'a pas pu être parsé en objet Location (en gros, une URI)
+   * Ceci peut arriver si le string ne comprenait pas de protocole
+   *
+   * (et vu que le parsing enlève les vides inutiles, " http://foo.bar " sera différent après parsing, i.e "http://foo.bar")
+   *
+   * @param msg
+   * @constructor
+   */
+  StringIsNotAnUriException: <span class="fstat-no" title="function not covered" >function (msg) {</span>
+<span class="cstat-no" title="statement not covered" >    this.type = "StringIsNotAnUriException";</span>
+<span class="cstat-no" title="statement not covered" >    this.description = 'A string was not parsed into a Location object. Missing protocole ("http", "https", "ftp", ...) could be the reason';</span>
+<span class="cstat-no" title="statement not covered" >    this.message = msg || undefined;</span>
+  }
+};</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 11 2019 16:09:44 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

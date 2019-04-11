@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js\utils\parametres-url.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">js/utils/</a> parametres-url.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">97.06% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>33/34</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>12/12</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">80% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>4/5</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">97.06% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>33/34</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * À hériter
+ * Sert de classe abstraite, de base (interface), aux objets permettant d'intéragir avec une nouvelle
+ * (différent format de données / page_location /etc...) base de données
+ *
+ * @param {string} windowLocation
+ *  @required
+ *  substring d'une URI contenant les paramètres GET (avec ou sans "?" initial)
+ *
+ * @param {boolean} isEmptyAllowed
+ *  @default false
+ *  autorise ou non la présence de paramètres GET sans valeurs
+ *
+ * @param {boolean} isAlreadyDecoded
+ *  @default false
+ *  précise s'il est nécessaire ou non de décoder l'URL
+ *
+ * @constructor
+ */
+function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
+  //EXCEPTIONS: on n'accepte que du {string} pour locationSearch
+  //!ATTENTION! Ne pas modifier le message
+  if (typeof windowLocation !== "string")
+    throw new EXCEPTIONS.InvalidArgumentExcepetion("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)");
+  this.isAlreadyDecoded = isAlreadyDecoded || false;
+  this.isEmptyAllowed = isEmptyAllowed || false;
+&nbsp;
+  //@argument {string} windowLocation
+  this.pageUri = windowLocation;
+  //{Object} Location construit à partir de l'@argument windowLocation
+  this.page_location = undefined;
+&nbsp;
+  //les tuples clé/valeur des paramètres GET récupérés dans l'url
+  this.asRaw = {};     //valeur de chaque paramètre sous forme de {string}
+  this.asArray = {};   //valeur de chaque paramètre sous forme d'array (séparation = "," virgule)
+  //Paramètres GET obligatoire (Exception renvoyée si l'un d'entre eux manque
+  this.MANDATORY_GET_PARAMETERS = [];
+  //Clé du JSON (reçu du webservice) contenant les données du graph
+  this.rootName = undefined;
+  //URL du webservice d'où on  récupère les données
+  this.webserviceUrl = undefined;
+&nbsp;
+&nbsp;
+  /**
+   * Initialise l'objet
+   * Toujours dans cet ordre
+   * C'est aux classes héritiaires d'implémenter les fonctions de façon à ce que ça corresponde en nom et en type de retour
+   */
+  this.init = function() {
+    //Transforme l'argument URL {string} en objet page_location
+    if (!this.page_location)
+      this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
+&nbsp;
+    //Récupérer les paramètres de l'URL
+    let params = SHARED.getParamsFromPageUri(this);
+    this.asRaw = params.asRaw;
+    this.asArray = params.asArray;
+    this.locationSearch = params.locationSearch;
+&nbsp;
+    //Check for missing / incorrect MANDATORY parameters
+    this.checkMandatoryParameters();
+&nbsp;
+    //Générer l'URL pour les requêtes REST, dans le cas d'Oris on a le nom dans &amp;data (jusqu'à un "_gestion.ini") et on rajoute un "s"
+    this.webserviceUrl = this.generateWebserviceUrl();
+&nbsp;
+    //Générer le nom de l'objet contenant les données une fois le JSON récupéré par requête GET
+    this.rootName = this.generateRootName();
+  };
+&nbsp;
+  /**
+   * Génère l'URL du web-service à questionner pour récupérer les données (JSON) du graphique
+   *
+   * @returns {string}
+   */
+  this.generateWebserviceUrl = function() {
+    throw new EXCEPTIONS.NotImplementedException();
+  };
+&nbsp;
+  /**
+   * Génère le nom de la clé (du JSON) qui contient les données du graphique
+   * TODO: voir comment gérer le cas où la clé est "nested"
+   *
+   * @returns {string}
+   */
+  this.generateRootName = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >    throw new EXCEPTIONS.NotImplementedException();</span>
+  };
+&nbsp;
+  /**
+   * Vérifie qu'aucun des paramètres définis (dans le code) comme "obligatoires" sont absents ou invalide ("" / undefined)
+   *
+   * À appeler après getParamsFromUrl()
+   */
+  this.checkMandatoryParameters = function() {
+    let missingParameters = [];
+    let length = this.MANDATORY_GET_PARAMETERS.length;
+    while (length--) {
+      //potentiellement false, undefined, 0, ou "" mais vu que tout est stocké sous forme de de {string], que "" et undefined remplissent cette condition
+      if (!this.asRaw[this.MANDATORY_GET_PARAMETERS[length]])
+        missingParameters.push(this.MANDATORY_GET_PARAMETERS[length]);
+    }
+    if (missingParameters.length)
+      throw new EXCEPTIONS.NoMandatoryUrlParameterDetected(missingParameters.toString() + ' is/are missing');
+  }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 11 2019 16:09:44 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

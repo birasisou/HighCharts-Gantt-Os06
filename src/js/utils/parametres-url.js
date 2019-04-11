@@ -48,7 +48,8 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
    */
   this.init = function() {
     //Transforme l'argument URL {string} en objet page_location
-    this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
+    if (!this.page_location)
+      this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
 
     //Récupérer les paramètres de l'URL
     let params = SHARED.getParamsFromPageUri(this);

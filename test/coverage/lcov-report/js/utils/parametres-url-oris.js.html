@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js\utils\parametres-url-oris.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">js/utils/</a> parametres-url-oris.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">85.29% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>29/34</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">81.82% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>9/11</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>8/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">85.29% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>29/34</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * @Subclass of ParametresUrl
+ *
+ * @param {string} pageUri
+ *  @required
+ *
+ * @param {boolean} isEmptyAllowed
+ *  @default false
+ *
+ * @param {boolean} isAlreadyDecoded
+ *  @default false
+ *
+ * @constructor
+ */
+function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
+&nbsp;
+  //Hériter de ParametresUrl
+  ParametresUrl.call(this, pageUri, isEmptyAllowed, isAlreadyDecoded);
+&nbsp;
+  //Paramètres OBLIGATOIRES de cette implémentation
+  this.MANDATORY_GET_PARAMETERS = ["data", "id", "start", "end"];
+  this.USER_INFOS = {
+    HOST: undefined,
+    ID_ORIS: undefined
+  };
+&nbsp;
+  /**
+   * Extends basic init()
+   */
+  this.init = (function (oldInit) {
+    return function() {
+      this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
+&nbsp;
+      this.USER_INFOS.ID_ORIS = generateID_Oris.call(this);
+      this.USER_INFOS.HOST = generateHost.call(this);
+      oldInit.call(this);
+    }
+  })(this.init);
+&nbsp;
+  /**
+   * Récupère le nom de la base dans l'attribut "data="
+   * ET
+   * y rajoute un "s" (minuscule)
+   * CE QUI correspond au nom de l'objet contenant les valeurs des Points/Axes etc...
+   * à la racine du JSON récupéré par la requête GET
+   *
+   * @return {string}  le nom de la base avec un "s" en plus
+   *
+   * /////////////////////////////////////////////////
+   *
+   * @param {string} urlBaseDeDonnees
+   * @returns {string}
+   */
+  //TODO: update
+  this.generateRootName = function(urlBaseDeDonnees) {
+    //if (!this.asRaw.data) TODO No Need car "CheckMandatory
+        //    throw new EXCEPTIONS.NoMandatoryUrlParameterDetected('Paramètre "&amp;data" manquant')
+        return false;
+        //en minuscules
+<span class="cstat-no" title="statement not covered" >        let lowerData = parametres_url_data.toLowerCase();</span>
+        //Récupère tout AVANT ".ini" dans l'attribut "data"
+<span class="cstat-no" title="statement not covered" >        var chemin_ini = lowerData.substring(0, lowerData.lastIndexOf("_gestion.ini") + "_gestion.ini".length), //+12 car ".ini" = 4 caractères</span>
+            //Nom de la base AVEC "_gestion.ini"
+            base_ini = chemin_ini.substring(chemin_ini.lastIndexOf("/") + 1),
+            //Nom de la base SANS "_gestion.ini" et AVEC un "s" en plus
+            base_nameS = base_ini.replace("_gestion.ini", "") + "s";
+<span class="cstat-no" title="statement not covered" >        return base_nameS;</span>
+    };
+&nbsp;
+  /**
+   * Génère l'URL du webservice Oris permettant de communiquer avec la base
+   *  location.host inclu automatiquement le port s'il existe
+   *
+   * @return {string} l'URI du WebService distribuant les données des de la BD
+   */
+  this.generateWebserviceUrl = function() {
+    return this.page_location.protocol + "//" + this.USER_INFOS.HOST + "/"
+      + this.USER_INFOS.ID_ORIS + "/"
+      + this.asRaw["data"]
+      + genererParamData(this.asRaw);
+  };
+&nbsp;
+  /**
+   * @private
+   *
+   * @param parametresAsRaw
+   * @return {string}
+   */
+  function genererParamData(parametresAsRaw) {
+    let toutData = "?json=true";
+    for(let i in parametresAsRaw) {
+      if (parametresAsRaw.hasOwnProperty(i)
+        &amp;&amp; typeof parametresAsRaw[i] === "string"
+        &amp;&amp; i !== "data")
+        toutData += "&amp;" + i + "=" + parametresAsRaw[i];
+    }
+    return toutData;
+  }
+&nbsp;
+  /**
+   * @private
+   * Renvoie l'ID Oris en "splittant" l'page_location à chaque slash ("/")
+   *
+   * @return {string} id Oris
+   */
+  function generateID_Oris () {
+    let path = this.page_location.pathname; // renvoie "/id-000192.168.1.74424011-0/reste/de/l/page_location/index.html"
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (path.split("/")[1].indexOf("id-") &gt;= 0) {
+      this.USER_INFOS.ID_ORIS = path.split("/")[1];  //[0] est une chaine vide car le pathname commence par un "/"
+      return this.USER_INFOS.ID_ORIS;
+    } else
+<span class="cstat-no" title="statement not covered" >      throw new EXCEPTIONS.NoIdOrisOrHostDetected();</span>
+  }
+&nbsp;
+  /**
+   * Renvoie l'attribut host de l'objet window.page_location, et non pas hostname,
+   * afin d'inclure un éventuel port
+   *
+   * @return {string}
+   */
+  function generateHost() {
+    this.USER_INFOS.HOST = this.USER_INFOS.HOST || this.page_location.host;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.USER_INFOS.HOST)
+<span class="cstat-no" title="statement not covered" >      throw new EXCEPTIONS.NoIdOrisOrHostDetected();</span>
+    return this.USER_INFOS.HOST;
+  }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 11 2019 16:09:44 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>
