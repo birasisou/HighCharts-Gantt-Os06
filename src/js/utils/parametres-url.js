@@ -1,7 +1,7 @@
 /**
  * À hériter
  * Sert de classe abstraite, de base (interface), aux objets permettant d'intéragir avec une nouvelle
- * (différent format de données / location /etc...) base de données
+ * (différent format de données / page_location /etc...) base de données
  *
  * @param {string} windowLocation
  *  @required
@@ -21,17 +21,23 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
   //EXCEPTIONS: on n'accepte que du {string} pour locationSearch
   //!ATTENTION! Ne pas modifier le message
   if (typeof windowLocation !== "string")
-    throw new EXCEPTIONS.InvalidArgumentExcepetion("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (location)");
+    throw new EXCEPTIONS.InvalidArgumentExcepetion("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)");
   this.isAlreadyDecoded = isAlreadyDecoded || false;
   this.isEmptyAllowed = isEmptyAllowed || false;
 
+  //@argument {string} windowLocation
   this.pageUri = windowLocation;
+  //{Object} Location construit à partir de l'@argument windowLocation
+  this.page_location = undefined;
 
-  this.locationSearch = undefined;  //TODO: useless ?
-  this.asRaw = {};     //le paramètre entier
-  this.asArray = {};   //le paramètre sous forme de tableau (chaque élément préalablement séparés par une virgule ",")
+  //les tuples clé/valeur des paramètres GET récupérés dans l'url
+  this.asRaw = {};     //valeur de chaque paramètre sous forme de {string}
+  this.asArray = {};   //valeur de chaque paramètre sous forme d'array (séparation = "," virgule)
+  //Paramètres GET obligatoire (Exception renvoyée si l'un d'entre eux manque
   this.MANDATORY_GET_PARAMETERS = [];
+  //Clé du JSON (reçu du webservice) contenant les données du graph
   this.rootName = undefined;
+  //URL du webservice d'où on  récupère les données
   this.webserviceUrl = undefined;
 
 
@@ -41,8 +47,14 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
    * C'est aux classes héritiaires d'implémenter les fonctions de façon à ce que ça corresponde en nom et en type de retour
    */
   this.init = function() {
+    //Transforme l'argument URL {string} en objet page_location
+    this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
+
     //Récupérer les paramètres de l'URL
-    getParamsFromPageUri.call(this);
+    let params = SHARED.getParamsFromPageUri(this);
+    this.asRaw = params.asRaw;
+    this.asArray = params.asArray;
+    this.locationSearch = params.locationSearch;
 
     //Check for missing / incorrect MANDATORY parameters
     this.checkMandatoryParameters();
@@ -53,98 +65,6 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
     //Générer le nom de l'objet contenant les données une fois le JSON récupéré par requête GET
     this.rootName = this.generateRootName();
   };
-
-  /**
-   * @private
-   * Transforme et stock les paramètres GET d'une URL en un Objet
-   *
-   * @param {string} locationSearch
-   *   chaîne de caractères correspondants aux paramètres
-   *   commençant par un '?' et avec & comme séparateur des paramètres (&a=b)
-   *
-   * @param {boolean} isAlreadyDecoded
-   * @default false
-   *   Précise si la chaîne de caractères passée a déjà été décodée ou non
-   *
-   * @param {boolean} isEmptyAllowed
-   * @default false
-   *   détermine si l'absence de paramètres doit être considéré comme une exception ou non
-   *
-   * @returns {object}
-   *
-   * @throws "No parameters detected"
-   */
-  function getParamsFromPageUri() {
-    console.warn("getParamsFromPageUri's this", this);
-    let parametresUrl = {
-        asRaw: {},
-        asArray: {}
-      },
-      parametresSplit;
-
-    //Vérifier que l'URL contient des paramètres GET
-    let debutParam = this.pageUri.indexOf("?");
-    if (debutParam < 0) {
-      if (isEmptyAllowed) {
-        this.locationSearch = "";
-        this.asRaw = parametresUrl.asRaw;
-        this.asArray = parametresUrl.asArray;
-        return parametresUrl;
-      } else
-        throw new EXCEPTIONS.NoParametersDetectedInURI('Query string should start with "?"');
-    }
-    this.locationSearch = this.pageUri.substr(debutParam);
-
-
-    //EXCEPTIONS: URI vide et/ou sans paramètres GET
-    if (this.locationSearch.indexOf("=") < 0) {
-      if (isEmptyAllowed)
-        return parametresUrl;
-      throw new EXCEPTIONS.NoParametersDetectedInURI();
-    }
-
-    //Enlever le '?' initial, s'il existe
-    if (this.locationSearch[0] === '?')
-      this.locationSearch = this.locationSearch.substr(1);
-    //Récupérer les paramètres
-    parametresSplit = this.locationSearch.split("&"); //Tout derrière le 1er "?" (que l'on supprime) de l'URL --> devient un tableau
-    //Stocker les paramètres comme objet
-    let i = parametresSplit.length;
-    while (i--) {
-      //Ignorer les paramètres vides "&&"
-      if (!parametresSplit[i].length)
-        continue;
-
-      let arr = parametresSplit[i].split("="); //arr[0] == clé/paramètre ("mask", "data", ...)
-
-      //Ignorer les faux paramètres "&toto" ou "&tata="
-      if (arr.length < 2 ||                 //paramètres sans "="
-        !arr[0].length || !arr[1].length)   //paramètres sans valeur après le "="
-        continue;
-
-      //Décoder si nécessaire
-      if (!isAlreadyDecoded)
-        try {
-          arr[1] = decodeURIComponent(arr[1]);
-        } catch (e) {
-          if (e instanceof URIError) {
-            isAlreadyDecoded = true;
-            parametresUrl.asRaw[arr[0]] = arr[1];
-          } else
-            throw e;
-        }
-      parametresUrl.asRaw[arr[0]] = arr[1];
-
-      if (!parametresUrl.asRaw[arr[0]])
-        LoggerModule.warn("Le paramètre '" + arr[0] + "' n'a pas de valeur");
-
-      parametresUrl.asArray["_" + arr[0]] = (parametresUrl.asRaw[arr[0]]).split(",");
-    }
-
-    //return parametresUrl;
-    this.asRaw = parametresUrl.asRaw;
-    this.asArray = parametresUrl.asArray;
-  }
 
   /**
    * Génère l'URL du web-service à questionner pour récupérer les données (JSON) du graphique
@@ -181,5 +101,4 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
     if (missingParameters.length)
       throw new EXCEPTIONS.NoMandatoryUrlParameterDetected(missingParameters.toString() + ' is/are missing');
   }
-
 }

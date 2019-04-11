@@ -22,20 +22,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     HOST: undefined,
     ID_ORIS: undefined
   };
-  this.location = undefined;
-  //this.location = SHARED.stringToLocation(this.windowLocation);   //nécessite une URI valide, c-à-d qui commence par un protocole
-
-  //Extends basic init()
-  this.init = (function (oldInit) {
-    return function() {
-      this.location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole
-      this.USER_INFOS.ID_ORIS = generateID_Oris.call(this);
-      this.USER_INFOS.HOST = generateHost.call(this);
-      oldInit();
-      console.info("parent", parent);
-      alert("stall");
-    }
-  })(this.init);
+  //this.page_location = SHARED.stringToLocation(this.windowLocation);   //nécessite une URI valide, c-à-d qui commence par un protocole
 
   /**
    * Récupère le nom de la base dans l'attribut "data="
@@ -74,29 +61,40 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     };
 
   /**
+   * Génère l'URL du web-service à questionner pour récupérer les données (JSON) du graphique
+   *
+   * @returns {string}
+   */
+  //TODO implement
+  this.generateWebserviceUrl = function() {
+    return false;
+  };
+
+  /**
    * Génère l'URL du webservice permettant de communiquer avec la base
    *
    * @return {string}
    */
+  //TODO implement
   this.generateWebserviceUrl = function() {
+    return false;
+
     return this.location.protocol + "//" + this.location.host + "/"
       + this.USER_INFOS.ID_ORIS + "/"     //
-      + _path                           //TODO this.path = &data
+      + _path  //TODO this.path = &data
       + this.USER_INFOS.HOST;
   };
 
-
-
   /**
    * @private
-   * Renvoie l'ID Oris en "splittant" l'location à chaque slash ("/")
+   * Renvoie l'ID Oris en "splittant" l'page_location à chaque slash ("/")
    *
    * @return {string} id Oris
    */
   function generateID_Oris () {
     console.info("generateID_Oris this", this);
 
-    let path = this.location.pathname; // renvoie "/id-000192.168.1.74424011-0/reste/de/l/location/index.html"
+    let path = this.page_location.pathname; // renvoie "/id-000192.168.1.74424011-0/reste/de/l/page_location/index.html"
     if (path.split("/")[1].indexOf("id-") >= 0) {
       this.USER_INFOS.ID_ORIS = path.split("/")[1];  //[0] est une chaine vide car le pathname commence par un "/"
       return this.USER_INFOS.ID_ORIS;
@@ -105,14 +103,14 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   }
 
   /**
-   * Renvoie l'attribut host de l'objet window.location, et non pas hostname,
+   * Renvoie l'attribut host de l'objet window.page_location, et non pas hostname,
    * afin d'inclure un éventuel port
    *
    * @return {string}
    */
   function generateHost() {
     console.info("generateHost this", this);
-    this.USER_INFOS.HOST = this.USER_INFOS.HOST || this.location.host;
+    this.USER_INFOS.HOST = this.USER_INFOS.HOST || this.page_location.host;
     if (!this.USER_INFOS.HOST)
       throw new EXCEPTIONS.NoIdOrisOrHostDetected();
     return this.USER_INFOS.HOST;
@@ -122,4 +120,15 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   function genererParamData() {
     throw new EXCEPTIONS.NotImplementedException()
   }
+
+
+  //Extends basic init()
+  this.init = (function (oldInit) {
+    return function() {
+      oldInit.call(this);
+      this.USER_INFOS.ID_ORIS = generateID_Oris.call(this);
+      this.USER_INFOS.HOST = generateHost.call(this);
+    }
+  })(this.init);
+
 }

@@ -3,7 +3,7 @@
 
  If a project is using Jasmine via the standalone distribution, this file can be customized directly. If a project is using Jasmine via the [Ruby gem][jasmine-gem], this file can be copied into the support directory via `jasmine copy_boot_js`. Other environments (e.g., Python) will have different mechanisms.
 
- The location of `boot.js` can be specified and/or overridden in `jasmine.yml`.
+ The page_location of `boot.js` can be specified and/or overridden in `jasmine.yml`.
 
  [jasmine-gem]: http://github.com/pivotal/jasmine-gem
  */

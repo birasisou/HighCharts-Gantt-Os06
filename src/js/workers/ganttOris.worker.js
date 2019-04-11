@@ -10,7 +10,7 @@
  *
  * @Example:
  * PUB_SUB.publish('/page/load', {
- *   location: '/some/location/path' // any argument
+ *   page_location: '/some/page_location/path' // any argument
  * });
  *
  * var subscription = PUB_SUB.subscribe('/page/load', function(obj) {

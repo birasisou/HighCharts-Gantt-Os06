@@ -1,11 +1,10 @@
 describe("ParametresUrlOris permet d'initialiser différents paramètres nécessaires à l'interaction avec une BD Oris", function() {
-  let parametres_url;
 
-  describe("Lors de l'initialisation", function() {
+  describe("Lors de l'initialisation...", function() {
     it("Renvoie une exception si l'un des paramètres obligatoires est absent", function() {
-      let url = "?param1=aze&param2=bbb",
+      let url = window.location.href + "?param1=aze&param2=bbb",
         mandatoryParameters = ["data", "id", "start", "end"];
-      parametres_url = new ParametresUrlOris(url);
+      let parametres_url = new ParametresUrlOris(url);
 
       //Liste des paramètres obligatoires
       expect( parametres_url.MANDATORY_GET_PARAMETERS ).toEqual(mandatoryParameters);
@@ -15,14 +14,11 @@ describe("ParametresUrlOris permet d'initialiser différents paramètres nécess
         .toThrow(new EXCEPTIONS.NoMandatoryUrlParameterDetected(mandatoryParameters.reverse().toString() + ' is/are missing'));
     });
 
-    it("Cas normal avec '?' initial", function() {
-      parametres_url = new ParametresUrlOris("?data=.&id=col0&start=col1&end=col2", true, true);
+    it("Cas normal", function() {
+      let parametres_url = new ParametresUrlOris("http://XxX_Dark-Angel-1337-du-94_XxX:8080/id-000192.168.1.74424011-0/reste/de/l/page_location/index.html"
+          + "?data=.&id=col0&start=col1&end=col2", true, true);
 
-      try {
-        parametres_url.init();
-      } catch (e) {
-        console.log(e.name, e);
-      }
+      parametres_url.init();
 
       expect( parametres_url.asRaw ).toEqual({
         data: ".",
