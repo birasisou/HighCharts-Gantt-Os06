@@ -26,7 +26,7 @@ var SHARED = {
   /**
    * Transforme et stock les paramètres GET d'une URL en un Objet
    *
-   * @param {object} target
+   * @param {object/ParametresUrl} target
    *    Objet ParametreUrl cible contenant
    *      - {string} locationSearch
    *        chaîne de caractères correspondants aux paramètres
@@ -39,6 +39,7 @@ var SHARED = {
    *        détermine si l'absence de paramètres doit être considéré comme une exception ou non
    *
    * @returns {object}
+   *    config pour un Objet ParametresUrl
    *
    * @throws "No parameters detected"
    */
@@ -53,7 +54,7 @@ var SHARED = {
         asArray: {},
         locationSearch: ""
       },
-      parametresSplit = []
+      parametresSplit = [];
 
     //Vérifier que l'URL contient des paramètres GET
     //let debutParam = _pageUri.indexOf("?");

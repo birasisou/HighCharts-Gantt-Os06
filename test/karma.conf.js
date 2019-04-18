@@ -8,7 +8,16 @@ module.exports = function(config) {
     basePath: '',
 
     // plugins starting with karma- are autoloaded
-    plugins: ['karma-chrome-launcher', 'karma-firefox-launcher', 'karma-edge-launcher', 'karma-jasmine', 'karma-verbose-reporter', 'karma-coverage'],
+    plugins: [
+      'karma-chrome-launcher',
+      'karma-firefox-launcher',
+      'karma-edge-launcher',
+      'karma-jasmine',
+      'karma-verbose-reporter',
+      'karma-coverage'/*,
+      'karma-coverage-istanbul-reporter'  --> "karma-coverage-istanbul-reporter": "^2.0.5" DANS PACKAGE.JSON
+      //*/
+    ],
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
@@ -33,7 +42,9 @@ module.exports = function(config) {
     coverageReporter: {
       dir: 'coverage',
       reporters: [
-        {type: 'html', subdir: 'lcov-report'},
+        //{type: 'html', subdir: 'html-report'},
+        {type: 'lcov', subdir: './'}, //thml+Icov
+        {type: 'text', subdir: './'}, //sans filename --> écrit dans la console
         {type: 'json', subdir: './', file: 'coverage.json'}
       ]
     },
@@ -51,7 +62,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
@@ -60,7 +71,7 @@ module.exports = function(config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     //browsers: ['Chrome', 'ChromeHeadless', 'Firefox', 'FirefoxHeadless', 'Edge'],
     //MODE HEADLESS ONLY car le PC décède
-    browsers: ['Chrome_travis_ci', 'FirefoxHeadless'],
+    browsers: ['Chrome_travis_ci'],
 
     // e.g see https://swizec.com/blog/how-to-run-javascript-tests-in-chrome-on-travis/swizec/6647
     customLaunchers: {
@@ -85,8 +96,8 @@ module.exports = function(config) {
 
   //*
   if (process.env.TRAVIS) {
-    //configuration.browsers = ['Chrome_travis_ci'];
     configuration.browsers = ['Chrome_travis_ci', 'FirefoxHeadless'];
+    configuration.logLevel = config.LOG_DEBUG;
   }//*/
 
   config.set(configuration);

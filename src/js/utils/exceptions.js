@@ -1,5 +1,27 @@
 const EXCEPTIONS = {
   /**
+   * Constructeur pour toutes les Exceptions
+   *
+   * @param _type {string}
+   *    EXACTEMENT le nom de la fonction/exception
+   *    sert pour faire un faux "type of" / "class name"
+   *
+   * @param _description {string}
+   *    description générale prédéfinie de l'excepion
+   *
+   * @param _msg {string}
+   *    message passé en paramètre lorsque l'exception est thrown
+   *    sert à détailler cette exception en particulier
+   *
+   * @constructor
+   */
+  DefaultException: function(_type, _description, _msg) {
+    this.type = _type;
+    this.description = _description;
+    this.message = _msg ||undefined;
+  },
+
+  /**
    * Exception renvoyée si l'URL de la page (passé en argument de la fonction init) ne contient pas de paramètres GET
    * (commence à "?", sont séparés par des "&" et ont la forme <clé>=<valeur>
    *
@@ -10,9 +32,10 @@ const EXCEPTIONS = {
    * @constructor
    */
   NoParametersDetectedInURI: function (msg) {
-    this.type = "NoParametersDetectedInURI";
-    this.description = "No URI parameters detected";
-    this.message = msg || undefined;
+    EXCEPTIONS.DefaultException.call(this,
+      "NoParametersDetectedInURI",
+      "No URI parameters detected",
+      msg);
   },
 
   /**
@@ -25,9 +48,10 @@ const EXCEPTIONS = {
    * @constructor
    */
   InvalidArgumentExcepetion: function (msg) {
-    this.type = "InvalidArgumentExcepetion";
-    this.description = "An invalid argument was passed to a function";
-    this.message = msg || undefined;
+    EXCEPTIONS.DefaultException.call(this,
+      "InvalidArgumentExcepetion",
+      "An invalid argument was passed to a function",
+      msg);
   },
 
   /**
@@ -43,9 +67,10 @@ const EXCEPTIONS = {
    * @constructor
    */
   NotImplementedException: function (msg) {
-    this.type = "NotImplementedException";
-    this.description = "This function is not yet implemented";
-    this.message = msg || undefined;
+    EXCEPTIONS.DefaultException.call(this,
+      "NotImplementedException",
+      "This function is not yet implemented",
+      msg);
   },
 
   /**
@@ -60,9 +85,10 @@ const EXCEPTIONS = {
    * @constructor
    */
   NoMandatoryUrlParameterDetected: function (msg) {
-    this.type = "NoMandatoryUrlParameterDetected";
-    this.description = "A mandatory GET parameter was missing or has no value";
-    this.message = msg || undefined;
+    EXCEPTIONS.DefaultException.call(this,
+      "NoMandatoryUrlParameterDetected",
+      "A mandatory GET parameter was missing or has no value",
+      msg);
   },
 
   /**
@@ -71,9 +97,10 @@ const EXCEPTIONS = {
    * @constructor
    */
   NoIdOrisOrHostDetected: function (msg) {
-    this.type = "NoIdOrisOrHostDetected";
-    this.description = "Erreur lors de la récupération de l'ID-Oris ou de l'host";
-    this.message = msg || undefined;
+    EXCEPTIONS.DefaultException.call(this,
+      "NoIdOrisOrHostDetected",
+      "Erreur lors de la récupération de l'ID-Oris ou de l'host",
+      msg);
   },
 
   /**
@@ -86,8 +113,16 @@ const EXCEPTIONS = {
    * @constructor
    */
   StringIsNotAnUriException: function (msg) {
-    this.type = "StringIsNotAnUriException";
-    this.description = 'A string was not parsed into a Location object. Missing protocole ("http", "https", "ftp", ...) could be the reason';
-    this.message = msg || undefined;
+    EXCEPTIONS.DefaultException.call(this,
+      "StringIsNotAnUriException",
+      "'A string was not parsed into a Location object. Missing protocole (\"http\", \"https\", \"ftp\", ...) could be the reason'",
+      msg);
+  },
+
+  XMLHttpBadRequestException: function (msg) {
+    EXCEPTIONS.DefaultException.call(this,
+      "XMLHttpBadRequestException",
+      "XMLHttpRequest resulted with a status code of '400 Bad Request'",
+      msg);
   }
 };

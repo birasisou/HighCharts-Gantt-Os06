@@ -1,4 +1,11 @@
 /**
+ * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
+ * TODO Vu qu'on ne peut pas importer de script dans un Web Worker (erreur de MIME), il faut C/C ce code.
+ * TODO il faut donc penser à le faire à chaque fois que le code est modifié
+ * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
+ */
+
+/**
  * @Subclass of ParametresUrl
  *
  * @param {string} pageUri
@@ -14,6 +21,30 @@
  */
 function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
+  this.CONSTANTS = {
+    // Définir ici comment on nomme chaque paramètre URL nécessaire à l'instanciation des séries HighCharts (en mode Gantt)
+    // Il s'agit d'un Copier/Coller des noms par défaut de HighCharts...
+    HC_CONFIG_KEYS: {
+      id: 'id',                   // {unique string} id de la tâche @MANDATORY
+      start: 'start',             // {date} date de début de la tâche @MANDATORY
+      end: 'end',                 // {date} date de fin de la tâche @MANDATORY (sauf si 'milestone == true', auquel cas il faut null)
+      name: 'name',               // {string} texte apparant sur la tâche
+      milestone: 'is-milestone',  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
+      category: 'category',       // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
+      dependency: 'dependency',   // {string} @id d'une autre tâche dont celle-ci dépend
+      complete: 'complete',       // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
+      color: 'color',             // {RGBA} couleur en RGB ou RGBA (avec ou sans '#', court ou long) de la tâche
+
+      //TODO bonus
+      owner: 'owner',             // responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
+      icon: 'icon'  // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
+    },
+
+    PATH_KEY: "data",                     //clé du paramètres GET contenant le chemin de l'URI du webservice
+
+    ROOT_NAME_IDENTIFIER: "_gestion.ini"  //identificateur du nom de base Oris (utilisé pour récupérer un sub-string du nom complet)
+  };
+
   //Hériter de ParametresUrl
   ParametresUrl.call(this, pageUri, isEmptyAllowed, isAlreadyDecoded);
 
@@ -24,11 +55,13 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     ID_ORIS: undefined
   };
 
+
   /**
    * Extends basic init()
    */
   this.init = (function (oldInit) {
     return function() {
+      //obligé de le dupliquer/rappeler ici pour ce qui suit.
       this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
 
       this.USER_INFOS.ID_ORIS = generateID_Oris.call(this);
@@ -40,31 +73,26 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   /**
    * Récupère le nom de la base dans l'attribut "data="
    * ET
-   * y rajoute un "s" (minuscule)
+   * le formate (enlève _gestion.ini et rajoute un "s" (minuscule)
    * CE QUI correspond au nom de l'objet contenant les valeurs des Points/Axes etc...
-   * à la racine du JSON récupéré par la requête GET
+   * qui sera siuté à la RACINE du JSON récupéré par la requête GET
    *
    * @return {string}  le nom de la base avec un "s" en plus
-   *
-   * /////////////////////////////////////////////////
-   *
-   * @param {string} urlBaseDeDonnees
-   * @returns {string}
    */
-  //TODO: update
-  this.generateRootName = function(urlBaseDeDonnees) {
-    //if (!this.asRaw.data) TODO No Need car "CheckMandatory
-        //    throw new EXCEPTIONS.NoMandatoryUrlParameterDetected('Paramètre "&data" manquant')
-        return false;
-        //en minuscules
-        let lowerData = parametres_url_data.toLowerCase();
-        //Récupère tout AVANT ".ini" dans l'attribut "data"
-        var chemin_ini = lowerData.substring(0, lowerData.lastIndexOf("_gestion.ini") + "_gestion.ini".length), //+12 car ".ini" = 4 caractères
-            //Nom de la base AVEC "_gestion.ini"
-            base_ini = chemin_ini.substring(chemin_ini.lastIndexOf("/") + 1),
-            //Nom de la base SANS "_gestion.ini" et AVEC un "s" en plus
-            base_nameS = base_ini.replace("_gestion.ini", "") + "s";
-        return base_nameS;
+  this.generateRootName = function() {
+    if (this.rootName)
+      return this.rootName;
+
+    //en minuscules
+    let lowerCasePath = this.asRaw[this.CONSTANTS.PATH_KEY].toLowerCase(),
+      offset = this.CONSTANTS.ROOT_NAME_IDENTIFIER.length,
+      //Récupère tout AVANT ".ini" dans l'attribut "data"
+      chemin_ini = lowerCasePath.substring(0, lowerCasePath.lastIndexOf(this.CONSTANTS.ROOT_NAME_IDENTIFIER) + offset), //+12, car ".ini" = 4 caractères
+      //Nom de la base AVEC "_gestion.ini"
+      base_ini = chemin_ini.substring(chemin_ini.lastIndexOf("/") + 1);
+      //Nom de la base SANS "_gestion.ini" et AVEC un "s" en plus
+      this.rootName = base_ini.replace(this.CONSTANTS.ROOT_NAME_IDENTIFIER, "") + "s";
+    return this.rootName;
     };
 
   /**
@@ -76,8 +104,8 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   this.generateWebserviceUrl = function() {
     return this.page_location.protocol + "//" + this.USER_INFOS.HOST + "/"
       + this.USER_INFOS.ID_ORIS + "/"
-      + this.asRaw["data"]
-      + genererParamData(this.asRaw);
+      + this.asRaw[this.CONSTANTS.PATH_KEY]   //&data
+      + genererParamData.call(this);
   };
 
   /**
@@ -86,13 +114,13 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
    * @param parametresAsRaw
    * @return {string}
    */
-  function genererParamData(parametresAsRaw) {
+  function genererParamData() {
     let toutData = "?json=true";
-    for(let i in parametresAsRaw) {
-      if (parametresAsRaw.hasOwnProperty(i)
-        && typeof parametresAsRaw[i] === "string"
+    for(let i in this.asRaw) {
+      if (this.asRaw.hasOwnProperty(i)
+        && typeof this.asRaw[i] === "string"
         && i !== "data")
-        toutData += "&" + i + "=" + parametresAsRaw[i];
+        toutData += "&" + i + "=" + this.asRaw[i];
     }
     return toutData;
   }
@@ -113,6 +141,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   }
 
   /**
+   * @private
    * Renvoie l'attribut host de l'objet window.page_location, et non pas hostname,
    * afin d'inclure un éventuel port
    *
@@ -124,4 +153,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       throw new EXCEPTIONS.NoIdOrisOrHostDetected();
     return this.USER_INFOS.HOST;
   }
+
+  //Automatiquement initialiser l'Objet lorsqu'il est instancié
+  this.init();
 }
