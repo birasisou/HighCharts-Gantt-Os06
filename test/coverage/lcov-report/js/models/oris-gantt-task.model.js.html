@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Code coverage report for js\utils\logger-module.js</title>
+    <title>Code coverage report for js\models\oris-gantt-task.model.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -16,32 +16,32 @@
 <div class='wrapper'>
   <div class='pad1'>
     <h1>
-      <a href="../../index.html">all files</a> / <a href="index.html">js/utils/</a> logger-module.js
+      <a href="../../index.html">all files</a> / <a href="index.html">js/models/</a> oris-gantt-task.model.js
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">16.67% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>7/7</span>
-      </div>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
-        <span class="quiet">Branches</span>
-        <span class='fraction'>4/8</span>
-      </div>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">66.67% </span>
-        <span class="quiet">Functions</span>
-        <span class='fraction'>4/6</span>
+        <span class='fraction'>1/6</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/2</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">16.67% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>7/7</span>
+        <span class='fraction'>1/6</span>
       </div>
     </div>
   </div>
-  <div class='status-line high'></div>
+  <div class='status-line low'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -69,7 +69,10 @@
 24
 25
 26
-27</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+27
+28</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -81,46 +84,46 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
- * @Module
- * Remplace la condition "isDebug" précédent chaque console.log/info/warn/error
- *
- * On peut envisager 3 états
- * @None désactive toutes les fonctions du Logger
- * @Semi désactive .log/.info
- * @All ne désactive rien
- *
- * @type {{warn, log, error, toggleOn, info}}
+ * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
+ * TODO Vu qu'on ne peut pas importer de script dans un Web Worker (erreur de MIME), il faut C/C ce code.
+ * TODO il faut donc penser à le faire à chaque fois que le code est modifié
+ * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
  */
-let LoggerModule = (function () {
-  return {
-    log: console.log,
-    info: console.info,
-    warn: console.warn,
-    error: console.error,
-    setDebug: function(isOn) {
-      this.log = isOn === true ? <span class="branch-0 cbranch-no" title="branch not covered" >console.log </span>: function () {};
-      this.info = isOn === true ? <span class="branch-0 cbranch-no" title="branch not covered" >console.info </span>: function () {};
-      this.warn = isOn === true ? <span class="branch-0 cbranch-no" title="branch not covered" >console.warn </span>: <span class="fstat-no" title="function not covered" >function () {</span>};
-      this.error = isOn === true ? <span class="branch-0 cbranch-no" title="branch not covered" >console.error </span>: <span class="fstat-no" title="function not covered" >function () {</span>};
-      return isOn;
+&nbsp;
+/**
+ * @DataModel pour une tâche Oris
+ * TODO: extends une classe du genre GanttDataModel
+ * @param {Object} data_row Objet contenant les différente
+ * @constructor
+ */
+<span class="fstat-no" title="function not covered" >function OrisGanttTask(data_row, parametres_url_oris_config) {</span>
+  // shortcut
+<span class="cstat-no" title="statement not covered" >  let HC_CONFIG_KEYS = parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  this.configAsOrisData = {};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  this.init = <span class="fstat-no" title="function not covered" >function () {</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    for(let key in HC_CONFIG_KEYS) {</span>
+<span class="cstat-no" title="statement not covered" >      this.configAsOrisData[key] = new OrisData(data_row[key]);</span>
     }
-  }
-}());
+&nbsp;
+  };
+}
 &nbsp;</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->

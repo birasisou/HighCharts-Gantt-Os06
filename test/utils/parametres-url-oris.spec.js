@@ -25,16 +25,17 @@ describe("ParametresUrlOris permet d'initialiser différents paramètres nécess
 
       //Formatage des paramètres de l'URL
       expect( parametres_url.asRaw ).toEqual({
+        end: "col2",
         data: "aze_gestion.ini",
         id: "col0",
-        start: "col1",
-        end: "col2"
+        start: "col1"
+
       });
       expect( parametres_url.asArray ).toEqual({
-        _data: ["aze_gestion.ini"],
-        _id: ["col0"],
+        _end: ["col2"],
         _start: ["col1"],
-        _end: ["col2"]
+        _id: ["col0"],
+        _data: ["aze_gestion.ini"]
       });
       //Génération de l'URL
       expect( parametres_url.webserviceUrl )

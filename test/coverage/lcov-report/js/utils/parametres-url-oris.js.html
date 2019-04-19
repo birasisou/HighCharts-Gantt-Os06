@@ -175,7 +175,41 @@
 130
 131
 132
-133</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -197,11 +231,31 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -308,6 +362,13 @@
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
+ * TODO Vu qu'on ne peut pas importer de script dans un Web Worker (erreur de MIME), il faut C/C ce code.
+ * TODO il faut donc penser à le faire à chaque fois que le code est modifié
+ * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
+ */
+&nbsp;
+/**
  * @Subclass of ParametresUrl
  *
  * @param {string} pageUri
@@ -322,9 +383,28 @@
  * @constructor
  */
 function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
-  //CONSTANTES de l'implémentation Oris
+&nbsp;
   this.CONSTANTS = {
+    // Définir ici comment on nomme chaque paramètre URL nécessaire à l'instanciation des séries HighCharts (en mode Gantt)
+    // Il s'agit d'un Copier/Coller des noms par défaut de HighCharts...
+    HC_CONFIG_KEYS: {
+      id: 'id',                   // {unique string} id de la tâche @MANDATORY
+      start: 'start',             // {date} date de début de la tâche @MANDATORY
+      end: 'end',                 // {date} date de fin de la tâche @MANDATORY (sauf si 'milestone == true', auquel cas il faut null)
+      name: 'name',               // {string} texte apparant sur la tâche
+      milestone: 'is-milestone',  // {boolean} true =&gt; il s'agit d'une milestone (un losange à une date fixe et pas une zone)
+      category: 'category',       // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
+      dependency: 'dependency',   // {string} @id d'une autre tâche dont celle-ci dépend
+      complete: 'complete',       // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
+      color: 'color',             // {RGBA} couleur en RGB ou RGBA (avec ou sans '#', court ou long) de la tâche
+&nbsp;
+      //TODO bonus
+      owner: 'owner',             // responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
+      icon: 'icon'  // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
+    },
+&nbsp;
     PATH_KEY: "data",                     //clé du paramètres GET contenant le chemin de l'URI du webservice
+&nbsp;
     ROOT_NAME_IDENTIFIER: "_gestion.ini"  //identificateur du nom de base Oris (utilisé pour récupérer un sub-string du nom complet)
   };
 &nbsp;
@@ -338,12 +418,13 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     ID_ORIS: undefined
   };
 &nbsp;
+&nbsp;
   /**
    * Extends basic init()
    */
   this.init = (function (oldInit) {
     return function() {
-      //obligé de le rappeler ici pour ce qui suit... si on appelle
+      //obligé de le dupliquer/rappeler ici pour ce qui suit.
       this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
 &nbsp;
       this.USER_INFOS.ID_ORIS = generateID_Oris.call(this);
@@ -445,7 +526,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Apr 12 2019 11:41:16 GMT+0200 (Central European Summer Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Apr 19 2019 08:35:44 GMT+0200 (Central European Summer Time)
 </div>
 </div>
 <script src="../../prettify.js"></script>
