@@ -54,38 +54,55 @@ let PUB_SUB = (function(){
 })();
 
 // @TO_PRIVATE
-let CONFIG = undefined; // ParametreUrlOris récupéré de la page principale
-let dataById = {};      //
+let CONFIG = {}; // ParametreUrlOris récupéré de la page principale
+// "BD locale" des tâches (instancié
+let orisTaskById = {};      // Row by ID, dictionnaire/hashmap des tâches (OrisGanttTask)
+
+// TODO implémenter côté main page
+let ALLOW_INVALID = false;
 
 //Début du worker
 self.onmessage = function(event) {
-  //récupérer la config depuis l'Objet ParametresUrl appelant (ici, Oris)
-  CONFIG = event.data.CONFIG;
+  // récupérer la config depuis l'Objet ParametresUrl appelant (ici, Oris) et lancer la récupération des données
+  if (event.data.CONFIG) {
+    CONFIG = event.data.CONFIG;
+    autoUpdateData(CONFIG.webserviceUrl)
 
-  //Faire la requête GET + formatter le JSON + retourner le JSON
+    // TODO Formatter / Corirger les valeurs ?
+  }
+
+  // TODO utiliser pour autoriser, côté main page, à recevoir des valeurs "invalides" (imaginons un popup signalant '3 valeurs étaient invalident et ont été ignorées'
+  if (event.data.ALLOW_INVALID)
+    ALLOW_INVALID = new OrisData(event.data.ALLOW_INVALID).asBoolean();
+
+  // pour debug/test
+  if (!event.data.LoggerModule) {
+    self.postMessage({ LoggerModule: e.data});
+  }
 
 };
 
+// TODO osef / delete
 function initXMLHttpRequest(_xmlhttp) {
-  //Comportement lorsque l'on reçoit un message de la page principale
+  // Comportement lorsque l'on reçoit un message de la page principale
   _xmlhttp.onreadystatechange = function() {
     try {
       if (_xmlhttp.readyState == XMLHttpRequest.DONE) {
         //CAS: Succès (200)
         if (_xmlhttp.status == 200) {
 
-          //Formatter en JSON
-          var response = JSON.parse(this.responseText);
-          var formattedResponse = formatResponse(response, GLOBALS.nomRacine);
+          // Formatter en JSON
+          let response = JSON.parse(this.responseText);
+          let formattedResponse = formatResponse(response, GLOBALS.nomRacine);
 
-          //Parser les datas
+          // Parser les datas
           var yAxisAndSeriesDatas = parseFormattedResponse(formattedResponse);
 
-          //Initialiser les axes Y / séries et regrouper avec la config vide
+          // Initialiser les axes Y / séries et regrouper avec la config vide
           creerLesAxesY(yAxisAndSeriesDatas);
           creerLesSeries(yAxisAndSeriesDatas);
 
-          //Renvoyer toutes les config à la page principale
+          // Renvoyer toutes les config à la page principale
           self.postMessage({
             success: true,
             result: CONFIGS
@@ -122,7 +139,7 @@ function initXMLHttpRequest(_xmlhttp) {
 function autoUpdateData(url) {
   GET(url)                                    // requête
     .then(responseRootNameToJson(response))   // récupérer les données
-    .then()                                   // traiter les données
+    .then(updateLocal(rawTasksData))                                   // traiter les données
     .catch(postError(err))                    // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
     .finally();
 }
@@ -178,17 +195,51 @@ function GET(url) {
 function responseRootNameToJson(requestResponse) {
   // Parse response to JSON
   let parsedResponse = undefined;
-  try {
+  //try {
     parsedResponse = JSON.parse(requestResponse);
-  } catch (e) { // Détecter erreur de syntaxe du JSON
+  /*} catch (e) { // Détecter erreur de syntaxe du JSON
     throw new Error(e);
-  }
+  }//*/
+
   // Récupérer les données à l'aide de "rootName"
   return parsedResponse[CONFIG.rootName]; //TODO dans d'autres bases, peut-être que le rootName sera 'nested' (exemple: 'root.baseName')
 }
 
-function formatData(rawData) {
+function updateLocal(rawTaskData) {
+  let updatedTasks = {},
+      invalidTasks = {},
+      length = rawTaskData.length;
 
+  // stocker les nouvelles valeurs et informer la page principale des changements
+  while (length--) {
+    // instancier la nouvelle tâche
+    let currentOrisTask = new OrisGanttTask(rawTaskData[length], CONFIG),
+        //ancienne valeur pour cette tâche
+        oldTask = orisTaskById[currentOrisTask.getRaw('id')];
+
+    // Ignorer les tâches "invalides" TODO (puis SIGNALER à la page principale)
+    if (!currentOrisTask.isValidTask()) {
+      invalidTasks[currentOrisTask.getRaw('id')] = currentOrisTask.rawUserOptions;
+      continue;
+    }
+
+    // Ne rien faire si TOUTES les valeurs sont les mêmes
+    if (oldTask === undefined
+        || SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions))
+      continue;
+
+    // Remplacer la valeur et enregistrer ce remplacement TODO signaler ce remplacement
+    updatedTasks[currentOrisTask.getRaw('id')] = orisTaskById[currentOrisTask.getRaw('id')] = currentOrisTask;
+  }
+
+  // Informer des éventuels changements de valeurs
+  if (Object.keys(updatedTasks).length > 0) {
+    postMessage({
+      updatedTasks: updatedTasks
+    });
+  }
+
+  //
 }
 
 /**

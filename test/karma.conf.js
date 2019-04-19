@@ -31,7 +31,7 @@ module.exports = function(config) {
     ],
 
     // list of files / patterns to exclude
-    exclude: [],
+    exclude: ['../src/js/dist/all-in-one-worker.js'],       //fichier concaténé avec GULP mais qui, du coup, redéclare des "let" (ce qui est interdit)
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
@@ -71,7 +71,9 @@ module.exports = function(config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     //browsers: ['Chrome', 'ChromeHeadless', 'Firefox', 'FirefoxHeadless', 'Edge'],
     //MODE HEADLESS ONLY car le PC décède
-    browsers: ['Chrome_travis_ci'],
+//    browsers: ['Chrome_travis_ci'],
+    //Pour pouvoir tester avec window
+    browsers: ['Chrome'],
 
     // e.g see https://swizec.com/blog/how-to-run-javascript-tests-in-chrome-on-travis/swizec/6647
     customLaunchers: {

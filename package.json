@@ -7,6 +7,10 @@
     "test": "karma start test/karma.conf.js --single-run"
   },
   "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-uglify": "^3.0.2",
     "jasmine-core": "*",
     "karma": "^4.0.1",
     "karma-chrome-launcher": "^2.2.0",

@@ -20,28 +20,28 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">73.17% </span>
+        <span class="strong">47.62% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>30/41</span>
+        <span class='fraction'>30/63</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">60% </span>
+        <span class="strong">28.3% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>15/25</span>
+        <span class='fraction'>15/53</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">40% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>2/2</span>
+        <span class='fraction'>2/5</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">73.17% </span>
+        <span class="strong">56.6% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>30/41</span>
+        <span class='fraction'>30/53</span>
       </div>
     </div>
   </div>
-  <div class='status-line medium'></div>
+  <div class='status-line low'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -162,7 +162,47 @@
 117
 118
 119
-120</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -281,7 +321,46 @@
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">var SHARED = {
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// TODO serait mieux en module car "this"
+var SHARED = {
   /**
    * Parse un string en un objet Location (on peut alors utiliser les attributs host/protocol/...)
    *
@@ -300,7 +379,7 @@
     fakeWindowLocation.href = stringToParse;
     LoggerModule.info("stringToParse", stringToParse);
     LoggerModule.log("fakeWindowLocation.href", fakeWindowLocation.href);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (stringToParse.toLowerCase() !== fakeWindowLocation.href) {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (stringToParse.toLowerCase() !== fakeWindowLocation.href.toLowerCase()) {
 <span class="cstat-no" title="statement not covered" >      throw new EXCEPTIONS.StringIsNotAnUriException("'" + stringToParse + "' wasn\'t parsed to an URI (result: '" + fakeWindowLocation.href + "')");</span>
     }
     return fakeWindowLocation;
@@ -398,15 +477,53 @@
       parametresUrl.asArray["_" + arr[0]] = (parametresUrl.asRaw[arr[0]]).split(",");
     }
     return parametresUrl;
+  },
+&nbsp;
+  /**
+   * Deep Object comparaison
+   * @param {Object} x
+   * @param {Object} y
+   * @return {boolean}
+   */
+  objectEquals: <span class="fstat-no" title="function not covered" >function(x, y) {</span>
+<span class="cstat-no" title="statement not covered" >    if (x === null || x === undefined || y === null || y === undefined) { <span class="cstat-no" title="statement not covered" >return x === y; </span>}</span>
+    // after this just checking type of one would be enough
+<span class="cstat-no" title="statement not covered" >    if (x.constructor !== y.constructor) { <span class="cstat-no" title="statement not covered" >return false; </span>}</span>
+    // if they are functions, they should exactly refer to same one (because of closures)
+<span class="cstat-no" title="statement not covered" >    if (x instanceof Function) { <span class="cstat-no" title="statement not covered" >return x === y; </span>}</span>
+    // if they are regexps, they should exactly refer to same one (it is hard to better equality check on current ES)
+<span class="cstat-no" title="statement not covered" >    if (x instanceof RegExp) { <span class="cstat-no" title="statement not covered" >return x === y; </span>}</span>
+<span class="cstat-no" title="statement not covered" >    if (x === y || x.valueOf() === y.valueOf()) { <span class="cstat-no" title="statement not covered" >return true; </span>}</span>
+<span class="cstat-no" title="statement not covered" >    if (Array.isArray(x) &amp;&amp; x.length !== y.length) { <span class="cstat-no" title="statement not covered" >return false; </span>}</span>
+&nbsp;
+    // if they are dates, they must had equal valueOf
+<span class="cstat-no" title="statement not covered" >    if (x instanceof Date) { <span class="cstat-no" title="statement not covered" >return false; </span>}</span>
+&nbsp;
+    // if they are strictly equal, they both need to be object at least
+<span class="cstat-no" title="statement not covered" >    if (!(x instanceof Object)) { <span class="cstat-no" title="statement not covered" >return false; </span>}</span>
+<span class="cstat-no" title="statement not covered" >    if (!(y instanceof Object)) { <span class="cstat-no" title="statement not covered" >return false; </span>}</span>
+&nbsp;
+    // recursive object equality check
+<span class="cstat-no" title="statement not covered" >    var p = Object.keys(x);</span>
+<span class="cstat-no" title="statement not covered" >    return Object.keys(y).every(<span class="fstat-no" title="function not covered" >function (i) {</span> <span class="cstat-no" title="statement not covered" >return p.indexOf(i) !== -1; </span>}) &amp;&amp;</span>
+      p.every(<span class="fstat-no" title="function not covered" >function (i) {</span> <span class="cstat-no" title="statement not covered" >return SHARED.objectEquals(x[i], y[i]); </span>});
   }
 &nbsp;
-};</pre></td></tr>
+};
+&nbsp;
+/** Gulp concat
+  gulp.task('script', function() {
+    return gulp.src(['./js/workers/*.js', './js/models/*.js', './js/utils/*.js'])
+      .pipe(concat('all-in-one-worker.js'))
+      .pipe(gulp.dest('./js/dist/'));
+  });
+ //*/</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Apr 19 2019 08:35:44 GMT+0200 (Central European Summer Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Apr 19 2019 17:16:44 GMT+0200 (Central European Summer Time)
 </div>
 </div>
 <script src="../../prettify.js"></script>

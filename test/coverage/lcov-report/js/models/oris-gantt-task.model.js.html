@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">16.67% </span>
+        <span class="strong">25% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>1/6</span>
+        <span class='fraction'>4/16</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/0</span>
+        <span class='fraction'>0/4</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/2</span>
+        <span class='fraction'>0/5</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">16.67% </span>
+        <span class="strong">25% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>1/6</span>
+        <span class='fraction'>4/16</span>
       </div>
     </div>
   </div>
@@ -70,7 +70,53 @@
 25
 26
 27
-28</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -91,12 +137,46 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
  * TODO Vu qu'on ne peut pas importer de script dans un Web Worker (erreur de MIME), il faut C/C ce code.
@@ -107,30 +187,70 @@
 /**
  * @DataModel pour une tâche Oris
  * TODO: extends une classe du genre GanttDataModel
- * @param {Object} data_row Objet contenant les différente
+ * @param {Object} data_row
+ *    Objet contenant les données des colonnes récupérées
+ *    (&amp;id, &amp;start, &amp;end, etc...)
+ *
+ * @param {ParametresUrlOris} parametres_url_oris_config
+ *    configuration passée en paramètres (contient notamment les colonnes de la base Oris)
+ *
  * @constructor
  */
 <span class="fstat-no" title="function not covered" >function OrisGanttTask(data_row, parametres_url_oris_config) {</span>
-  // shortcut
-<span class="cstat-no" title="statement not covered" >  let HC_CONFIG_KEYS = parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS;</span>
+  // @Repository pattern (context) TODO l'init à part "{ id: 'id'
+<span class="cstat-no" title="statement not covered" >  this.ORIS_CONFIG = parametres_url_oris_config;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  this.configAsOrisData = {};</span>
+<span class="cstat-no" title="statement not covered" >  this.rawUserOptions = {};</span>
 &nbsp;
+<span class="cstat-no" title="statement not covered" >  this.userOptions = {}; </span>//id, name, start, end, etc...
+&nbsp;
+  /**
+   * Initialise l'objet en récupérant de l'argument les valeurs correctement formattées (sinon, null) correspondant aux userOptions d'une série (Gantt)
+   */
 <span class="cstat-no" title="statement not covered" >  this.init = <span class="fstat-no" title="function not covered" >function () {</span></span>
+    // Liste des paramètres "implémentés" d'une série HighCharts
+<span class="cstat-no" title="statement not covered" >    let keys = Object.keys(this.ORIS_CONFIG.CONSTANTS.HC_CONFIG_KEYS),</span>
+        length = keys.length;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    for(let key in HC_CONFIG_KEYS) {</span>
-<span class="cstat-no" title="statement not covered" >      this.configAsOrisData[key] = new OrisData(data_row[key]);</span>
+<span class="cstat-no" title="statement not covered" >    while (length--) {</span>
+<span class="cstat-no" title="statement not covered" >      let key = keys[length];</span>
+      //On stock en dur pour debug
+<span class="cstat-no" title="statement not covered" >      this.rawUserOptions[key] = data_row[this.ORIS_CONFIG.CONSTANTS.HC_CONFIG_KEYS[key['url_param']]];</span>
+      //On stock directement la clé dans le format souhaité par HighCharts pour ne pas faire 3 boucles de plus
+<span class="cstat-no" title="statement not covered" >      this.userOptions[key] = new OrisData(this.rawUserOptions[key])[this.ORIS_CONFIG.CONSTANTS.HC_CONFIG_KEYS[key['format']]];</span>
     }
+&nbsp;
+    //TODO plus tard, ignorer les OrisGanttTask malformées (&amp;id, &amp;start ou &amp;end incorrect, aka "null") lorsqu'on ajout
 &nbsp;
   };
 }
-&nbsp;</pre></td></tr>
+&nbsp;
+/**
+ * Une Tâche Oris est "valide" SSI &amp;id, &amp;start ET &amp;end ne sont pas null
+ *  &amp;id est faux SSI il est vide ("")
+ *  &amp;start et &amp;end sont "null" si le parsing à l'initialisation à foiré (.getTime() !== .getTime())
+ *  &amp;end est valide s'il est manquant SSI &amp;milestone == true
+ *
+ * @return {boolean} true si la tâche est considérée comme "valide"
+ */
+OrisGanttTask.prototype.isValidTask = <span class="fstat-no" title="function not covered" >function () {</span>
+<span class="cstat-no" title="statement not covered" >  return this.userOptions['id'].asString()</span>
+            &amp;&amp; this.userOptions['start'].asDate()
+            &amp;&amp; (this.userOptions['end'].asDate() || this.userOptions['milestone']);
+};
+&nbsp;
+OrisGanttTask.prototype.get = <span class="fstat-no" title="function not covered" >function (key) {</span>
+<span class="cstat-no" title="statement not covered" >  return this.userOptions[key];</span>
+};
+OrisGanttTask.prototype.getRaw = <span class="fstat-no" title="function not covered" >function (key) {</span>
+<span class="cstat-no" title="statement not covered" >  return this.rawUserOptions[key];</span>
+};</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Apr 19 2019 08:35:44 GMT+0200 (Central European Summer Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Apr 19 2019 17:16:44 GMT+0200 (Central European Summer Time)
 </div>
 </div>
 <script src="../../prettify.js"></script>

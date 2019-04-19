@@ -38,7 +38,7 @@ describe("ParametresUrlOris permet d'initialiser différents paramètres nécess
         _data: ["aze_gestion.ini"]
       });
       //Génération de l'URL
-      expect( parametres_url.webserviceUrl )
+      expect( parametres_url.webserviceUrl.toLowerCase() )
         .toEqual("http://xxx_420-dark-angel-1337-du-69_xxx:8080/id-000192.168.1.74424011-0/aze_gestion.ini?json=true&end=col2&start=col1&id=col0");
       //Génération de la clé du JSON contenant les données
       expect( parametres_url.rootName )

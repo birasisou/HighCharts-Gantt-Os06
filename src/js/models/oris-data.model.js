@@ -111,7 +111,7 @@ OrisData.prototype.tryParseDate = function () {
 
 /**
  * Récupérer la valeur sous forme de timestamp (en ms, car JavaScript)
- * @returns {null|Int}
+ * @returns {null|number}
  */
 OrisData.prototype.asTimestamp = function () {
   return this.timestampValue !== undefined

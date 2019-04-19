@@ -1,3 +1,4 @@
+// TODO serait mieux en module car "this"
 var SHARED = {
   /**
    * Parse un string en un objet Location (on peut alors utiliser les attributs host/protocol/...)
@@ -17,7 +18,7 @@ var SHARED = {
     fakeWindowLocation.href = stringToParse;
     LoggerModule.info("stringToParse", stringToParse);
     LoggerModule.log("fakeWindowLocation.href", fakeWindowLocation.href);
-    if (stringToParse.toLowerCase() !== fakeWindowLocation.href) {
+    if (stringToParse.toLowerCase() !== fakeWindowLocation.href.toLowerCase()) {
       throw new EXCEPTIONS.StringIsNotAnUriException("'" + stringToParse + "' wasn\'t parsed to an URI (result: '" + fakeWindowLocation.href + "')");
     }
     return fakeWindowLocation;
@@ -115,6 +116,44 @@ var SHARED = {
       parametresUrl.asArray["_" + arr[0]] = (parametresUrl.asRaw[arr[0]]).split(",");
     }
     return parametresUrl;
+  },
+
+  /**
+   * Deep Object comparaison
+   * @param {Object} x
+   * @param {Object} y
+   * @return {boolean}
+   */
+  objectEquals: function(x, y) {
+    if (x === null || x === undefined || y === null || y === undefined) { return x === y; }
+    // after this just checking type of one would be enough
+    if (x.constructor !== y.constructor) { return false; }
+    // if they are functions, they should exactly refer to same one (because of closures)
+    if (x instanceof Function) { return x === y; }
+    // if they are regexps, they should exactly refer to same one (it is hard to better equality check on current ES)
+    if (x instanceof RegExp) { return x === y; }
+    if (x === y || x.valueOf() === y.valueOf()) { return true; }
+    if (Array.isArray(x) && x.length !== y.length) { return false; }
+
+    // if they are dates, they must had equal valueOf
+    if (x instanceof Date) { return false; }
+
+    // if they are strictly equal, they both need to be object at least
+    if (!(x instanceof Object)) { return false; }
+    if (!(y instanceof Object)) { return false; }
+
+    // recursive object equality check
+    var p = Object.keys(x);
+    return Object.keys(y).every(function (i) { return p.indexOf(i) !== -1; }) &&
+      p.every(function (i) { return SHARED.objectEquals(x[i], y[i]); });
   }
 
 };
+
+/** Gulp concat
+  gulp.task('script', function() {
+    return gulp.src(['./js/workers/*.js', './js/models/*.js', './js/utils/*.js'])
+      .pipe(concat('all-in-one-worker.js'))
+      .pipe(gulp.dest('./js/dist/'));
+  });
+ //*/

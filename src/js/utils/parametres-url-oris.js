@@ -22,22 +22,55 @@
 function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
   this.CONSTANTS = {
-    // Définir ici comment on nomme chaque paramètre URL nécessaire à l'instanciation des séries HighCharts (en mode Gantt)
-    // Il s'agit d'un Copier/Coller des noms par défaut de HighCharts...
+    // @url_param Définir ici comment on nomme chaque paramètre URL nécessaire à l'instanciation des séries HighCharts (en mode Gantt)
+    // @format Et comment on souhaite les formater (parser en string, nombre, booléen, couleur, date, etc...)
     HC_CONFIG_KEYS: {
-      id: 'id',                   // {unique string} id de la tâche @MANDATORY
-      start: 'start',             // {date} date de début de la tâche @MANDATORY
-      end: 'end',                 // {date} date de fin de la tâche @MANDATORY (sauf si 'milestone == true', auquel cas il faut null)
-      name: 'name',               // {string} texte apparant sur la tâche
-      milestone: 'is-milestone',  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
-      category: 'category',       // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
-      dependency: 'dependency',   // {string} @id d'une autre tâche dont celle-ci dépend
-      complete: 'complete',       // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
-      color: 'color',             // {RGBA} couleur en RGB ou RGBA (avec ou sans '#', court ou long) de la tâche
+      id: { // {unique string} id de la tâche @MANDATORY
+        url_param: 'id',    //paramètre URL contenant la colonne correspondante
+        format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+      },
+      start: {  // {date} date de début de la tâche @MANDATORY
+        url_param: 'start',
+        format: 'asTimestamp'
+      },
+      end: {  // {date} date de fin de la tâche @MANDATORY (sauf si 'milestone == true', auquel cas il faut null)
+        url_param: 'start',
+        format: 'asTimestamp'
+      },
+      name: { // {string} texte apparant sur la tâche
+        url_param: 'name',
+        format: 'asString'
+      },
+      milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
+        url_param: 'is-milestone',
+        format: 'asBoolean'
+      },
+      category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
+        url_param: 'category',
+        format: 'asString'
+      },
+      dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
+        url_param: 'dependency',
+        format: 'asString'
+      },
+      complete: { // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
+        url_param: 'complete',
+        format: 'asNumber'
+      },
+      color: {  // {RGBA} couleur en RGB ou RGBA (avec ou sans '#', court ou long) de la tâche
+        url_param: 'color',
+        format: 'asRgb'
+      },
 
       //TODO bonus
-      owner: 'owner',             // responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
-      icon: 'icon'  // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
+      owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
+        url_param: 'owner',
+        format: 'asString'
+      },
+      icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
+        url_param: 'icon',
+        format: 'asString'
+      }
     },
 
     PATH_KEY: "data",                     //clé du paramètres GET contenant le chemin de l'URI du webservice
@@ -157,3 +190,17 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   //Automatiquement initialiser l'Objet lorsqu'il est instancié
   this.init();
 }
+
+ParametresUrlOris.prototype.getAllButFunctions = function () {
+  let thisWithoutFunction = {};
+  for (let key in this) {
+    if (typeof this[key] !== "function")
+      thisWithoutFunction[key] = this[key];
+  }
+
+  // hackerino TODO trouver comment ne pas avoir à faire ça (transférer des fonctions via postMessage est impossible)
+  if (thisWithoutFunction.page_location)
+    thisWithoutFunction.page_location = undefined;
+
+  return thisWithoutFunction;
+};
