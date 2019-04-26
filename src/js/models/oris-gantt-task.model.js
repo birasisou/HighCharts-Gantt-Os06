@@ -26,7 +26,10 @@ function OrisGanttTask(data_row, parametres_url_oris_config) {
   this.userOptions = {}; //id, name, start, end, etc...
 
   /**
-   * Initialise l'objet en récupérant de l'argument les valeurs correctement formattées (sinon, null) correspondant aux userOptions d'une série (Gantt)
+   * Initialise l'objet en récupérant de l'argument les valeurs correctement formattées (sinon, null)
+   * correspondant aux userOptions d'une série (Gantt)
+   *
+   * La clé est celle définie dans l'argument CONFIG parametres_url_oris_config (".CONSTANTS.HC_CONFIG_KEYS")
    */
   this.init = function () {
     // Liste des paramètres "implémentés" d'une série HighCharts
@@ -55,7 +58,7 @@ function OrisGanttTask(data_row, parametres_url_oris_config) {
  * @return {boolean} true si la tâche est considérée comme "valide"
  */
 OrisGanttTask.prototype.isValidTask = function () {
-  return this.userOptions['id'].asString()
+  return this.userOptions['id'].asRaw()
             && this.userOptions['start'].asDate()
             && (this.userOptions['end'].asDate() || this.userOptions['milestone']);
 };

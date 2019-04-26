@@ -268,7 +268,7 @@ function postError(errorMsg) {
  * @constructor
  */
 function OrisData(_value) {
-  this.value = _value || undefined;
+  this.value = _value;
   this.booleanValue = undefined;
   this.dateValue = undefined;
   this.numberValue = undefined;
@@ -290,7 +290,7 @@ function OrisData(_value) {
 /**
  * Récupérer la valeur brute
  */
-OrisData.prototype.asString = function () {
+OrisData.prototype.asRaw = function () {
   return this.value;
 };
 
@@ -308,6 +308,9 @@ OrisData.prototype.asBoolean = function () {
  * @returns {null|boolean}
  */
 OrisData.prototype.tryParseBoolean = function () {
+  if (typeof this.value == "boolean")
+    return this.value;
+
   if (typeof this.value != "string")
     return null;
 
@@ -480,7 +483,7 @@ function OrisGanttTask(data_row, parametres_url_oris_config) {
  * @return {boolean} true si la tâche est considérée comme "valide"
  */
 OrisGanttTask.prototype.isValidTask = function () {
-  return this.userOptions['id'].asString()
+  return this.userOptions['id'].asRaw()
             && this.userOptions['start'].asDate()
             && (this.userOptions['end'].asDate() || this.userOptions['milestone']);
 };
@@ -675,7 +678,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     HC_CONFIG_KEYS: {
       id: { // {unique string} id de la tâche @MANDATORY
         url_param: 'id',    //paramètre URL contenant la colonne correspondante
-        format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+        format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
       },
       start: {  // {date} date de début de la tâche @MANDATORY
         url_param: 'start',
@@ -687,7 +690,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       },
       name: { // {string} texte apparant sur la tâche
         url_param: 'name',
-        format: 'asString'
+        format: 'asRaw'
       },
       milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
         url_param: 'is-milestone',
@@ -695,11 +698,11 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       },
       category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
         url_param: 'category',
-        format: 'asString'
+        format: 'asRaw'
       },
       dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
         url_param: 'dependency',
-        format: 'asString'
+        format: 'asRaw'
       },
       complete: { // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
         url_param: 'complete',
@@ -713,11 +716,11 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       //TODO bonus
       owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
         url_param: 'owner',
-        format: 'asString'
+        format: 'asRaw'
       },
       icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
         url_param: 'icon',
-        format: 'asString'
+        format: 'asRaw'
       }
     },
 

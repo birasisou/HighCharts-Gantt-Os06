@@ -27,7 +27,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     HC_CONFIG_KEYS: {
       id: { // {unique string} id de la tâche @MANDATORY
         url_param: 'id',    //paramètre URL contenant la colonne correspondante
-        format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+        format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
       },
       start: {  // {date} date de début de la tâche @MANDATORY
         url_param: 'start',
@@ -39,7 +39,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       },
       name: { // {string} texte apparant sur la tâche
         url_param: 'name',
-        format: 'asString'
+        format: 'asRaw'
       },
       milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
         url_param: 'is-milestone',
@@ -47,11 +47,11 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       },
       category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
         url_param: 'category',
-        format: 'asString'
+        format: 'asRaw'
       },
       dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
         url_param: 'dependency',
-        format: 'asString'
+        format: 'asRaw'
       },
       complete: { // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
         url_param: 'complete',
@@ -65,11 +65,11 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       //TODO bonus
       owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
         url_param: 'owner',
-        format: 'asString'
+        format: 'asRaw'
       },
       icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
         url_param: 'icon',
-        format: 'asString'
+        format: 'asRaw'
       }
     },
 

@@ -13,7 +13,7 @@
  * @constructor
  */
 function OrisData(_value) {
-  this.value = _value || undefined;
+  this.value = _value;
   this.booleanValue = undefined;
   this.dateValue = undefined;
   this.numberValue = undefined;
@@ -35,7 +35,7 @@ function OrisData(_value) {
 /**
  * Récupérer la valeur brute
  */
-OrisData.prototype.asString = function () {
+OrisData.prototype.asRaw = function () {
   return this.value;
 };
 
@@ -53,14 +53,32 @@ OrisData.prototype.asBoolean = function () {
  * @returns {null|boolean}
  */
 OrisData.prototype.tryParseBoolean = function () {
-  if (typeof this.value != "string")
-    return null;
+  if (typeof this.asRaw() === "boolean")
+    return this.asRaw();
 
-  switch (this.value.toLocaleLowerCase()) {
+  let tmp = typeof this.asRaw() === "string"
+            ? this.asRaw().toLowerCase()
+            : this.asRaw();
+  //if (typeof this.asRaw() !== "string")
+  //  return null;
+
+  switch (tmp) {
     case "true":
       return true;
 
+    case "1":
+      return true;
+
+    case 1:
+      return true;
+
     case "false":
+      return false;
+
+    case "0":
+      return false;
+
+    case 0:
       return false;
 
     default:
@@ -82,9 +100,10 @@ OrisData.prototype.asNumber = function () {
  * @returns {null|Number}
  */
 OrisData.prototype.tryParseNumber = function () {
-  if (this.value === null || this.value === undefined)
+  if (isNaN(this.value) || this.value === null || this.value === undefined)
     return null;
 
+  // Attention, Number(null) = 0. Alors que Number(undefined) = NaN
   let tmpParsed = Number(this.value);
   return isNaN(tmpParsed) ? null
                           : tmpParsed;
@@ -100,6 +119,9 @@ OrisData.prototype.asDate = function () {
     : (this.dateValue = this.tryParseDate());
 };
 OrisData.prototype.tryParseDate = function () {
+  if (isNaN(Number(this.value)))
+    return null; // Sinon, "#42" produit Wed Jan 01 2042 00:00:00 GMT+0100 (Central European Standard Time)
+
   let parsedDate = new Date(this.value);
 
   //Si la date est invalide {Invalid Date}, les fonctions renvoient NaN
@@ -136,6 +158,9 @@ OrisData.prototype.asRgb = function () {
     : (this.rgbValue = this.tryParseRgb());
 };
 OrisData.prototype.tryParseRgb = function () {
+  if (!this.value || typeof this.value != "string")
+    return null;
+
   let formattedRgb = this.value[0] === "#"
     ? this.value
     : ("#"+this.value);
