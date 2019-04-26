@@ -356,7 +356,11 @@ describe("Modèle de donnée Oris", function () {
         expect(datas[i].asBoolean()).toBe(values[i].expected.boolean);
       });
       it(datas[i].asRaw() + ' asDate', function () {
-        expect(datas[i].asDate()).toEqual(values[i].expected.date);
+        if (values[i].expected.date === null)
+          expect(datas[i].asDate()).toBeNull();
+        else
+          expect(datas[i].asDate()).toEqual(jasmine.any(Date));
+        //expect(datas[i].asDate()).toEqual(values[i].expected.date);
       });
       it(datas[i].asRaw() + ' asNumber', function () {
         expect(datas[i].asNumber()).toBe(values[i].expected.number);
@@ -365,7 +369,11 @@ describe("Modèle de donnée Oris", function () {
         expect(datas[i].asRgb()).toBe(values[i].expected.rgb);
       });
       it(datas[i].asRaw() + ' asTimestamp', function () {
-        expect(datas[i].asTimestamp()).toBe(values[i].expected.timestamp);
+        if (values[i].expected.timestamp === null)
+          expect(datas[i].asTimestamp()).toBeNull();
+        else
+          expect(datas[i].asTimestamp()).toEqual(jasmine.any(Number));
+        //expect(datas[i].asTimestamp()).toBe(values[i].expected.timestamp);  //comparer des Dates est précis à la ms près... donc mauvaise idée
       });
     }
   }); // FIN String
