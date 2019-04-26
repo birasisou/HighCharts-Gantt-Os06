@@ -146,6 +146,18 @@ var SHARED = {
     var p = Object.keys(x);
     return Object.keys(y).every(function (i) { return p.indexOf(i) !== -1; }) &&
       p.every(function (i) { return SHARED.objectEquals(x[i], y[i]); });
+  },
+
+
+  /**
+   * Check si une chaîne de caractères et une Date au format ISO
+   * @param {string} str
+   * @return {boolean} true SSI exactement le format ISO (norme Ecmascript, Zulu time)
+   */
+  isIsoDate: function(str) {
+    if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(str)) return false;
+    let d = new Date(str);
+    return d.toISOString()===str;
   }
 
 };

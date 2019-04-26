@@ -35,9 +35,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 0,
           boolean: false,
-          date: new Date(0),
+          date: null,
           number: 0,
-          timestamp: 0,
+          timestamp: null,
           rgb: null
         }
       },
@@ -46,9 +46,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 1,
           boolean: true,
-          date: new Date(1),
+          date: null,
           number: 1,
-          timestamp: 1,
+          timestamp: null,
           rgb: null
         }
       },
@@ -68,9 +68,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: -10,
           boolean: null,
-          date: new Date(-10),
+          date: null,
           number: -10,
-          timestamp: -10,
+          timestamp: null,
           rgb: null
         }
       },
@@ -79,9 +79,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: -50.5,
           boolean: null,
-          date: new Date(-50.5),
+          date: null,
           number: -50.5,
-          timestamp: -50,
+          timestamp: null,
           rgb: null
         }
       },
@@ -90,9 +90,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 3.4,
           boolean: null,
-          date: new Date(3.4),
+          date: null,
           number: 3.4,
-          timestamp: 3,
+          timestamp: null,
           rgb: null
         }
       },
@@ -101,9 +101,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 13.14,
           boolean: null,
-          date: new Date(13.14),
+          date: null,
           number: 13.14,
-          timestamp: 13,
+          timestamp: null,
           rgb: null
         }
       }
@@ -150,9 +150,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: true,
           boolean: true,
-          date: new Date(1),
+          date: null,
           number: 1,
-          timestamp: 1,
+          timestamp: null,
           rgb: null
         }
       },
@@ -161,9 +161,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: false,
           boolean: false,
-          date: new Date(0),
+          date: null,
           number: 0,
-          timestamp: 0,
+          timestamp: null,
           rgb: null
         }
       }
@@ -226,9 +226,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: '3',
           boolean: null,
-          date: new Date('3'),
+          date: null,
           number: 3,
-          timestamp: 983401200000,
+          timestamp: null,
           rgb: null
         }
       },
@@ -237,9 +237,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: '-3',
           boolean: null,
-          date: new Date('-3'),
+          date: null,
           number: -3,
-          timestamp: 983401200000,
+          timestamp: null,
           rgb: null
         }
       },
@@ -248,9 +248,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: '-5.5',
           boolean: null,
-          date: new Date('-5.5'),
+          date: null,
           number: -5.5,
-          timestamp: 989013600000,
+          timestamp: null,
           rgb: null
         }
       },
@@ -314,9 +314,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: '0',
           boolean: false,
-          date: new Date('0'),
+          date: null,
           number: 0,
-          timestamp: new Date('0').getTime(),
+          timestamp: null,
           rgb: null
         }
       },
@@ -325,9 +325,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: '1',
           boolean: true,
-          date: new Date('1'),
+          date: null,
           number: 1,
-          timestamp: new Date('1').getTime(),
+          timestamp: null,
           rgb: null
         }
       },
@@ -342,6 +342,17 @@ describe("Modèle de donnée Oris", function () {
           rgb: null
         }
       },
+      {
+        raw: '2019-04-26T14:02:21.566Z',      // seule façon qui permet de déclarer une Date (ISO)
+        expected: {
+          raw: '2019-04-26T14:02:21.566Z',
+          boolean: null,
+          date: new Date('2019-04-26T14:02:21.566Z'),
+          number: null,
+          timestamp: new Date('2019-04-26T14:02:21.566Z').getTime(),
+          rgb: null
+        }
+      }
     ];
 
     // Init
@@ -420,9 +431,9 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: null,
           boolean: null,
-          date: new Date(null),
+          date: null,
           number: null,
-          timestamp: 0,
+          timestamp: null,
           rgb: null
         }
       },
@@ -455,7 +466,7 @@ describe("Modèle de donnée Oris", function () {
         expect(datas[i].asBoolean()).toBe(values[i].expected.boolean);
       });
       it(datas[i].asRaw() + ' asDate expects ' + values[i].expected.date + '(is: ' + datas[i].asDate() + ")", function () {
-        if (datas[i].asRaw() instanceof Date || datas[i].asRaw() === null)   //new Date(null) == new Date(0) == 1970....
+        if (datas[i].asRaw() instanceof Date)   //new Date(null) == new Date(0) == 1970....
           expect(datas[i].asDate().getTime()).toEqual(values[i].expected.date.getTime());
         else
           expect(datas[i].asDate()).toBeNull();

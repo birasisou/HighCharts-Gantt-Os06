@@ -119,6 +119,13 @@ OrisData.prototype.asDate = function () {
     : (this.dateValue = this.tryParseDate());
 };
 OrisData.prototype.tryParseDate = function () {
+  if (this.value instanceof Date)
+    return this.value;
+
+  return (SHARED.isIsoDate(this.value))
+    ? new Date(this.value) //la date est invalide / n'a pas pû être parsée automatiquement
+    : null;
+  /*
   if (isNaN(Number(this.value)))
     return null; // Sinon, "#42" produit Wed Jan 01 2042 00:00:00 GMT+0100 (Central European Standard Time)
 
@@ -129,6 +136,7 @@ OrisData.prototype.tryParseDate = function () {
   return (parsedDate.getTime() !== parsedDate.getTime())
     ? null //la date est invalide / n'a pas pû être parsée automatiquement
     : parsedDate;
+  //*/
 };
 
 /**

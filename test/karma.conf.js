@@ -73,7 +73,7 @@ module.exports = function(config) {
     //MODE HEADLESS ONLY car le PC décède
 //    browsers: ['Chrome_travis_ci'],
     //Pour pouvoir tester avec window
-    browsers: ['Chrome'],
+    browsers: ['Chrome', 'FirefoxHeadless'],
 
     // e.g see https://swizec.com/blog/how-to-run-javascript-tests-in-chrome-on-travis/swizec/6647
     customLaunchers: {
