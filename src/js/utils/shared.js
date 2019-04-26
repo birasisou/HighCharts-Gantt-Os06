@@ -18,7 +18,7 @@ var SHARED = {
     fakeWindowLocation.href = stringToParse;
     LoggerModule.info("stringToParse", stringToParse);
     LoggerModule.log("fakeWindowLocation.href", fakeWindowLocation.href);
-    if (stringToParse.toLowerCase() !== fakeWindowLocation.href.toLowerCase()) {
+    if (stringToParse.toLowerCase() !== fakeWindowLocation.href && (stringToParse.toLowerCase()+'/') !== fakeWindowLocation.href) {
       throw new EXCEPTIONS.StringIsNotAnUriException("'" + stringToParse + "' wasn\'t parsed to an URI (result: '" + fakeWindowLocation.href + "')");
     }
     return fakeWindowLocation;
