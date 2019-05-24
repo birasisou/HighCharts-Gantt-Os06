@@ -22,7 +22,7 @@ function OrisData(_value) {
 
   this.update = function () {
     this.asBoolean();
-    this.asDate();
+    this.asDateObject();
     this.asNumber();
     this.asRgb();
     this.asTimestamp();
@@ -38,10 +38,19 @@ function OrisData(_value) {
 OrisData.prototype.asRaw = function () {
   return this.value;
 };
+/**
+ * Récupérer la valeur sous forme de String
+ *    (bien souvent ça sera déjà le cas dans asRaw, mais au cas où
+ *     mais ID, Category, etc... doivent impérativement être des String)
+ * @return {string}
+ */
+OrisData.prototype.asString = function () {
+  return (this.value || this.value === false || this.value === 0) ? ("" + this.value) : undefined;
+};
 
 /**
  * Récupérer la valeur sous forme booléenne
- * @returns {null|boolean}
+ * @returns {undefined|boolean}
  */
 OrisData.prototype.asBoolean = function () {
   return this.booleanValue !== undefined
@@ -50,7 +59,7 @@ OrisData.prototype.asBoolean = function () {
 };
 /**
  * Tente de convertir la valeur brute en boolean
- * @returns {null|boolean}
+ * @returns {undefined|boolean}
  */
 OrisData.prototype.tryParseBoolean = function () {
   if (typeof this.asRaw() === "boolean")
@@ -60,35 +69,46 @@ OrisData.prototype.tryParseBoolean = function () {
             ? this.asRaw().toLowerCase()
             : this.asRaw();
   //if (typeof this.asRaw() !== "string")
-  //  return null;
+  //  return undefined;
+  let toReturn = undefined;
 
   switch (tmp) {
     case "true":
-      return true;
-
+      toReturn = true;
+      break;
     case "1":
-      return true;
-
+      toReturn = true;
+      break;
     case 1:
-      return true;
+      toReturn = true;
+      break;
+    case true:
+      toReturn = true;
+      break;
 
     case "false":
-      return false;
-
+      toReturn = false;
+      break;
     case "0":
-      return false;
-
+      toReturn = false;
+      break;
     case 0:
-      return false;
+      toReturn = false;
+      break;
+    case false:
+      toReturn = false;
+      break;
 
     default:
-      return null;
+      return undefined;
   }
+
+  return toReturn;
 };
 
 /**
  * Récupérer la valeur sous forme de nombre
- * @returns {null|Number}
+ * @returns {undefined|Number}
  */
 OrisData.prototype.asNumber = function () {
   return this.numberValue !== undefined
@@ -97,15 +117,15 @@ OrisData.prototype.asNumber = function () {
 };
 /**
  * Tente de convertir la valeur brute en nombre
- * @returns {null|Number}
+ * @returns {undefined|Number}
  */
 OrisData.prototype.tryParseNumber = function () {
   if (isNaN(this.value) || this.value === null || this.value === undefined)
-    return null;
+    return undefined;
 
   // Attention, Number(null) = 0. Alors que Number(undefined) = NaN
   let tmpParsed = Number(this.value);
-  return isNaN(tmpParsed) ? null
+  return isNaN(tmpParsed) ? undefined
                           : tmpParsed;
 };
 
@@ -113,7 +133,7 @@ OrisData.prototype.tryParseNumber = function () {
  * Récupérer la valeur sous forme de Date
  * @returns {Date}
  */
-OrisData.prototype.asDate = function () {
+OrisData.prototype.asDateObject = function () {
   return this.dateValue !== undefined
     ? this.dateValue
     : (this.dateValue = this.tryParseDate());
@@ -122,26 +142,26 @@ OrisData.prototype.tryParseDate = function () {
   if (this.value instanceof Date)
     return this.value;
 
-  return (SHARED.isIsoDate(this.value))
+  return (typeof this.value === "number" || SHARED.isIsoDate(this.value))   // on autorise les timestamps
     ? new Date(this.value) //la date est invalide / n'a pas pû être parsée automatiquement
-    : null;
+    : undefined;
   /*
   if (isNaN(Number(this.value)))
-    return null; // Sinon, "#42" produit Wed Jan 01 2042 00:00:00 GMT+0100 (Central European Standard Time)
+    return undefined; // Sinon, "#42" produit Wed Jan 01 2042 00:00:00 GMT+0100 (Central European Standard Time)
 
   let parsedDate = new Date(this.value);
 
   //Si la date est invalide {Invalid Date}, les fonctions renvoient NaN
   //et NaN est le seul "type" qui n'est jamais égal à lui même (NaN === NaN -> false)
   return (parsedDate.getTime() !== parsedDate.getTime())
-    ? null //la date est invalide / n'a pas pû être parsée automatiquement
+    ? undefined //la date est invalide / n'a pas pû être parsée automatiquement
     : parsedDate;
   //*/
 };
 
 /**
  * Récupérer la valeur sous forme de timestamp (en ms, car JavaScript)
- * @returns {null|number}
+ * @returns {undefined|number}
  */
 OrisData.prototype.asTimestamp = function () {
   return this.timestampValue !== undefined
@@ -149,16 +169,16 @@ OrisData.prototype.asTimestamp = function () {
     : (this.timestampValue = this.tryParseTimestamp())
 };
 OrisData.prototype.tryParseTimestamp = function () {
-  let parsedDate = this.asDate();
+  let parsedDate = this.asDateObject();
 
   return parsedDate
     ? parsedDate.getTime()
-    : null;
+    : undefined;
 };
 
 /**
  * Récupérer la valeur sous forme de string représentant un RGB ou RGBA
- * @returns {null|string}
+ * @returns {undefined|string}
  */
 OrisData.prototype.asRgb = function () {
   return this.rgbValue !== undefined
@@ -167,13 +187,13 @@ OrisData.prototype.asRgb = function () {
 };
 OrisData.prototype.tryParseRgb = function () {
   if (!this.value || typeof this.value != "string")
-    return null;
+    return undefined;
 
   let formattedRgb = this.value[0] === "#"
     ? this.value
     : ("#"+this.value);
 
-  return isValidHexColor(formattedRgb) ? this.value : null;
+  return isValidHexColor(formattedRgb) ? this.value : undefined;
 };
 
 /**

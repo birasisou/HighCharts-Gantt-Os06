@@ -2,7 +2,7 @@
 // Generated on Fri Mar 15 2019 09:36:01 GMT+0100 (Central European Standard Time)
 
 module.exports = function(config) {
-  var configuration = {
+  let configuration = {
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
@@ -12,6 +12,7 @@ module.exports = function(config) {
       'karma-chrome-launcher',
       'karma-firefox-launcher',
       'karma-edge-launcher',
+      'karma-jasmine-ajax',
       'karma-jasmine',
       'karma-verbose-reporter',
       'karma-coverage'/*,
@@ -21,7 +22,7 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine-ajax', 'jasmine'],
 
     // list of files / patterns to load in the browser
     files: [
@@ -31,7 +32,9 @@ module.exports = function(config) {
     ],
 
     // list of files / patterns to exclude
-    exclude: ['../src/js/dist/all-in-one-worker.js'],       //fichier concaténé avec GULP mais qui, du coup, redéclare des "let" (ce qui est interdit)
+    exclude: [
+      '../src/js/dist/all-in-one-worker.js'
+    ],       //fichier concaténé avec GULP mais qui, du coup, redéclare des "let" (ce qui est interdit)
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
@@ -52,7 +55,8 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['verbose', 'progress', 'coverage'],
+    //reporters: ['verbose', 'progress', 'coverage'],
+    reporters: ['progress'],
 
     // web server port
     port: 9876,
@@ -62,7 +66,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_ERROR,
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
@@ -73,7 +77,8 @@ module.exports = function(config) {
     //MODE HEADLESS ONLY car le PC décède
 //    browsers: ['Chrome_travis_ci'],
     //Pour pouvoir tester avec window
-    browsers: ['Chrome', 'FirefoxHeadless'],
+    //browsers: ['Chrome', 'FirefoxHeadless'],
+    browsers: ['Chrome'],
 
     // e.g see https://swizec.com/blog/how-to-run-javascript-tests-in-chrome-on-travis/swizec/6647
     customLaunchers: {
@@ -96,10 +101,18 @@ module.exports = function(config) {
     concurrency: Infinity
   };
 
+  // CUSTOM inline arguments
+  if (config.verbose)
+    configuration.reporters.push('verbose');
+  if (config.coverage)
+    configuration.reporters.push('coverage');
+
   //*
   if (process.env.TRAVIS) {
     configuration.browsers = ['Chrome_travis_ci', 'FirefoxHeadless'];
     configuration.logLevel = config.LOG_DEBUG;
+    configuration.reporters = ['verbose', 'progress', 'coverage'];
+
   }//*/
 
   config.set(configuration);

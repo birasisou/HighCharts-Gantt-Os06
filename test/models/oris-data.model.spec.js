@@ -1,4 +1,8 @@
-describe("Modèle de donnée Oris", function () {
+beforeAll(function () {
+  LoggerModule.setDebug("error");
+});
+
+describe("Modèle de données Oris", function () {
   // Dans notre modèle, si une valeur est manquante (ou pas parsable dans le type demandé), elle vaut null
   // 'null' est une valeur (absence de valeur) > 'typeof null == "object"'
   // 'undefined' est l'absence d'initialisation > 'typeof undefined == "undefined"'
@@ -11,19 +15,19 @@ describe("Modèle de donnée Oris", function () {
       expect(data.asRaw()).toEqual(undefined);
     });
     it(data.asRaw() + ' asBoolean', function () {
-      expect(data.asBoolean()).toBeNull();
+      expect(data.asBoolean()).toBeUndefined();
     });
-    it(data.asRaw() + ' asDate', function () {
-      expect(data.asDate()).toBeNull();
+    it(data.asRaw() + ' asDateObject', function () {
+      expect(data.asDateObject()).toBeUndefined();
     });
     it(data.asRaw() + ' asNumber', function () {
-      expect(data.asNumber()).toBeNull();
+      expect(data.asNumber()).toBeUndefined();
     });
     it(data.asRaw() + ' asRgb', function () {
-      expect(data.asRgb()).toBeNull();
+      expect(data.asRgb()).toBeUndefined();
     });
     it(data.asRaw() + ' asTimestamp', function () {
-      expect(data.asTimestamp()).toBeNull();
+      expect(data.asTimestamp()).toBeUndefined();
     });
   });
 
@@ -35,10 +39,10 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 0,
           boolean: false,
-          date: null,
+          date: new Date(0),
           number: 0,
-          timestamp: null,
-          rgb: null
+          timestamp: new Date(0).getTime(),
+          rgb: undefined
         }
       },
       {
@@ -46,65 +50,65 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 1,
           boolean: true,
-          date: null,
+          date: new Date(1),
           number: 1,
-          timestamp: null,
-          rgb: null
+          timestamp: new Date(1).getTime(),
+          rgb: undefined
         }
       },
       {
         raw: NaN,
         expected: {
           raw: NaN,
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: new Date(NaN),
+          number: undefined,
+          timestamp: new Date(NaN).getTime(),
+          rgb: undefined
         }
       },
       {
         raw: -10,
         expected: {
           raw: -10,
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: new Date(-10),
           number: -10,
-          timestamp: null,
-          rgb: null
+          timestamp: new Date(-10).getTime(),
+          rgb: undefined
         }
       },
       {
         raw: -50.5,
         expected: {
           raw: -50.5,
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: new Date(-50.5),
           number: -50.5,
-          timestamp: null,
-          rgb: null
+          timestamp: new Date(-50.5).getTime(),
+          rgb: undefined
         }
       },
       {
         raw: 3.4,
         expected: {
           raw: 3.4,
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: new Date(3.4),
           number: 3.4,
-          timestamp: null,
-          rgb: null
+          timestamp: new Date(3.4).getTime(),
+          rgb: undefined
         }
       },
       {
         raw: 13.14,
         expected: {
           raw: 13.14,
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: new Date(13.14),
           number: 13.14,
-          timestamp: null,
-          rgb: null
+          timestamp: new Date(13.14).getTime(),
+          rgb: undefined
         }
       }
     ];
@@ -124,20 +128,23 @@ describe("Modèle de donnée Oris", function () {
       it(datas[i].asRaw() + ' asBoolean', function () {
         expect(datas[i].asBoolean()).toBe(values[i].expected.boolean); // .toBe(NO_VALUE);
       });
-      it(datas[i].asRaw() + ' asDate', function () {
-        expect(datas[i].asDate()).toEqual(values[i].expected.date); // .toBe(NO_VALUE);
+      it(datas[i].asRaw() + ' asDateObject', function () {
+        if (isNaN(datas[i].asRaw()))
+          expect(datas[i].asDateObject().getTime()).toBeNaN();
+        else
+          expect(datas[i].asDateObject()).toEqual(values[i].expected.date);
       });
       it(datas[i].asRaw() + ' asNumber', function () {
-        if (isNaN(datas[i].asRaw()))
-          expect(datas[i].asRaw()).toBeNaN();
-        else
-          expect(datas[i].asNumber()).toBe(Number(values[i].expected.number));
+          expect(datas[i].asNumber()).toBe(values[i].expected.number);
       });
       it(datas[i].asRaw() + ' asRgb ', function () {
         expect(datas[i].asRgb()).toBe(values[i].expected.rgb); // .toBe(NO_VALUE);
       });
       it(datas[i].asRaw() + ' asTimestamp', function () {
-        expect(datas[i].asTimestamp()).toBe(values[i].expected.timestamp);
+        if (isNaN(datas[i].asRaw()))
+          expect(isNaN(datas[i].asTimestamp())).toBe(true);
+        else
+          expect(datas[i].asTimestamp()).toBe(values[i].expected.timestamp);
       });
     }
   }); // FIN Number
@@ -150,10 +157,10 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: true,
           boolean: true,
-          date: null,
+          date: undefined,
           number: 1,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
@@ -161,10 +168,10 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: false,
           boolean: false,
-          date: null,
+          date: undefined,
           number: 0,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       }
     ];
@@ -181,8 +188,8 @@ describe("Modèle de donnée Oris", function () {
       it(datas[i].asRaw() + ' asBoolean', function () {
         expect(datas[i].asBoolean()).toBe(values[i].expected.boolean); // .toBe(NO_VALUE);
       });
-      it(datas[i].asRaw() + ' asDate', function () {
-        expect(datas[i].asDate()).toEqual(values[i].expected.date); // .toBe(NO_VALUE);
+      it(datas[i].asRaw() + ' asDateObject', function () {
+        expect(datas[i].asDateObject()).toEqual(values[i].expected.date); // .toBe(NO_VALUE);
       });
       it(datas[i].asRaw() + ' asNumber', function () {
         expect(datas[i].asNumber()).toBe(Number(values[i].expected.number));
@@ -203,66 +210,66 @@ describe("Modèle de donnée Oris", function () {
         raw: '',
         expected: {
           raw: '',
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: undefined,
           number: 0,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: 'aze',
         expected: {
           raw: 'aze',
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '3',
         expected: {
           raw: '3',
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: undefined,
           number: 3,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '-3',
         expected: {
           raw: '-3',
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: undefined,
           number: -3,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '-5.5',
         expected: {
           raw: '-5.5',
-          boolean: null,
-          date: null,
+          boolean: undefined,
+          date: undefined,
           number: -5.5,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '3.33',
         expected: {
           raw: '3.33',
-          boolean: null,
-          date: null,     // JAMAIS 2 chiffres après la virgule (et 1 est ignoré) en {String}
+          boolean: undefined,
+          date: undefined,     // JAMAIS 2 chiffres après la virgule (et 1 est ignoré) en {String}
           number: 3.33,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
@@ -270,10 +277,10 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 'true',
           boolean: true,
-          date: null,     // new Date("true") == [Invalid Date] !== new Date({boolean})
-          number: null,
-          timestamp: null,
-          rgb: null
+          date: undefined,     // new Date("true") == [Invalid Date] !== new Date({boolean})
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
@@ -281,32 +288,32 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: 'false',
           boolean: false,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '#42',
         expected: {
           raw: '#42',
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '42#',
         expected: {
           raw: '42#',
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
@@ -314,10 +321,10 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: '0',
           boolean: false,
-          date: null,
+          date: undefined,
           number: 0,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
@@ -325,32 +332,32 @@ describe("Modèle de donnée Oris", function () {
         expected: {
           raw: '1',
           boolean: true,
-          date: null,
+          date: undefined,
           number: 1,
-          timestamp: null,
-          rgb: null
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '32,5',      // virgule au lieu de point
         expected: {
           raw: '32,5',
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: '2019-04-26T14:02:21.566Z',      // seule façon qui permet de déclarer une Date (ISO)
         expected: {
           raw: '2019-04-26T14:02:21.566Z',
-          boolean: null,
+          boolean: undefined,
           date: new Date('2019-04-26T14:02:21.566Z'),
-          number: null,
+          number: undefined,
           timestamp: new Date('2019-04-26T14:02:21.566Z').getTime(),
-          rgb: null
+          rgb: undefined
         }
       }
     ];
@@ -366,12 +373,12 @@ describe("Modèle de donnée Oris", function () {
       it(datas[i].asRaw() + ' asBoolean', function () {
         expect(datas[i].asBoolean()).toBe(values[i].expected.boolean);
       });
-      it(datas[i].asRaw() + ' asDate', function () {
-        if (values[i].expected.date === null)
-          expect(datas[i].asDate()).toBeNull();
+      it(datas[i].asRaw() + ' asDateObject', function () {
+        if (values[i].expected.date === undefined)
+          expect(datas[i].asDateObject()).toBeUndefined();
         else
-          expect(datas[i].asDate()).toEqual(jasmine.any(Date));
-        //expect(datas[i].asDate()).toEqual(values[i].expected.date);
+          expect(datas[i].asDateObject()).toEqual(jasmine.any(Date));
+        //expect(datas[i].asDateObject()).toEqual(values[i].expected.date);
       });
       it(datas[i].asRaw() + ' asNumber', function () {
         expect(datas[i].asNumber()).toBe(values[i].expected.number);
@@ -380,8 +387,8 @@ describe("Modèle de donnée Oris", function () {
         expect(datas[i].asRgb()).toBe(values[i].expected.rgb);
       });
       it(datas[i].asRaw() + ' asTimestamp', function () {
-        if (values[i].expected.timestamp === null)
-          expect(datas[i].asTimestamp()).toBeNull();
+        if (values[i].expected.timestamp === undefined)
+          expect(datas[i].asTimestamp()).toBeUndefined();
         else
           expect(datas[i].asTimestamp()).toEqual(jasmine.any(Number));
         //expect(datas[i].asTimestamp()).toBe(values[i].expected.timestamp);  //comparer des Dates est précis à la ms près... donc mauvaise idée
@@ -397,55 +404,55 @@ describe("Modèle de donnée Oris", function () {
         raw: { titi: "toto" },
         expected: {
           raw: { titi: "toto" },
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: NaN,
         expected: {
           raw: NaN,
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: new Date(NaN),
+          number: undefined,
+          timestamp: new Date(NaN).getTime(),
+          rgb: undefined
         }
       },
       {
         raw: undefined,
         expected: {
           raw: undefined,
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: null,
         expected: {
           raw: null,
-          boolean: null,
-          date: null,
-          number: null,
-          timestamp: null,
-          rgb: null
+          boolean: undefined,
+          date: undefined,
+          number: undefined,
+          timestamp: undefined,
+          rgb: undefined
         }
       },
       {
         raw: newDate,
         expected: {
           raw: newDate,
-          boolean: null,
+          boolean: undefined,
           date: newDate,
           number: newDate.getTime(),
           timestamp: newDate.getTime(),
-          rgb: null
+          rgb: undefined
         }
       },
     ];
@@ -465,11 +472,13 @@ describe("Modèle de donnée Oris", function () {
       it(datas[i].asRaw() + ' asBoolean(expected:' + datas[i].asBoolean() + ")", function () {
         expect(datas[i].asBoolean()).toBe(values[i].expected.boolean);
       });
-      it(datas[i].asRaw() + ' asDate expects ' + values[i].expected.date + '(is: ' + datas[i].asDate() + ")", function () {
+      it(datas[i].asRaw() + ' asDateObject expects ' + values[i].expected.date + '(is: ' + datas[i].asDateObject() + ")", function () {
         if (datas[i].asRaw() instanceof Date)   //new Date(null) == new Date(0) == 1970....
-          expect(datas[i].asDate().getTime()).toEqual(values[i].expected.date.getTime());
+          expect(datas[i].asDateObject().getTime()).toEqual(values[i].expected.date.getTime());
+        else if (isNaN(datas[i].asRaw()))
+          expect(isNaN(datas[i].asDateObject())).toBe(true);
         else
-          expect(datas[i].asDate()).toBeNull();
+          expect(datas[i].asDateObject()).toBeUndefined();
       });
       it(datas[i].asRaw() + ' asNumber(=' + datas[i].asNumber() + ")", function () {
         expect(datas[i].asNumber()).toBe(values[i].expected.number);
@@ -478,7 +487,10 @@ describe("Modèle de donnée Oris", function () {
         expect(datas[i].asRgb()).toBe(values[i].expected.rgb); // .toBe(NO_VALUE);
       });
       it(datas[i].asRaw() + ' asTimestamp(=' + datas[i].asTimestamp() + ")", function () {
-        expect(datas[i].asTimestamp()).toBe(values[i].expected.timestamp);
+        if (isNaN(datas[i].asRaw()))
+          expect(isNaN(datas[i].asTimestamp())).toBe(true);
+        else
+          expect(datas[i].asTimestamp()).toBe(values[i].expected.timestamp);
       });
     }
   }); // FIN Objet

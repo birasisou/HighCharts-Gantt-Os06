@@ -27,19 +27,20 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     HC_CONFIG_KEYS: {
       id: { // {unique string} id de la tâche @MANDATORY
         url_param: 'id',    //paramètre URL contenant la colonne correspondante
-        format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+        //format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+        format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
       },
       start: {  // {date} date de début de la tâche @MANDATORY
         url_param: 'start',
         format: 'asTimestamp'
       },
       end: {  // {date} date de fin de la tâche @MANDATORY (sauf si 'milestone == true', auquel cas il faut null)
-        url_param: 'start',
+        url_param: 'end',
         format: 'asTimestamp'
       },
       name: { // {string} texte apparant sur la tâche
         url_param: 'name',
-        format: 'asRaw'
+        format: 'asString'
       },
       milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
         url_param: 'is-milestone',
@@ -47,11 +48,11 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       },
       category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
         url_param: 'category',
-        format: 'asRaw'
+        format: 'asString'
       },
       dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
         url_param: 'dependency',
-        format: 'asRaw'
+        format: 'asString'
       },
       complete: { // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
         url_param: 'complete',
@@ -65,11 +66,11 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       //TODO bonus
       owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
         url_param: 'owner',
-        format: 'asRaw'
+        format: 'asString'
       },
       icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
         url_param: 'icon',
-        format: 'asRaw'
+        format: 'asString'
       }
     },
 
@@ -192,6 +193,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 }
 
 ParametresUrlOris.prototype.getAllButFunctions = function () {
+  /*
   let thisWithoutFunction = {};
   for (let key in this) {
     if (typeof this[key] !== "function")
@@ -201,6 +203,10 @@ ParametresUrlOris.prototype.getAllButFunctions = function () {
   // hackerino TODO trouver comment ne pas avoir à faire ça (transférer des fonctions via postMessage est impossible)
   if (thisWithoutFunction.page_location)
     thisWithoutFunction.page_location = undefined;
-
   return thisWithoutFunction;
+  //*/
+
+  return JSON.parse(JSON.stringify(this));
 };
+
+// TODO OU mettre toutes les

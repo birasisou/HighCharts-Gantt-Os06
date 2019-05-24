@@ -16,10 +16,10 @@ let LoggerModule = (function () {
     warn: console.warn,
     error: console.error,
     setDebug: function(isOn) {
-      this.log = isOn === true ? console.log : function () {};
-      this.info = isOn === true ? console.info : function () {};
-      this.warn = isOn === true ? console.warn : function () {};
-      this.error = isOn === true ? console.error : function () {};
+      this.log = (isOn === true || isOn === "log") ? console.log : function () {};
+      this.info = (isOn === true || isOn === "log" || isOn === "info") ? console.info : function () {};
+      this.warn = (isOn === true  || isOn === "log" || isOn === "info" || isOn === "warn") ? console.warn : function () {};
+      this.error = (isOn === true || isOn === "log" || isOn === "info" || isOn === "warn" || isOn === "error") ? console.error : function () {};
       return isOn;
     }
   }

@@ -54,7 +54,7 @@ let PUB_SUB = (function(){
 })();
 
 // @TO_PRIVATE
-let CONFIG = {}; // ParametreUrlOris récupéré de la page principale
+let WORKER_CONFIG = {}; // ParametreUrlOris récupéré de la page principale
 // "BD locale" des tâches (instancié
 let orisTaskById = {};      // Row by ID, dictionnaire/hashmap des tâches (OrisGanttTask)
 
@@ -62,23 +62,26 @@ let orisTaskById = {};      // Row by ID, dictionnaire/hashmap des tâches (Oris
 let ALLOW_INVALID = false;
 
 //Début du worker
+// TODO NE SURTOUT PAS IMPORTER SINON LA PAGE PRINCIPALE VA EXECUTER (enfin non, car elle ne recevra jamais de .CONFIG, mais ...)
 self.onmessage = function(event) {
+  LoggerModule.log("[WORKER.ONMESSAGE] event.data", event.data);
+
   // récupérer la config depuis l'Objet ParametresUrl appelant (ici, Oris) et lancer la récupération des données
   if (event.data.CONFIG) {
-    CONFIG = event.data.CONFIG;
-    autoUpdateData(CONFIG.webserviceUrl)
+    LoggerModule.log("[WORKER.ONMESSAGE] event.data.CONFIG received");
+    WORKER_CONFIG = event.data.CONFIG;
+    LoggerModule.info("[WORKER.ONMESSAGE] event.data.CONFIG copy succesfuly ?", WORKER_CONFIG == event.data.CONFIG );
+    LoggerModule.info("[WORKER.ONMESSAGE] event.data.CONFIG.asRaw", event.data.CONFIG.asRaw);
+    LoggerModule.info("[WORKER.ONMESSAGE] WORKER_CONFIG.asRaw", WORKER_CONFIG.asRaw);
 
-    // TODO Formatter / Corirger les valeurs ?
+
+    if (event.data.START_AUTO)
+      autoUpdateData(WORKER_CONFIG.webserviceUrl)
   }
 
   // TODO utiliser pour autoriser, côté main page, à recevoir des valeurs "invalides" (imaginons un popup signalant '3 valeurs étaient invalident et ont été ignorées'
   if (event.data.ALLOW_INVALID)
     ALLOW_INVALID = new OrisData(event.data.ALLOW_INVALID).asBoolean();
-
-  // pour debug/test
-  if (!event.data.LoggerModule) {
-    self.postMessage({ LoggerModule: e.data});
-  }
 
 };
 
@@ -137,11 +140,18 @@ function initXMLHttpRequest(_xmlhttp) {
  * @param url URL du web-service à contacter
  */
 function autoUpdateData(url) {
-  GET(url)                                    // requête
-    .then(responseRootNameToJson(response))   // récupérer les données
-    .then(updateLocal(rawTasksData))                                   // traiter les données
-    .catch(postError(err))                    // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
-    .finally();
+  LoggerModule.log("[WORKER.autoUpdateData] url:", url);
+
+  return WORKER_GET(url)                 // requête
+    .then(JSON.parse)             // Parser en JSON
+    .then(extractRootNameData)    // Extraire les données
+    .then(updateLocal)            // traiter les données
+    .catch(postError)             // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
+    .finally(function (arg) {
+      LoggerModule.info("[WORKER.finally] arg", arg);
+      self.postMessage({done: true})
+    }); // TODO rendre infini
+                // mais je pense plutôt attendre que le main "confirme" le monde infini
 }
 
 //TODO: importer es6-promise.auto.min.js ? (le polyfill pour les Promise);
@@ -152,17 +162,21 @@ function autoUpdateData(url) {
  * @returns {Promise<any>}
  * @constructor
  */
-function GET(url) {
+function WORKER_GET(url) {
+  LoggerModule.log("[WORKER_GET] url:", url );
+
   // Return a new promise.
   return new Promise(function(resolve, reject) {
     // Do the usual XHR stuff
     let req = new XMLHttpRequest();
-    req.open('GET', url, false);
+    req.open('GET', url, true);
 
     req.onload = function() {
+      LoggerModule.info("[GET.onload] req.status", req.status);
       // This is called even on 404 etc
       // so check the status
       if (req.status === 200) {
+        LoggerModule.info("[GET.onload] req.response", req.response);
         resolve(req.response);
       }
       else {
@@ -188,32 +202,32 @@ function GET(url) {
  * @param {string} requestResponse
  *  résulat de la requête
  *
- * @return {JSON} array de données de la base Oris
+ * @return {Object} array de données de la base Oris
  *
  * @throws si le parsing du JSON renvoie une erreur (Syntax Error)
  */
-function responseRootNameToJson(requestResponse) {
-  // Parse response to JSON
-  let parsedResponse = undefined;
-  //try {
-    parsedResponse = JSON.parse(requestResponse);
-  /*} catch (e) { // Détecter erreur de syntaxe du JSON
-    throw new Error(e);
-  }//*/
+function extractRootNameData(requestResponse) {
+  LoggerModule.log("[extractRootNameData] WORKER_CONFIG", WORKER_CONFIG);
+  LoggerModule.log("[extractRootNameData] requestResponse", requestResponse);
+  LoggerModule.log("[extractRootNameData] WORKER_CONFIG.rootName", WORKER_CONFIG.rootName);
 
   // Récupérer les données à l'aide de "rootName"
-  return parsedResponse[CONFIG.rootName]; //TODO dans d'autres bases, peut-être que le rootName sera 'nested' (exemple: 'root.baseName')
+  return requestResponse[WORKER_CONFIG.rootName]; //TODO dans d'autres bases, peut-être que le rootName sera 'nested' (exemple: 'root.baseName')
 }
 
-function updateLocal(rawTaskData) {
+function updateLocal(rawTaskDatas) {
+  LoggerModule.log("[updateLocal] rawTaskDatas", rawTaskDatas);
+
   let updatedTasks = {},
       invalidTasks = {},
-      length = rawTaskData.length;
+      length = rawTaskDatas.length;
 
   // stocker les nouvelles valeurs et informer la page principale des changements
   while (length--) {
+    LoggerModule.log("\n\nTRYING TO TRANSFORM", rawTaskDatas[length]);
     // instancier la nouvelle tâche
-    let currentOrisTask = new OrisGanttTask(rawTaskData[length], CONFIG),
+    let currentOrisTask = new OrisGanttTask(rawTaskDatas[length], WORKER_CONFIG),
+//  let currentOrisTask = new OrisGanttTask(rawTaskDatas[length], WORKER_CONFIG.CONSTANTS.HC_CONFIG_KEYS),
         //ancienne valeur pour cette tâche
         oldTask = orisTaskById[currentOrisTask.getRaw('id')];
 
@@ -234,12 +248,12 @@ function updateLocal(rawTaskData) {
 
   // Informer des éventuels changements de valeurs
   if (Object.keys(updatedTasks).length > 0) {
-    postMessage({
+    self.postMessage({
       updatedTasks: updatedTasks
     });
   }
 
-  //
+  return updatedTasks;
 }
 
 /**
@@ -247,8 +261,10 @@ function updateLocal(rawTaskData) {
  * @param errorMsg
  */
 function postError(errorMsg) {
-  postMessage({
-    error: errorMsg
+  LoggerModule.error("**** ERROR ****");
+  LoggerModule.error(errorMsg);
+  self.postMessage({
+    error: errorMsg.toString()
   });
 }
 

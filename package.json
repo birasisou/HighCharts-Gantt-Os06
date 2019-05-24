@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "test": "karma start test/karma.conf.js --single-run"
+    "test": "karma start test/karma.conf.js --single-run --captureExceptions"
   },
   "devDependencies": {
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.4.0",
     "gulp-uglify": "^3.0.2",
+    "jasmine-ajax": "^4.0.0",
     "jasmine-core": "*",
     "karma": "^4.0.1",
     "karma-chrome-launcher": "^2.2.0",
@@ -18,6 +19,7 @@
     "karma-edge-launcher": "^0.4.2",
     "karma-firefox-launcher": "^1.1.0",
     "karma-jasmine": "^2.0.1",
+    "karma-jasmine-ajax": "^0.1.13",
     "karma-verbose-reporter": "0.0.6"
   }
 }
