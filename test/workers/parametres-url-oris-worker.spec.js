@@ -173,7 +173,6 @@ describe("Worker functions", function () {
     jasmine.clock().tick(5001);
     setTimeout(function () {
       var request = jasmine.Ajax.requests.mostRecent();
-      console.log("request", request);
       LoggerModule.warn("fake timeout");
       jasmine.Ajax.requests.mostRecent().responseTimeout();
 
@@ -182,9 +181,6 @@ describe("Worker functions", function () {
   });
 
   it('(statusCode !== 200) WORKER_GET should postError on non-OK status', function (done) {
-    for (i in noFunctions) {
-      console.log("- " + i, noFunctions[i]);
-    }
 
       // Spies
       let autoUpdateDataSpy = spyOn(window, 'autoUpdateData').and.callThrough();
@@ -411,10 +407,8 @@ describe("Worker functions", function () {
           expect(updateLocalSpy).toHaveBeenCalled();
           expect(postErrorSpy).not.toHaveBeenCalled();
 
-          console.log(finalValidDatas);
           expect(finalValidDatas).toEqual(expected_gantt_oris_data.valid);
 
-          console.log(finalinValidDatas);
           expect(finalinValidDatas).toEqual(expected_gantt_oris_data.invalid);
 
           window.removeEventListener("message", aze, false);
