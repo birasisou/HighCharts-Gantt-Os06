@@ -1,8 +1,8 @@
 describe('Oris Gantt Task Model', function () {
   let today = new Date(),
+    orisConfig = undefined,
     day = 1000 * 60 * 60 * 24,  // 24 heures en timestamp (ms)
     end = new Date(today.getTime() + 5 * day),
-    orisConfig = new ParametresUrlOris("http://www.on_en_a_gros.fr:8080/id-000192.168.1.74424011-0/index.html?data=root_gestion.ini&id=col-id&start=col-start&end=col-end&is-milestone=col-milestone"),
     DATA = {
       emptyString: '',
       undefined: undefined,
@@ -41,7 +41,8 @@ describe('Oris Gantt Task Model', function () {
     };
 
   beforeEach(function () {
-    LoggerModule.setDebug(false);
+    // LoggerModule.setDebug("error");
+    orisConfig = new ParametresUrlOris("http://www.on_en_a_gros.fr:8080/id-000192.168.1.74424011-0/index.html?data=root_gestion.ini&id=col-id&start=col-start&end=col-end&is-milestone=col-milestone");
   });
 
   describe('Should be invalid', function () {
@@ -360,6 +361,28 @@ describe('Oris Gantt Task Model', function () {
       expect(endAndMilestoneTask.userOptions['end']).toBeFalsy();
       expect(endAndMilestoneTask.userOptions['milestone']).toBeFalsy();
     });
+
+    it('if object is empty', function () {
+      let emptyObj = {},
+        emptyObjTask = new OrisGanttTask(emptyObj, orisConfig);
+
+      expect(emptyObjTask.isValidTask()).toBe(false);
+      expect(emptyObjTask.userOptions['id']).toBeUndefined();
+      expect(emptyObjTask.userOptions['start']).toBeUndefined();
+      expect(emptyObjTask.userOptions['end']).toBeUndefined();
+      expect(emptyObjTask.userOptions['milestone']).toBeUndefined();
+    });
+
+    it('if an argument is undefined (throws)', function () {
+      let undefinedObj = undefined;
+      expect(function () { new OrisGanttTask(undefined, orisConfig) }).toThrow();
+      expect(function () { new OrisGanttTask(undefinedObj, undefined) }).toThrow();
+    });
+
+    // TODO !!!!! TRY CATCH AILLEURS
+    it('if an argument is missing', function () {
+
+    });
   });
 
   describe('Should be valid', function () {
@@ -380,20 +403,35 @@ describe('Oris Gantt Task Model', function () {
       expect(okNotMilestoneTask.userOptions['milestone']).toBeFalsy();
     });
     it('if ID, START are valid, END is unset/invalid and IS-MILESTONE is true', function () {
-      let okNotMilestone = {
+      let okMilestone = {
           "col-id": DATA.id.asString,
           "col-start": DATA.start.asString,
           "col-end": DATA.end.asGMT,
           "col-milestone": DATA.true.asString
         },
-        okNotMilestoneTask = new OrisGanttTask(okNotMilestone, orisConfig);
+        okMilestoneTask = new OrisGanttTask(okMilestone, orisConfig);
 
-      expect(okNotMilestoneTask.isValidTask()).toBe(true);
+      expect(okMilestoneTask.isValidTask()).toBe(true);
 
-      expect(okNotMilestoneTask.userOptions['id']).toBeTruthy();
-      expect(okNotMilestoneTask.userOptions['start']).toBeTruthy();
-      expect(okNotMilestoneTask.userOptions['end']).toBeUndefined();
-      expect(okNotMilestoneTask.userOptions['milestone']).toBeTruthy();
+      expect(okMilestoneTask.userOptions['id']).toBeTruthy();
+      expect(okMilestoneTask.userOptions['start']).toBeTruthy();
+      expect(okMilestoneTask.userOptions['end']).toBeUndefined();
+      expect(okMilestoneTask.userOptions['milestone']).toBeTruthy();
+
+      let okMilestone2 = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": DATA.emptyString,
+          "col-milestone": DATA.true.asString
+        },
+        okMilestoneTask2 = new OrisGanttTask(okMilestone2, orisConfig);
+
+      expect(okMilestoneTask2.isValidTask()).toBe(true);
+
+      expect(okMilestoneTask2.userOptions['id']).toBeTruthy();
+      expect(okMilestoneTask2.userOptions['start']).toBeTruthy();
+      expect(okMilestoneTask2.userOptions['end']).toBeUndefined();
+      expect(okMilestoneTask2.userOptions['milestone']).toBeTruthy();
     });
   });
 });

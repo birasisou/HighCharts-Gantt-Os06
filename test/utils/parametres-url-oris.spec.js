@@ -1,5 +1,5 @@
 describe("ParametresUrlOris permet d'initialiser différents paramètres nécessaires à l'interaction avec une BD Oris", function() {
-  LoggerModule.setDebug(false);
+  // LoggerModule.setDebug(false);
 
   let commonUri = "http://XxX_420-Dark-Angel-1337-du-69_XxX:8080/id-000192.168.1.74424011-0/";
   let baseUri = commonUri + "reste/de/l/page_location/index.html";

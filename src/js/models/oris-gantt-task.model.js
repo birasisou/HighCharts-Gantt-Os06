@@ -17,8 +17,10 @@
  * @constructor
  */
 function OrisGanttTask(data_row, oris_config) {
-  if (arguments.length !== 2)
+  if (arguments.length !== 2) // TODO éviter de throw ? Risque de couper toute la boucle
     throw new Error("OrisGanttTask constructor expects 2 parameters");
+  if (!data_row || !oris_config)
+    throw new Error("[OrisGanttTask Constructor] Invalid parameter(s)");
 
   // Les cléfs, définies dans notre url (GET parameters), correspondant aux userOptions d'HC
   let oris_column = oris_config.asRaw,

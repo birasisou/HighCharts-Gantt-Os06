@@ -70,10 +70,6 @@ self.onmessage = function(event) {
   if (event.data.CONFIG) {
     LoggerModule.log("[WORKER.ONMESSAGE] event.data.CONFIG received");
     WORKER_CONFIG = event.data.CONFIG;
-    LoggerModule.info("[WORKER.ONMESSAGE] event.data.CONFIG copy succesfuly ?", WORKER_CONFIG == event.data.CONFIG );
-    LoggerModule.info("[WORKER.ONMESSAGE] event.data.CONFIG.asRaw", event.data.CONFIG.asRaw);
-    LoggerModule.info("[WORKER.ONMESSAGE] WORKER_CONFIG.asRaw", WORKER_CONFIG.asRaw);
-
 
     if (event.data.START_AUTO)
       autoUpdateData(WORKER_CONFIG.webserviceUrl)
@@ -85,52 +81,6 @@ self.onmessage = function(event) {
 
 };
 
-// TODO osef / delete
-function initXMLHttpRequest(_xmlhttp) {
-  // Comportement lorsque l'on reçoit un message de la page principale
-  _xmlhttp.onreadystatechange = function() {
-    try {
-      if (_xmlhttp.readyState == XMLHttpRequest.DONE) {
-        //CAS: Succès (200)
-        if (_xmlhttp.status == 200) {
-
-          // Formatter en JSON
-          let response = JSON.parse(this.responseText);
-          let formattedResponse = formatResponse(response, GLOBALS.nomRacine);
-
-          // Parser les datas
-          var yAxisAndSeriesDatas = parseFormattedResponse(formattedResponse);
-
-          // Initialiser les axes Y / séries et regrouper avec la config vide
-          creerLesAxesY(yAxisAndSeriesDatas);
-          creerLesSeries(yAxisAndSeriesDatas);
-
-          // Renvoyer toutes les config à la page principale
-          self.postMessage({
-            success: true,
-            result: CONFIGS
-          });
-        }
-        else if (_xmlhttp.status == 400) {
-          throw {
-            details: 'GET request resulted in error code: 400',
-            exception: ""
-          };
-        }
-        else {
-          throw 'GET request resulted in error code other than 200 and 400';
-        }
-      }
-    } catch (exc) {
-      //Renvoyer un message d'erreur à la page principale
-      self.postMessage({
-        success: false,
-        error: exc
-      })
-    }
-  };
-}
-
 /**
  * S'occupe de tout
  *    > Fait la requête GET
@@ -140,16 +90,25 @@ function initXMLHttpRequest(_xmlhttp) {
  * @param url URL du web-service à contacter
  */
 function autoUpdateData(url) {
-  LoggerModule.log("[WORKER.autoUpdateData] url:", url);
+  LoggerModule.info("[WORKER.autoUpdateData] url:", url);
 
   return WORKER_GET(url)                 // requête
-    .then(JSON.parse)             // Parser en JSON
-    .then(extractRootNameData)    // Extraire les données
-    .then(updateLocal)            // traiter les données
-    .catch(postError)             // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
+    .then(function (response) {
+      return customJsonParse(response);
+    })             // Parser en JSON
+    .then(function (json) {
+      return extractData(json);
+    })    // Extraire les données
+    .then(function (rawDatas) {
+      return updateLocal(rawDatas);
+    })            // traiter les données
+    .catch(function (err) {
+      postError(err.message);
+      throw err;
+    })             // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
     .finally(function (arg) {
-      LoggerModule.info("[WORKER.finally] arg", arg);
-      self.postMessage({done: true})
+      LoggerModule.warn("[WORKER.autoUpdateData.finally] arg", arg);
+      self.postMessage({done: true}); // Pour débug
     }); // TODO rendre infini
                 // mais je pense plutôt attendre que le main "confirme" le monde infini
 }
@@ -163,8 +122,7 @@ function autoUpdateData(url) {
  * @constructor
  */
 function WORKER_GET(url) {
-  LoggerModule.log("[WORKER_GET] url:", url );
-
+  LoggerModule.info("[WORKER.WORKER_GET] url", url);
   // Return a new promise.
   return new Promise(function(resolve, reject) {
     // Do the usual XHR stuff
@@ -182,20 +140,52 @@ function WORKER_GET(url) {
       else {
         // Otherwise reject with the status text
         // which will hopefully be a meaningful error
-        reject(Error(req.statusText));
+        let msg = "[GET.onload] req.status !== 200. \nActual req.status: " + req.status;
+        LoggerModule.error(msg);
+        reject(Error(msg));
       }
     };
 
     // Handle network errors
-    req.onerror = function() {
-      reject(Error("Network Error"));
+    req.onerror = function(e) {
+      LoggerModule.error("[GET.onerror] Network Error. e:", e);
+      LoggerModule.error("[GET.onerror] Network Error. xhr.statusText: ", "'" + req.statusText + "'");
+      LoggerModule.error("[GET.onerror] Network Error. xhr.status:", req.status);
+      reject(Error("[GET.onerror] Network Error "+ req.statusText +"(" + req.status + ")"));
     };
+
+    // Timeout après 60s
+    //req.timeout = 5000;
+
+    /*
+    req.ontimeout = function(e) {
+      LoggerModule.error("Request Timeout e:", e);
+      LoggerModule.error("Request Timeout req.statusText:", req.statusText);
+      LoggerModule.error("Request Timeout req.status:", req.status);
+      reject(Error("Request Timeout"))
+    }; //*/
 
     // Make the request
     req.send();
   });
 }
 
+/**
+ * JSON.parse mais avec un message d'erreur plus détaillé
+ * @param response
+ * @return {JSON/Error}
+ */
+function customJsonParse(response) {
+  LoggerModule.log("[WORKER.customJsonParse] response", response);
+  let a = undefined;
+  try {
+    a = JSON.parse(response);
+    return a;
+  } catch (e) {
+
+    throw Error("[WORKER.customJsonParse] Unable to parse response to JSON. " + e.message);
+  }
+}
 
 /**
  * Convertir le résultat de la requête en JSON et y récupérer les données brutes via 'CONFIG.rootName'
@@ -206,30 +196,43 @@ function WORKER_GET(url) {
  *
  * @throws si le parsing du JSON renvoie une erreur (Syntax Error)
  */
-function extractRootNameData(requestResponse) {
-  LoggerModule.log("[extractRootNameData] WORKER_CONFIG", WORKER_CONFIG);
-  LoggerModule.log("[extractRootNameData] requestResponse", requestResponse);
-  LoggerModule.log("[extractRootNameData] WORKER_CONFIG.rootName", WORKER_CONFIG.rootName);
+function extractData(requestResponse) {
+  LoggerModule.log("[extractData] WORKER_CONFIG", WORKER_CONFIG);
+  LoggerModule.log("[extractData] requestResponse", requestResponse);
+  LoggerModule.info("[extractData] WORKER_CONFIG.rootName", WORKER_CONFIG.rootName);
 
-  // Récupérer les données à l'aide de "rootName"
-  return requestResponse[WORKER_CONFIG.rootName]; //TODO dans d'autres bases, peut-être que le rootName sera 'nested' (exemple: 'root.baseName')
+  return new Promise(function(resolve, reject) {
+    // Pas de root
+    if (!requestResponse[WORKER_CONFIG.rootName])
+      reject(Error("RootName (" + WORKER_CONFIG.rootName + ") not found in the JSON"));
+
+    // Récupérer les données à l'aide de "rootName"
+    resolve(requestResponse[WORKER_CONFIG.rootName]); //TODO dans d'autres bases, peut-être que le rootName sera 'nested' (exemple: 'root.baseName')
+  });
 }
 
 function updateLocal(rawTaskDatas) {
+  if(arguments.length !== 1)
+    throw new Error("[updateLocal] Missing an argument");
+  if(!rawTaskDatas)
+    throw new Error("[updateLocal] Argument is invalid (" + rawTaskDatas +")");
+
   LoggerModule.log("[updateLocal] rawTaskDatas", rawTaskDatas);
 
-  let updatedTasks = {},
-      invalidTasks = {},
+  let updatedTasks = {},  // Nouvelles tâches à afficher / MàJ dans le graphique
+      invalidTasks = {},  // Tâches invalides, seront renvoyés à la page principale et signalées via popup
       length = rawTaskDatas.length;
 
   // stocker les nouvelles valeurs et informer la page principale des changements
   while (length--) {
     LoggerModule.log("\n\nTRYING TO TRANSFORM", rawTaskDatas[length]);
     // instancier la nouvelle tâche
+    // TODO try / catch car throw si pas le
     let currentOrisTask = new OrisGanttTask(rawTaskDatas[length], WORKER_CONFIG),
-//  let currentOrisTask = new OrisGanttTask(rawTaskDatas[length], WORKER_CONFIG.CONSTANTS.HC_CONFIG_KEYS),
-        //ancienne valeur pour cette tâche
-        oldTask = orisTaskById[currentOrisTask.getRaw('id')];
+      //ancienne valeur pour cette tâche
+      oldTask = orisTaskById[currentOrisTask.getRaw('id')];
+
+    LoggerModule.log("currentOrisTask", currentOrisTask.userOptions);
 
     // Ignorer les tâches "invalides" TODO (puis SIGNALER à la page principale)
     if (!currentOrisTask.isValidTask()) {
@@ -238,22 +241,28 @@ function updateLocal(rawTaskDatas) {
     }
 
     // Ne rien faire si TOUTES les valeurs sont les mêmes
-    if (oldTask === undefined
-        || SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions))
+    if (oldTask !== undefined
+        && SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions)) {
+      LoggerModule.info("\nVALUES DIDN'T CHANGE\n");
       continue;
+    }
 
     // Remplacer la valeur et enregistrer ce remplacement TODO signaler ce remplacement
-    updatedTasks[currentOrisTask.getRaw('id')] = orisTaskById[currentOrisTask.getRaw('id')] = currentOrisTask;
+    updatedTasks[currentOrisTask.getRaw('id')] = orisTaskById[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
   }
 
-  // Informer des éventuels changements de valeurs
-  if (Object.keys(updatedTasks).length > 0) {
+  // Informer des éventuels changements de valeurs, et de celles qui sont invalides
+  if (Object.keys(updatedTasks).length > 0 || Object.keys(invalidTasks).length > 0) {
     self.postMessage({
-      updatedTasks: updatedTasks
+      updatedTasks: updatedTasks,
+      invalidTasks: invalidTasks
     });
   }
 
-  return updatedTasks;
+  return {
+    updatedTasks: updatedTasks,
+    invalidTasks: invalidTasks
+  };
 }
 
 /**
@@ -261,8 +270,7 @@ function updateLocal(rawTaskDatas) {
  * @param errorMsg
  */
 function postError(errorMsg) {
-  LoggerModule.error("**** ERROR ****");
-  LoggerModule.error(errorMsg);
+  LoggerModule.error("**** [WORKER] postError ****", errorMsg);
   self.postMessage({
     error: errorMsg.toString()
   });

@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js\dist\no-proto-oris-data.model.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">js/dist/</a> no-proto-oris-data.model.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">2.74% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>2/73</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/51</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/16</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">2.74% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>2/73</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * @DataModel pour une donnée Oris
+ * le web-service renvoie toujours des données en string,
+ * ce modèle nous sert à normaliser leur formatage
+ * @param {string} _value valeur de la donnée
+ * @constructor
+ */
+<span class="fstat-no" title="function not covered" >function NoProtoOrisData(_value) {</span>
+<span class="cstat-no" title="statement not covered" >  this.value = _value;</span>
+<span class="cstat-no" title="statement not covered" >  this.booleanValue = undefined;</span>
+<span class="cstat-no" title="statement not covered" >  this.dateValue = undefined;</span>
+<span class="cstat-no" title="statement not covered" >  this.numberValue = undefined;</span>
+<span class="cstat-no" title="statement not covered" >  this.rgbValue = undefined;</span>
+<span class="cstat-no" title="statement not covered" >  this.timestampValue = undefined;</span>
+&nbsp;
+  /**
+   * Récupérer la valeur brute
+   */
+<span class="cstat-no" title="statement not covered" >  this.asRaw = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.value;</span>
+  };
+&nbsp;
+&nbsp;
+  /**
+   * Récupérer la valeur brute
+   */
+<span class="cstat-no" title="statement not covered" >  this.asRaw = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.value;</span>
+  };
+  /**
+   * Récupérer la valeur sous forme de String
+   *    (bien souvent ça sera déjà le cas dans asRaw, mais au cas où
+   *     mais ID, Category, etc... doivent impérativement être des String)
+   * @return {string}
+   */
+<span class="cstat-no" title="statement not covered" >  this.asString = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return (this.value || this.value === false || this.value === 0) ? ("" + this.value) : undefined;</span>
+  };
+&nbsp;
+  /**
+   * Récupérer la valeur sous forme booléenne
+   * @returns {undefined|boolean}
+   */
+<span class="cstat-no" title="statement not covered" >  this.asBoolean = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.booleanValue !== undefined</span>
+      ? this.booleanValue
+      : (this.booleanValue = this.tryParseBoolean());
+  };
+  /**
+   * Tente de convertir la valeur brute en boolean
+   * @returns {undefined|boolean}
+   */
+<span class="cstat-no" title="statement not covered" >  this.tryParseBoolean = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    if (typeof this.asRaw() === "boolean")</span>
+<span class="cstat-no" title="statement not covered" >      return this.asRaw();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    let tmp = typeof this.asRaw() === "string"</span>
+      ? this.asRaw().toLowerCase()
+      : this.asRaw();
+    //if (typeof this.asRaw() !== "string")
+    //  return undefined;
+<span class="cstat-no" title="statement not covered" >    let toReturn = undefined;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    switch (tmp) {</span>
+      case "true":
+<span class="cstat-no" title="statement not covered" >        toReturn = true;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case "1":
+<span class="cstat-no" title="statement not covered" >        toReturn = true;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 1:
+<span class="cstat-no" title="statement not covered" >        toReturn = true;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case true:
+<span class="cstat-no" title="statement not covered" >        toReturn = true;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+&nbsp;
+      case "false":
+<span class="cstat-no" title="statement not covered" >        toReturn = false;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case "0":
+<span class="cstat-no" title="statement not covered" >        toReturn = false;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 0:
+<span class="cstat-no" title="statement not covered" >        toReturn = false;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case false:
+<span class="cstat-no" title="statement not covered" >        toReturn = false;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+&nbsp;
+      default:
+<span class="cstat-no" title="statement not covered" >        return undefined;</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return toReturn;</span>
+  };
+&nbsp;
+  /**
+   * Récupérer la valeur sous forme de nombre
+   * @returns {undefined|Number}
+   */
+<span class="cstat-no" title="statement not covered" >  this.asNumber = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.numberValue !== undefined</span>
+      ? this.numberValue
+      : (this.numberValue = this.tryParseNumber());
+  };
+  /**
+   * Tente de convertir la valeur brute en nombre
+   * @returns {undefined|Number}
+   */
+<span class="cstat-no" title="statement not covered" >  this.tryParseNumber = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    if (isNaN(this.value) || this.value === null || this.value === undefined)</span>
+<span class="cstat-no" title="statement not covered" >      return undefined;</span>
+&nbsp;
+    // Attention, Number(null) = 0. Alors que Number(undefined) = NaN
+<span class="cstat-no" title="statement not covered" >    let tmpParsed = Number(this.value);</span>
+<span class="cstat-no" title="statement not covered" >    return isNaN(tmpParsed) ? undefined</span>
+      : tmpParsed;
+  };
+&nbsp;
+  /**
+   * Récupérer la valeur sous forme de Date
+   * @returns {Date}
+   */
+<span class="cstat-no" title="statement not covered" >  this.asDateObject = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.dateValue !== undefined</span>
+      ? this.dateValue
+      : (this.dateValue = this.tryParseDate());
+  };
+<span class="cstat-no" title="statement not covered" >  this.tryParseDate = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    if (this.value instanceof Date)</span>
+<span class="cstat-no" title="statement not covered" >      return this.value;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return (typeof this.value === "number" || SHARED.isIsoDate(this.value))   // on autorise les timestamps</span>
+      ? new Date(this.value) //la date est invalide / n'a pas pû être parsée automatiquement
+      : undefined;
+    /*
+    if (isNaN(Number(this.value)))
+      return undefined; // Sinon, "#42" produit Wed Jan 01 2042 00:00:00 GMT+0100 (Central European Standard Time)
+&nbsp;
+    let parsedDate = new Date(this.value);
+&nbsp;
+    //Si la date est invalide {Invalid Date}, les fonctions renvoient NaN
+    //et NaN est le seul "type" qui n'est jamais égal à lui même (NaN === NaN -&gt; false)
+    return (parsedDate.getTime() !== parsedDate.getTime())
+      ? undefined //la date est invalide / n'a pas pû être parsée automatiquement
+      : parsedDate;
+    //*/
+  };
+&nbsp;
+  /**
+   * Récupérer la valeur sous forme de timestamp (en ms, car JavaScript)
+   * @returns {undefined|number}
+   */
+<span class="cstat-no" title="statement not covered" >  this.asTimestamp = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.timestampValue !== undefined</span>
+      ? this.timestampValue
+      : (this.timestampValue = this.tryParseTimestamp())
+  };
+<span class="cstat-no" title="statement not covered" >  this.tryParseTimestamp = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    let parsedDate = this.asDateObject();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return parsedDate</span>
+      ? parsedDate.getTime()
+      : undefined;
+  };
+&nbsp;
+  /**
+   * Récupérer la valeur sous forme de string représentant un RGB ou RGBA
+   * @returns {undefined|string}
+   */
+<span class="cstat-no" title="statement not covered" >  this.asRgb = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.rgbValue !== undefined</span>
+      ? this.rgbValue
+      : (this.rgbValue = this.tryParseRgb());
+  };
+<span class="cstat-no" title="statement not covered" >  this.tryParseRgb = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    if (!this.value || typeof this.value != "string")</span>
+<span class="cstat-no" title="statement not covered" >      return undefined;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    let formattedRgb = this.value[0] === "#"</span>
+      ? this.value
+      : ("#"+this.value);
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return isValidHexColor(formattedRgb) ? this.value : undefined;</span>
+  };
+&nbsp;
+  /**
+   * @TO_SHARE Teste si une chaine de caractère consitue une valeur hexadécimale (couleur) légale
+   *
+   * source: https://stackoverflow.com/questions/8027423/how-to-check-if-a-string-is-a-valid-hex-color-representation
+   * - ^ match beginning
+   * - # a hash
+   * - [a-f0-9] any letter from a-f and 0-9
+   * - {6} the previous group appears exactly 6 times
+   * - $ match end
+   * - i ignore case
+   *
+   * @param  {string}  stringToTest
+   *     chaine de caractères à tester
+   * @return {Boolean}
+   *     true si la chaine est une couleur écrite en hexadécimal :
+   *     - court (3 caractères, en plus du '#') "#cf9"
+   *     - long (6) "#ccff99"
+   *     - long, avec opacité (8) "#ccff9955"
+   *     - court, avec opacité (4) "#f9f9"
+   *     - même sans '#' initial "ccff9955" / "f9f9"
+   *
+   */
+<span class="fstat-no" title="function not covered" >  function isValidHexColor(stringToTest) {</span>
+<span class="cstat-no" title="statement not covered" >    return /^#?(?:(?:[A-F0-9]{2}){3,4}|[A-F0-9]{3}|[A-F0-9]{4})$/i.test(stringToTest);</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  this.update = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    this.asBoolean();</span>
+<span class="cstat-no" title="statement not covered" >    this.asDate();</span>
+<span class="cstat-no" title="statement not covered" >    this.asNumber();</span>
+<span class="cstat-no" title="statement not covered" >    this.asRgb();</span>
+<span class="cstat-no" title="statement not covered" >    this.asTimestamp();</span>
+  };
+&nbsp;
+  //Auto Init
+<span class="cstat-no" title="statement not covered" >  this.update();</span>
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Jun 11 2019 16:12:30 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

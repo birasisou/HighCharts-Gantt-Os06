@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js\dist\doom.worker.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">js/dist/</a> doom.worker.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">4.17% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>3/72</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/14</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">4.17% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>3/72</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * On crée un Web Worker via Blob afin de ne pas avoir un fichier "en dur"
+ * dans lequel on recopie (même de façon automatique en concaténant avec Gulp par exemple)
+ *
+ * Pour cela, il faut fournir un template (String) au Blop
+ *
+ * Ceci rend impossible l'utilisation de protoype (ou plutôt, ils seront perdu lors du 'parsing') et nous oblige à
+ */
+&nbsp;
+<span class="fstat-no" title="function not covered" >function myWorker(config) {</span>
+  // Invisible car dans le Worker
+<span class="cstat-no" title="statement not covered" >  console.info("[myWorker] param", config);</span>
+&nbsp;
+  /**
+   * Création des fonctions
+   */
+<span class="cstat-no" title="statement not covered" >  let that = {</span>
+    config: config,
+&nbsp;
+    url: config.webserviceUrl || 'https://api.kanye.rest/',
+&nbsp;
+    dataById: {},
+    keepLooping: true,
+    loopTimeoutMs: 1500, // 1.5s
+&nbsp;
+    start: <span class="fstat-no" title="function not covered" >function () {</span>
+<span class="cstat-no" title="statement not covered" >      self.postMessage({msg: "[From Worker] === START WORKER ==="});</span>
+<span class="cstat-no" title="statement not covered" >      that.infiniteGet();</span>
+    },
+&nbsp;
+    infiniteGet: <span class="fstat-no" title="function not covered" >function () {</span>
+<span class="cstat-no" title="statement not covered" >      self.postMessage({msg: "[From Worker] === infiniteGet ==="});</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      let xhr = new XMLHttpRequest();</span>
+<span class="cstat-no" title="statement not covered" >      xhr.open("GET", that.url, false);</span>
+&nbsp;
+      // Préparer la requête
+<span class="cstat-no" title="statement not covered" >      xhr.onload = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >        if (xhr.status !== 200) {</span>
+<span class="cstat-no" title="statement not covered" >          let err = "Request failed (" + xhr.status + ")";</span>
+<span class="cstat-no" title="statement not covered" >          self.postMessage({ error: err, description: "[Worker to Worker]" } );</span>
+<span class="cstat-no" title="statement not covered" >          postMessage( { error: err, description: "[Worker to Window] " } );</span>
+<span class="cstat-no" title="statement not covered" >          throw new Error(err);</span>
+<span class="cstat-no" title="statement not covered" >          return;</span>
+        }
+&nbsp;
+        // Parse en JSON
+<span class="cstat-no" title="statement not covered" >        let json;</span>
+<span class="cstat-no" title="statement not covered" >        try {</span>
+<span class="cstat-no" title="statement not covered" >          json = JSON.parse(xhr.responseText);</span>
+        } catch (e) {
+<span class="cstat-no" title="statement not covered" >          let err = "JSON parsing failed";</span>
+<span class="cstat-no" title="statement not covered" >          console.error(err, xhr.responseText);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          self.postMessage({ error: err, details: xhr.responseText, description: "[Worker to Worker]" } );</span>
+<span class="cstat-no" title="statement not covered" >          postMessage( { error: err, details: xhr.responseText, description: "[Worker to Window] " } );</span>
+<span class="cstat-no" title="statement not covered" >          throw new Error(err);</span>
+<span class="cstat-no" title="statement not covered" >          return;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        self.postMessage({description: "[From Worker] JSON content", data: json});</span>
+&nbsp;
+        // Loop -&gt; Stock/Update
+<span class="cstat-no" title="statement not covered" >        if (that.dataById[json.id]) { // TODO hasOwnProperty plutôt, sinon on risque d'avoir false si on a 0/false/""/...</span>
+<span class="cstat-no" title="statement not covered" >          that.dataById[json.id] = json;</span>
+<span class="cstat-no" title="statement not covered" >          self.postMessage({ updatedData: that.dataById[json.id] });</span>
+        } else {
+<span class="cstat-no" title="statement not covered" >          that.dataById[json.id] = json;</span>
+<span class="cstat-no" title="statement not covered" >          self.postMessage( { newData: that.dataById[json.id] } );</span>
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        self.postMessage({ allData: that.dataById } );</span>
+&nbsp;
+        // Infinite Loop
+<span class="cstat-no" title="statement not covered" >        if (that.keepLooping)</span>
+<span class="cstat-no" title="statement not covered" >          setTimeout(that.infiniteGet, that.loopTimeoutMs);</span>
+      };
+&nbsp;
+      // Effectuer la requête
+<span class="cstat-no" title="statement not covered" >      xhr.send();</span>
+    },
+&nbsp;
+    getJsonAndExtractRoot: <span class="fstat-no" title="function not covered" >function (url) {</span>
+<span class="cstat-no" title="statement not covered" >      return new Promise( <span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+<span class="cstat-no" title="statement not covered" >        let xhr = new XMLHttpRequest();</span>
+<span class="cstat-no" title="statement not covered" >        xhr.open("GET", url, false);</span>
+<span class="cstat-no" title="statement not covered" >        xhr.onload = <span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >          if (xhr.status !== 200) {</span>
+<span class="cstat-no" title="statement not covered" >            reject("Request failed (" + xhr.status + " - " + xhr.statusText + ")");</span>
+<span class="cstat-no" title="statement not covered" >            return;</span>
+          }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          let json = JSON.parse(xhr.responseText);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          if (json[config.rootName])</span>
+<span class="cstat-no" title="statement not covered" >            resolve(json[config.rootName]);</span>
+          else
+<span class="cstat-no" title="statement not covered" >            reject ("Unable to extract data from JSON (looking for '" + config.rootName + "').");</span>
+        };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        xhr.onerror = <span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >          reject("Request failed (" + xhr.status + " - " + xhr.statusText + ")");</span>
+        };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        xhr.send();</span>
+      });
+    },
+&nbsp;
+    formatToOrisGanttTask: <span class="fstat-no" title="function not covered" >function (array) {</span>
+<span class="cstat-no" title="statement not covered" >      if (array instanceof Array)</span>
+<span class="cstat-no" title="statement not covered" >        return array.map(<span class="fstat-no" title="function not covered" >function (data) {</span></span>
+&nbsp;
+        });
+    }
+&nbsp;
+  };
+&nbsp;
+  // Les déclare dans la page principale et pas dans le Worker
+<span class="cstat-no" title="statement not covered" >  self.addEventListener("message", <span class="fstat-no" title="function not covered" >function (e) {</span></span>
+<span class="cstat-no" title="statement not covered" >    let content = e.data;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    self.postMessage("[WORKER] Received: " + e.data);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (content.stop) {</span>
+<span class="cstat-no" title="statement not covered" >      that.keepLooping = false;</span>
+<span class="cstat-no" title="statement not covered" >      self.postMessage(" /// WILL STOP AFTER CURRENT LOOP \\\\\\")</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (content.start) {</span>
+<span class="cstat-no" title="statement not covered" >      that.keepLooping = true;</span>
+<span class="cstat-no" title="statement not covered" >      that.infiniteGet();</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (content.getAll)</span>
+<span class="cstat-no" title="statement not covered" >      self.postMessage(that.dataById);</span>
+  });
+&nbsp;
+  // Faire démarrer par la page principale (avec postMessage({}) ou même postMessage({init: true}))
+  // TODO that.start();
+}
+&nbsp;
+// TODO remove Global (pour debug)
+let worker;
+&nbsp;
+/**
+ *
+ * @param {ParametresUrlOris} config
+ *    config SANS FONCTIONS
+ */
+<span class="fstat-no" title="function not covered" >function initWorker (config) {</span>
+/*
+  // Auto init pas...
+  let workerTemplate = "self.onmessage = function (e) {" +
+      "((" + stringWorker + ")(e.data))" +
+    "}";
+//*/
+&nbsp;
+  // Magouille
+<span class="cstat-no" title="statement not covered" >  let workerTemplate =</span>
+    // SHARED
+    SHARED_FACTORY.toString() + "\nvar SHARED = new SHARED_FACTORY(); " +
+    // Oris Data
+    OrisData.toString() + "\n" +
+    // Oris Gantt Task
+    OrisGanttTask.toString() + "\n" +
+    // IIFE du Worker avec la CONFIG (ParametresUrlOris) en paramètre
+    "("+myWorker.toString() + ")(" + config + ")";
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  LoggerModule.info("workerTemplate", workerTemplate);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  let blob = new Blob([workerTemplate], { type: 'text/javascript' });</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  let blobUrl = window.URL.createObjectURL(blob);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  worker = new Worker(blobUrl);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  worker.addEventListener("message",<span class="fstat-no" title="function not covered" >function (e) {</span></span>
+<span class="cstat-no" title="statement not covered" >    console.log("[MAIN] Received message:", e.data);</span>
+  });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  worker.addEventListener("error", <span class="fstat-no" title="function not covered" >function (e) {</span></span>
+<span class="cstat-no" title="statement not covered" >    console.error("[MAIN] Received error:", e.data);</span>
+  });
+&nbsp;
+  // Pour le démarrer
+  // worker.postMessage({});
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Jun 11 2019 16:12:30 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

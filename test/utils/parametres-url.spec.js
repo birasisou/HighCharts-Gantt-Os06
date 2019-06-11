@@ -4,7 +4,7 @@
 describe("ParametresUrl permet d'initialiser différents paramètres nécessaires à l'intéraction avec un BD. " +
   "Il s'agit d'une classe destinée à être héritée et non pas utilisée directement", function () {
   let parametres_url;
-  LoggerModule.setDebug(false);
+  // LoggerModule.setDebug(false);
 
   describe("Lors de l'initialisation...", function() {
     it("L'argument à fournir est l'URI de la page {string}", function() {
