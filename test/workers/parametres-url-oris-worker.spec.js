@@ -165,11 +165,10 @@ describe("Worker functions", function () {
     spyOn(window, 'updateLocal').and.callThrough();
     spyOn(window, 'postError').and.callThrough();
 
-    //*
     window.postMessage({
       CONFIG: noFunctions,
       START_AUTO: true            // empêcher le GET auto de démarrer
-    });//*/
+    }, "*");
 
     jasmine.clock().tick(5001);
     setTimeout(function () {
@@ -183,6 +182,10 @@ describe("Worker functions", function () {
   });
 
   it('(statusCode !== 200) WORKER_GET should postError on non-OK status', function (done) {
+    for (i in noFunctions) {
+      console.log("- " + i, noFunctions[i]);
+    }
+
       // Spies
       let autoUpdateDataSpy = spyOn(window, 'autoUpdateData').and.callThrough();
       let WORKER_GETSpy = spyOn(window, 'WORKER_GET').and.callThrough();
@@ -208,11 +211,10 @@ describe("Worker functions", function () {
       };
       window.addEventListener("message", aze);
 
-      //*
       window.postMessage({
         CONFIG: noFunctions,
-        START_AUTO: true            // empêcher le GET auto de démarrer
-      });//*/
+        START_AUTO: true
+      }, "*");
 
       setTimeout(function () {
         let request = jasmine.Ajax.requests.mostRecent();
@@ -258,7 +260,7 @@ describe("Worker functions", function () {
       window.postMessage({
         CONFIG: noFunctions,
         START_AUTO: true
-      });
+      }, "*");
     });
 
   it('(NOT VALID JSON) WORKER_GET should postError if response content is not a valid JSON ', function (done) {
@@ -292,7 +294,7 @@ describe("Worker functions", function () {
       window.postMessage({
         CONFIG: noFunctions,
         START_AUTO: true
-      });
+      }, "*");
     });
 
   it('(no rootName in JSON) WORKER_GET should postError if the root field (not found in the JSON\'s root)', function (done) {
@@ -325,7 +327,7 @@ describe("Worker functions", function () {
       window.postMessage({
         CONFIG: noFunctions,
         START_AUTO: true
-      });
+      }, "*");
     });
 
   it('(no valid Data in JSON) should run OK and return an empty data Object', function (done) {
@@ -377,7 +379,7 @@ describe("Worker functions", function () {
       window.postMessage({
         CONFIG: noFunctions,
         START_AUTO: true
-      });
+      }, "*");
     });
 
   it("(OK) Cas normal, certaines données sont OK, d'autres sont invalides", function (done) {
@@ -423,11 +425,10 @@ describe("Worker functions", function () {
     };
     window.addEventListener("message", aze);
 
-    //*
     window.postMessage({
       CONFIG: noFunctions,
       START_AUTO: true
-    });//*/
+    }, "*");
 
     setTimeout(function () {
       let request = jasmine.Ajax.requests.mostRecent();
@@ -480,7 +481,7 @@ describe("Worker functions", function () {
     window.postMessage({
       CONFIG: noFunctions,
       START_AUTO: true
-    });
+    }, "*");
 /*
     setTimeout(function () {
       let request = jasmine.Ajax.requests.mostRecent();

@@ -106,6 +106,8 @@ module.exports = function(config) {
     configuration.reporters.push('verbose');
   if (config.coverage)
     configuration.reporters.push('coverage');
+  if (config.firefox)
+    configuration.browsers.push('FirefoxHeadless');
 
   //*
   if (process.env.TRAVIS) {
