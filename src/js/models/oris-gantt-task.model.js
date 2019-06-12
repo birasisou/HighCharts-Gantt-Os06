@@ -100,8 +100,8 @@ OrisGanttTask.prototype.isValidTask = function () {
     && (start <= end || (!end && end !== 0)))
     return true;
 
-  LoggerModule.error("[ID:" + id + "] n'est pas un donnée valide");
-  LoggerModule.warn("Raisons possibles: " +
+  LoggerModule.warn("[ID:" + id + "] n'est pas une donnée valide");
+  LoggerModule.info("Raisons possibles: " +
     "\n- [ID] manquant/vide/invalide..." +
     "\n- [START] manquant/vide/pas au format ISO-8601..." +
     "\n- [END] manquant/vide/pas au format ISO-8601......" +
