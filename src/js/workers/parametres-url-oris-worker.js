@@ -123,7 +123,7 @@ function autoUpdateData(url) {
  */
 function fakeFinally(arg) {
   LoggerModule.warn("[WORKER.autoUpdateData.finally] arg", arg);
-  self.postMessage({done: true}); // Pour débug
+  self.postMessage({done: true}, "*"); // Pour débug
 }
 
 //TODO: importer es6-promise.auto.min.js ? (le polyfill pour les Promise);
@@ -269,7 +269,7 @@ function updateLocal(rawTaskDatas) {
     self.postMessage({
       updatedTasks: updatedTasks,
       invalidTasks: invalidTasks
-    });
+    }, "*");
   }
 
   return {
@@ -286,6 +286,6 @@ function postError(errorMsg) {
   LoggerModule.error("**** [WORKER] postError ****", errorMsg);
   self.postMessage({
     error: errorMsg.toString()
-  });
+  }, "*");
 }
 
