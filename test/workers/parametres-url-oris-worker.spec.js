@@ -131,11 +131,15 @@ describe("Worker functions", function () {
       if (e.data.invalidTasks)
         LoggerModule.warn("\n[window.onmessage] Object.keys(e.data.invalidTasks)", Object.keys(e.data.invalidTasks));
     });
+
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
   });
 
   // don't forget to uninstall as well...
   afterEach(function() {
     jasmine.Ajax.uninstall();
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   // TODO Jasmine responseTimeout ne fonctionne pas et n'est pas documenté

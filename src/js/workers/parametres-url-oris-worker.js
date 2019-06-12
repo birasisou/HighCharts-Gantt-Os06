@@ -104,13 +104,26 @@ function autoUpdateData(url) {
     })            // traiter les données
     .catch(function (err) {
       postError(err.message);
+      throw err;
     })             // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
     //.finally(function (arg) {
     .then(function (arg) {
-      LoggerModule.warn("[WORKER.autoUpdateData.finally] arg", arg);
-      self.postMessage({done: true}); // Pour débug
-    }); // TODO rendre infini
+      fakeFinally(arg);
+      }, function (arg) {
+      fakeFinally(arg);
+    });
+  // TODO rendre infini
                 // mais je pense plutôt attendre que le main "confirme" le monde infini
+}
+
+/**
+ * Toujours exécuté à la fin d'autoUpdateData
+ * Promise.prototype.finally n'est pas toujours supporté
+ * @param arg
+ */
+function fakeFinally(arg) {
+  LoggerModule.warn("[WORKER.autoUpdateData.finally] arg", arg);
+  self.postMessage({done: true}); // Pour débug
 }
 
 //TODO: importer es6-promise.auto.min.js ? (le polyfill pour les Promise);
