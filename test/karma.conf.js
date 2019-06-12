@@ -115,7 +115,7 @@ module.exports = function(config) {
 
   //*
   if (process.env.TRAVIS) {
-    // configuration.browsers = ['Chrome_travis_ci', 'FirefoxHeadless'];
+    configuration.browsers = ['Chrome_travis_ci', 'FirefoxHeadless'];
     configuration.logLevel = config.LOG_DEBUG;
     configuration.reporters = ['verbose', 'progress', 'coverage'];
 
