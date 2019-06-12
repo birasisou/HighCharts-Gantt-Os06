@@ -108,10 +108,14 @@ module.exports = function(config) {
     configuration.reporters.push('coverage');
   if (config.firefox)
     configuration.browsers.push('FirefoxHeadless');
+  if (config["chrome-headless"]) {
+    console.log("Chrome Headless option detected");
+    configuration.reporters.push('Chrome_travis_ci');
+  }
 
   //*
   if (process.env.TRAVIS) {
-    configuration.browsers = ['Chrome_travis_ci', 'FirefoxHeadless'];
+    // configuration.browsers = ['Chrome_travis_ci', 'FirefoxHeadless'];
     configuration.logLevel = config.LOG_DEBUG;
     configuration.reporters = ['verbose', 'progress', 'coverage'];
 

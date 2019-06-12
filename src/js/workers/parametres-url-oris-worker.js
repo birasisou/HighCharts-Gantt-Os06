@@ -106,7 +106,8 @@ function autoUpdateData(url) {
       postError(err.message);
       throw err;
     })             // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
-    .finally(function (arg) {
+    //.finally(function (arg) {
+    .then(function (arg) {
       LoggerModule.warn("[WORKER.autoUpdateData.finally] arg", arg);
       self.postMessage({done: true}); // Pour débug
     }); // TODO rendre infini

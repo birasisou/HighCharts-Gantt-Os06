@@ -2,3 +2,5 @@ node_modules/
 .idea/
 hidden/
 test/utils/prototype-performance-test.js
+src/js/dist/
+test/dist/
