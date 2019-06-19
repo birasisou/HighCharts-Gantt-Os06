@@ -13,7 +13,7 @@
  *    (&id, &start, &end, etc...)
  *
  * @param {ParametresUrlOris} oris_config
- *    toute la config que le Worker a. Il nous faut les constantes et
+ *    toute la getConfig que le Worker a. Il nous faut les constantes et
  * @constructor
  */
 function OrisGanttTask(data_row, oris_config) {
@@ -25,7 +25,7 @@ function OrisGanttTask(data_row, oris_config) {
   // Les cléfs, définies dans notre url (GET parameters), correspondant aux userOptions d'HC
   let oris_column = oris_config.asRaw,
     // Les clés userOptions HighCharts
-    oris_config_HC_CONFIG_KEYS = oris_config.CONSTANTS.HC_CONFIG_KEYS;   //  *    parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS
+    oris_config_HC_CONFIG_KEYS = oris_config.CONSTANTS.HC_CONFIG_KEYS.data;   //  *    parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS.data
 
   // Valeur brute d'un userOption
   this.rawUserOptions = {};
@@ -38,19 +38,16 @@ function OrisGanttTask(data_row, oris_config) {
    * Initialise l'objet en récupérant de l'argument les valeurs correctement formattées (sinon, null)
    * correspondant aux userOptions d'une série (Gantt)
    *
-   * La clé est celle définie dans l'argument CONFIG parametres_url_oris_config (".CONSTANTS.HC_CONFIG_KEYS")
+   * La clé est celle définie dans l'argument CONFIG parametres_url_oris_config (".CONSTANTS.HC_CONFIG_KEYS.data")
    */
   // Liste des paramètres "implémentés" d'une série HighCharts
   let keys = Object.keys(oris_config_HC_CONFIG_KEYS),
     length = keys.length;
 
-
   while (length--) {
     let key = keys[length];
-    // La clé HC
-    LoggerModule.log("HighChart's Key", key);
     // L'équivalent Oris (définit en paramètre url)
-    LoggerModule.log("(oris_config_HC_CONFIG_KEYS[key]['url_param']) Our GET parameter equivalent", oris_config_HC_CONFIG_KEYS[key]['url_param']);
+    LoggerModule.log("(oris_config_HC_CONFIG_KEYS["+key+"]['url_param']) Our GET parameter equivalent", oris_config_HC_CONFIG_KEYS[key]['url_param']);
 
     // SAVE DATA
 
@@ -69,9 +66,22 @@ function OrisGanttTask(data_row, oris_config) {
     LoggerModule.log("(This userOptions's value formatted) userOptions[key] " + key + ":", this.userOptions[key]);
   }
 
-  LoggerModule.log("this.rawUserOptions", this.rawUserOptions);
-  LoggerModule.log("this.orisValueUserOption", this.orisValueUserOption);
-  LoggerModule.info("this.userOptions", this.userOptions);
+  /**
+   * CAS PARTICULIERS
+   */
+  // MILESTONE
+  //  on doit le "calculer" (TRUE s'il n'y pas de date de fin spécifiée)
+  this.userOptions["milestone"] = (typeof this.userOptions["start"] !== "undefined" && typeof this.userOptions["end"] === "undefined");
+  // COMPLETE
+  //  doit être formatté en un Objet "{ amount: <value> }"
+  if (typeof this.userOptions["completed"] === "number") {
+    if (this.userOptions["completed"] > 1)
+      this.userOptions["completed"] = this.userOptions["completed"] / 100;
+      if (this.userOptions["completed"] >= 0 && this.userOptions["completed"] <= 1)  // todo Autoriser entre 0 et 100 ?
+        this.userOptions["completed"] = { amount: this.userOptions["completed"] };
+  } else
+    this.userOptions["completed"] = null;
+
 }
 
 /**
@@ -100,8 +110,8 @@ OrisGanttTask.prototype.isValidTask = function () {
     && (start <= end || (!end && end !== 0)))
     return true;
 
-  LoggerModule.warn("[ID:" + id + "] n'est pas une donnée valide");
-  LoggerModule.info("Raisons possibles: " +
+  LoggerModule.info("[ID:" + id + "] n'est pas une donnée valide");
+  LoggerModule.log("Raisons possibles: " +
     "\n- [ID] manquant/vide/invalide..." +
     "\n- [START] manquant/vide/pas au format ISO-8601..." +
     "\n- [END] manquant/vide/pas au format ISO-8601......" +
@@ -116,4 +126,12 @@ OrisGanttTask.prototype.get = function (key) {
 };
 OrisGanttTask.prototype.getRaw = function (key) {
   return this.rawUserOptions[key];
+};
+
+OrisGanttTask.prototype.toString = function() {
+  let str = "";
+  for (let i in this) {
+    str += ('\nOrisGanttTask.prototype.' + i + ' = ' + this[i].toString());
+  }
+  return str;
 };

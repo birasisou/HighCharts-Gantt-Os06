@@ -8,6 +8,7 @@
   <title>Gantt Oris</title>
 
   <link rel="stylesheet" href="src/lib/font-awesome-5.7.2/css/font-awesome.min.css">
+  <link rel="stylesheet" href="src/css/index.css">
 
 </head>
 
@@ -15,24 +16,39 @@
   <div class="container-fluid" id="root">
     <!-- LOADING -->
     <div id="loading-overlay" class="overlay ">
-      <div id="loading-position">
-        <div id="loading-label">Chargement...</div>
-        <br>
+
+      <div id="loading-position" class="centered">
+        <div id="loading-spinner" class="lds-hourglass"></div>
+        <p id="loading-label">Chargement</p>
+        <!--
         <div id="progressbar" aria-busy="true" aria-label="Loading" role="progressbar"></div>
+        -->
       </div>
     </div>
 
+    <div id="container"></div>
   </div>
 
+
+
+  <!-- LIB -->
+  <script src="./src/lib/highcharts/highcharts-gantt.src.js"></script>
+
+  <!-- UI -->
+  <script src="src/js/UI/loading-overlay-handler.js"></script>
+
+  <!-- SHARED -->
   <script src="./src/js/utils/logger-module.js"></script>
   <script src="./src/js/utils/exceptions.js"></script>
   <script src="./src/js/utils/shared.js"></script>
   <script src="./src/js/utils/parametres-url.js"></script>
   <script src="./src/js/utils/parametres-url-oris.js"></script>
 
+  <!-- Models -->
   <script src="./src/js/models/oris-data.model.js"></script>
   <script src="./src/js/models/oris-gantt-task.model.js"></script>
+  <script src="./src/js/models/oris-gantt-chart-config.model.js"></script>
 
-  <script src="./src/js/workers/parametres-url-oris-worker.js"></script>
+  <script src="./src/js/index.js"></script>
 </body>
 </html>

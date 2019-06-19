@@ -15,9 +15,7 @@ module.exports = function(config) {
       'karma-jasmine-ajax',
       'karma-jasmine',
       'karma-verbose-reporter',
-      'karma-coverage'/*,
-      'karma-coverage-istanbul-reporter'  --> "karma-coverage-istanbul-reporter": "^2.0.5" DANS PACKAGE.JSON
-      //*/
+      'karma-coverage'
     ],
 
     // frameworks to use
@@ -33,7 +31,8 @@ module.exports = function(config) {
 
     // list of files / patterns to exclude
     exclude: [
-      '../src/js/dist/all-in-one-worker.js'
+      '../src/js/dist/all-in-one-worker.js',
+      '../src/js/index.js'
     ],       //fichier concaténé avec GULP mais qui, du coup, redéclare des "let" (ce qui est interdit)
 
     // preprocess matching files before serving them to the browser
@@ -65,7 +64,7 @@ module.exports = function(config) {
     colors: true,
 
     // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    // possible values: getConfig.LOG_DISABLE || getConfig.LOG_ERROR || getConfig.LOG_WARN || getConfig.LOG_INFO || getConfig.LOG_DEBUG
     logLevel: config.LOG_ERROR,
 
     // enable / disable watching file and executing tests whenever any file changes

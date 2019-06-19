@@ -18,7 +18,7 @@ const EXCEPTIONS = {
   DefaultException: function(_type, _description, _msg) {
     this.type = _type;
     this.description = _description;
-    this.message = _msg ||undefined;
+    this.message = _msg || undefined;
   },
 
   /**
@@ -51,6 +51,13 @@ const EXCEPTIONS = {
     EXCEPTIONS.DefaultException.call(this,
       "InvalidArgumentExcepetion",
       "An invalid argument was passed to a function",
+      msg);
+  },
+
+  MissingArgumentExcepetion: function (msg) {
+    EXCEPTIONS.DefaultException.call(this,
+      "MissingArgumentExcepetion",
+      "One or more arguments are missing",
       msg);
   },
 

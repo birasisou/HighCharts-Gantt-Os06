@@ -20,6 +20,34 @@ function OrisData(_value) {
   this.rgbValue = undefined;
   this.timestampValue = undefined;
 
+
+  /**
+   * @TO_SHARE Teste si une chaine de caractère consitue une valeur hexadécimale (couleur) légale
+   *
+   * source: https://stackoverflow.com/questions/8027423/how-to-check-if-a-string-is-a-valid-hex-color-representation
+   * - ^ match beginning
+   * - # a hash
+   * - [a-f0-9] any letter from a-f and 0-9
+   * - {6} the previous group appears exactly 6 times
+   * - $ match end
+   * - i ignore case
+   *
+   * @param  {string}  stringToTest
+   *     chaine de caractères à tester
+   * @return {Boolean}
+   *     true si la chaine est une couleur écrite en hexadécimal :
+   *     - court (3 caractères, en plus du '#') "#cf9"
+   *     - long (6) "#ccff99"
+   *     - long, avec opacité (8) "#ccff9955"
+   *     - court, avec opacité (4) "#f9f9"
+   *     - même sans '#' initial "ccff9955" / "f9f9"
+   *
+   */
+  isValidHexColor = function (stringToTest) {
+    return /^#?(?:(?:[A-F0-9]{2}){3,4}|[A-F0-9]{3}|[A-F0-9]{4})$/i.test(stringToTest);
+  };
+
+
   this.update = function () {
     this.asBoolean();
     this.asDateObject();
@@ -142,21 +170,19 @@ OrisData.prototype.tryParseDate = function () {
   if (this.value instanceof Date)
     return this.value;
 
-  return (typeof this.value === "number" || SHARED.isIsoDate(this.value))   // on autorise les timestamps
-    ? new Date(this.value) //la date est invalide / n'a pas pû être parsée automatiquement
-    : undefined;
-  /*
-  if (isNaN(Number(this.value)))
-    return undefined; // Sinon, "#42" produit Wed Jan 01 2042 00:00:00 GMT+0100 (Central European Standard Time)
-
-  let parsedDate = new Date(this.value);
-
-  //Si la date est invalide {Invalid Date}, les fonctions renvoient NaN
-  //et NaN est le seul "type" qui n'est jamais égal à lui même (NaN === NaN -> false)
-  return (parsedDate.getTime() !== parsedDate.getTime())
-    ? undefined //la date est invalide / n'a pas pû être parsée automatiquement
-    : parsedDate;
-  //*/
+  if (typeof this.value === "number"    // on autorise les timestamps
+   ||SHARED.isIsoDate(this.value))      // format ISO
+    return new Date(this.value);
+  else if (SHARED.isFrenchShortDate(this.value)) {  // On transforme DD/MM/YYYY en MM/DD/YYYY
+    let tmp = null;
+    if (this.value.indexOf("/"))
+      tmp = this.value.split("/");
+    else
+      tmp = this.value.split("-");
+    return new Date(tmp[1] + "/" + tmp[0] + "/" + tmp[2]);
+  }
+  else
+    return undefined;
 };
 
 /**
@@ -193,7 +219,7 @@ OrisData.prototype.tryParseRgb = function () {
     ? this.value
     : ("#"+this.value);
 
-  return isValidHexColor(formattedRgb) ? this.value : undefined;
+  return isValidHexColor(formattedRgb) ? formattedRgb : undefined;
 };
 
 /**
@@ -221,3 +247,11 @@ OrisData.prototype.tryParseRgb = function () {
 function isValidHexColor(stringToTest) {
   return /^#?(?:(?:[A-F0-9]{2}){3,4}|[A-F0-9]{3}|[A-F0-9]{4})$/i.test(stringToTest);
 }
+
+OrisData.prototype.toString = function() {
+  let str = "";
+  for (let i in this) {
+    str += ('\nOrisData.prototype.' + i + ' = ' + this[i].toString());
+  }
+  return str;
+};

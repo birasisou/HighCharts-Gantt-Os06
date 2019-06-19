@@ -24,8 +24,6 @@ function SHARED_FACTORY() {
       }
       return fakeWindowLocation;
     },*/
-
-
     stringToLocation: function (stringToParse) {
       let fakeWindowLocation = document.createElement('a');
       fakeWindowLocation.href = stringToParse;
@@ -73,7 +71,7 @@ function SHARED_FACTORY() {
      *        détermine si l'absence de paramètres doit être considéré comme une exception ou non
      *
      * @returns {object}
-     *    config pour un Objet ParametresUrl
+     *    getConfig pour un Objet ParametresUrl
      *
      * @throws "No parameters detected"
      */
@@ -204,17 +202,62 @@ function SHARED_FACTORY() {
     },
 
     /**
-     * Check si une chaîne de caractères et une Date au format ISO
+     * Quick and limited Object comparator using JSON.stringify
+     *  JSON.stringify turns the object into a String, ignoring the functions) and compares these,
+     *  essentially comparing only all of the Objects values
+     * @param {Object} obj1
+     * @param {Object} obj2
+     * @return {boolean}
+     */
+    quickObjectEquals: function (obj1, obj2) {
+      return JSON.stringify(obj1) === JSON.stringify(obj2);
+    },
+
+    /**
+     * Check si une chaîne de caractères est une Date au format ISO
      * @param {string} str
      * @return {boolean} true SSI exactement le format ISO (norme Ecmascript, Zulu time)
      */
     isIsoDate: function (str) {
-      if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(str)) return false;
+      if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/.test(str) && !/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(str)) return false;
       let d = new Date(str);
-      return (d.toISOString() === str
+      return ((d.toISOString() === str || d.toISOString() === (str.slice(0, -1)+".000Z"))
         && d.getTime() === d.getTime()); // false si Invalid Date car (NaN === NaN) => false
-    }
+    },
+
+    /**
+     * Check si une chaîne de caractère est une Date au format "Short Date" mais Européen (DD/MM/YYYY, au lieu du natif MM/DD/YYYY)
+     * @param str
+     * @return {boolean}
+     */
+    isFrenchShortDate: function (str) {
+      if (!/^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(str)) return false;
+      let tmp = null;
+      if (str.indexOf("/"))
+        tmp = str.split("/");
+      else
+        tmp = str.split("-");
+
+      // On transforme DD/MM/YYYY en MM/DD/YYYY
+      let d = new Date(tmp[1] + "/" + tmp[0] + "/" + tmp[2]);
+      return ((d.toISOString() === str || d.toISOString() === (str.slice(0, -1)+".000Z"))
+        && d.getTime() === d.getTime()); // false si Invalid Date car (NaN === NaN) => false
+    },
+
+    /**
+     * Importe dynamiquement un script
+     * @param {String} url
+     */
+    loadJsScript: function(url) {
+    if (arguments.length < 1)
+      throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel url]");
+
+    let script = document.createElement("script");  // create a script DOM node
+    script.src = url;  // set its src to the provided URL
+
+    document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
   }
+}
 }
 
 // Objet global comme avant

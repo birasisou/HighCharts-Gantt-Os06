@@ -25,52 +25,69 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     // @url_param Définir ici comment on nomme chaque paramètre URL nécessaire à l'instanciation des séries HighCharts (en mode Gantt)
     // @format Et comment on souhaite les formater (parser en string, nombre, booléen, couleur, date, etc...)
     HC_CONFIG_KEYS: {
-      id: { // {unique string} id de la tâche @MANDATORY
-        url_param: 'id',    //paramètre URL contenant la colonne correspondante
-        //format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
-        format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+      chart: {
+        title: {
+          url_param: 'title',
+          format: 'asString'
+        },
+        subtitle: {
+          url_param: 'title',
+          format: 'asString'
+        }
       },
-      start: {  // {date} date de début de la tâche @MANDATORY
-        url_param: 'start',
-        format: 'asTimestamp'
+      dataLabel: {
+        // prefix
+        // suffix
+        // idefix
       },
-      end: {  // {date} date de fin de la tâche @MANDATORY (sauf si 'milestone == true', auquel cas il faut null)
-        url_param: 'end',
-        format: 'asTimestamp'
-      },
-      name: { // {string} texte apparant sur la tâche
-        url_param: 'name',
-        format: 'asString'
-      },
-      milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
-        url_param: 'is-milestone',
-        format: 'asBoolean'
-      },
-      category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
-        url_param: 'category',
-        format: 'asString'
-      },
-      dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
-        url_param: 'dependency',
-        format: 'asString'
-      },
-      complete: { // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
-        url_param: 'complete',
-        format: 'asNumber'
-      },
-      color: {  // {RGBA} couleur en RGB ou RGBA (avec ou sans '#', court ou long) de la tâche
-        url_param: 'color',
-        format: 'asRgb'
-      },
+      data:{
+        id: { // {unique string} id de la tâche @MANDATORY
+          url_param: 'id',    //paramètre URL contenant la colonne correspondante
+          //format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+          format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+        },
+        start: {  // {date} date de début de la tâche @MANDATORY
+          url_param: 'start',
+          format: 'asTimestamp'
+        },
+        end: {  // {date} date de fin de la tâche @MANDATORY (sauf si 'milestone == true', auquel cas il faut null)
+          url_param: 'end',
+          format: 'asTimestamp'
+        },
+        name: { // {string} texte apparant sur la tâche
+          url_param: 'name',
+          format: 'asString'
+        },
+        milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
+          url_param: 'is-milestone',
+          format: 'asBoolean'
+        },
+        category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
+          url_param: 'category',
+          format: 'asString'
+        },
+        dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
+          url_param: 'dependency',
+          format: 'asString'
+        },
+        completed: { // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
+          url_param: 'complete',
+          format: 'asNumber'
+        },
+        color: {  // {RGBA} couleur en RGB ou RGBA (avec ou sans '#', court ou long) de la tâche
+          url_param: 'color',
+          format: 'asRgb'
+        },
 
-      //TODO bonus
-      owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
-        url_param: 'owner',
-        format: 'asString'
-      },
-      icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
-        url_param: 'icon',
-        format: 'asString'
+        //TODO bonus
+        owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
+          url_param: 'owner',
+          format: 'asString'
+        },
+        icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
+          url_param: 'icon',
+          format: 'asString'
+        }
       }
     },
 

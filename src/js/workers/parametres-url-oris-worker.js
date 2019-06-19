@@ -59,26 +59,32 @@ let WORKER_CONFIG = {}; // ParametreUrlOris récupéré de la page principale
 let orisTaskById = {};      // Row by ID, dictionnaire/hashmap des tâches (OrisGanttTask)
 
 // TODO implémenter côté main page
-let ALLOW_INVALID = false;
+let ALLOW_INVALID = false,
+  IS_MONITORING = true,
+  MONITORING_DELAY = 3000; // delay entre deux mise à jours (en ms)
+
 
 //Début du worker
 // TODO NE SURTOUT PAS IMPORTER SINON LA PAGE PRINCIPALE VA EXECUTER (enfin non, car elle ne recevra jamais de .CONFIG, mais ...)
 self.onmessage = function(event) {
-  LoggerModule.log("[WORKER.ONMESSAGE] event.data", event.data);
-
-  // récupérer la config depuis l'Objet ParametresUrl appelant (ici, Oris) et lancer la récupération des données
+  // récupérer la getConfig depuis l'Objet ParametresUrl appelant (ici, Oris) et lancer la récupération des données
   if (event.data.CONFIG) {
     LoggerModule.log("[WORKER.ONMESSAGE] event.data.CONFIG received");
     WORKER_CONFIG = event.data.CONFIG;
-
-    if (event.data.START_AUTO)
-      autoUpdateData(WORKER_CONFIG.webserviceUrl)
+  }
+  if (event.data.START_AUTO) {
+    LoggerModule.info("[WORKER.ONMESSAGE] event.data.START_AUTO received.", "Stopping monitoring after current loop");
+    IS_MONITORING = true;
+    autoUpdateData(WORKER_CONFIG.webserviceUrl);
+  }
+  if (event.data.STOP_AUTO) {
+    LoggerModule.info("[WORKER.ONMESSAGE] event.data.STOP_AUTO received.", "Stopping monitoring after current loop");
+    IS_MONITORING = false;
   }
 
   // TODO utiliser pour autoriser, côté main page, à recevoir des valeurs "invalides" (imaginons un popup signalant '3 valeurs étaient invalident et ont été ignorées'
   if (event.data.ALLOW_INVALID)
     ALLOW_INVALID = new OrisData(event.data.ALLOW_INVALID).asBoolean();
-
 };
 
 /**
@@ -122,8 +128,13 @@ function autoUpdateData(url) {
  * @param arg
  */
 function fakeFinally(arg) {
-  LoggerModule.warn("[WORKER.autoUpdateData.finally] arg", arg);
-  self.postMessage({done: true}, "*"); // Pour débug
+  LoggerModule.log("[WORKER.autoUpdateData.finally] arg", arg);
+  postMessage({done: true}, "*"); // Pour débug
+
+  if (IS_MONITORING)
+    setTimeout(function () {
+      autoUpdateData(WORKER_CONFIG.webserviceUrl);
+    }, MONITORING_DELAY);
 }
 
 //TODO: importer es6-promise.auto.min.js ? (le polyfill pour les Promise);
@@ -135,7 +146,7 @@ function fakeFinally(arg) {
  * @constructor
  */
 function WORKER_GET(url) {
-  LoggerModule.info("[WORKER.WORKER_GET] url", url);
+  LoggerModule.log("[WORKER.WORKER_GET] url", url);
   // Return a new promise.
   return new Promise(function(resolve, reject) {
     // Do the usual XHR stuff
@@ -143,11 +154,11 @@ function WORKER_GET(url) {
     req.open('GET', url, true);
 
     req.onload = function() {
-      LoggerModule.info("[GET.onload] req.status", req.status);
+      LoggerModule.log("[GET.onload] req.status", req.status);
       // This is called even on 404 etc
       // so check the status
       if (req.status === 200) {
-        LoggerModule.info("[GET.onload] req.response", req.response);
+        LoggerModule.log("[GET.onload] req.response", req.response);
         resolve(req.response);
       }
       else {
@@ -195,7 +206,7 @@ function customJsonParse(response) {
     a = JSON.parse(response);
     return a;
   } catch (e) {
-
+    LoggerModule.info("tried to Parse:", response);
     throw Error("[WORKER.customJsonParse] Unable to parse response to JSON. " + e.message);
   }
 }
@@ -228,7 +239,7 @@ function updateLocal(rawTaskDatas) {
   if(arguments.length !== 1)
     throw new Error("[updateLocal] Missing an argument");
   if(!rawTaskDatas)
-    throw new Error("[updateLocal] Argument is invalid (" + rawTaskDatas +")");
+    throw new Error("[updateLocal] Argument is invalid ('" + rawTaskDatas +"')");
 
   LoggerModule.log("[updateLocal] rawTaskDatas", rawTaskDatas);
 
@@ -245,8 +256,6 @@ function updateLocal(rawTaskDatas) {
       //ancienne valeur pour cette tâche
       oldTask = orisTaskById[currentOrisTask.getRaw('id')];
 
-    LoggerModule.log("currentOrisTask", currentOrisTask.userOptions);
-
     // Ignorer les tâches "invalides" TODO (puis SIGNALER à la page principale)
     if (!currentOrisTask.isValidTask()) {
       invalidTasks[currentOrisTask.getRaw('id')] = currentOrisTask.rawUserOptions;
@@ -255,19 +264,27 @@ function updateLocal(rawTaskDatas) {
 
     // Ne rien faire si TOUTES les valeurs sont les mêmes
     if (oldTask !== undefined
-        && SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions)) {
+        && SHARED.quickObjectEquals(oldTask, currentOrisTask.userOptions)) {
+        // && SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions)) {
       LoggerModule.info("\nVALUES DIDN'T CHANGE\n");
       continue;
     }
 
-    // Remplacer la valeur et enregistrer ce remplacement TODO signaler ce remplacement
+    // Remplacer la valeur et enregistrer ce remplacement
+    // TODO signaler ce remplacement (pour l'instant on est en mode naif
+    LoggerModule.info("updated or new ", currentOrisTask.userOptions);
     updatedTasks[currentOrisTask.getRaw('id')] = orisTaskById[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
   }
 
-  // Informer des éventuels changements de valeurs, et de celles qui sont invalides
-  if (Object.keys(updatedTasks).length > 0 || Object.keys(invalidTasks).length > 0) {
-    self.postMessage({
-      updatedTasks: updatedTasks,
+  // Informer des changements de valeurs
+  if (Object.keys(updatedTasks).length > 0) {
+    postMessage({
+      updatedTasks: orisTaskById // updatedTasks TOUT renvoyer car méthode naïve
+    }, "*");
+  }
+  // Informer de l'existence de valeurs invalides dans la BD
+  if (Object.keys(invalidTasks).length > 0) {
+    postMessage({
       invalidTasks: invalidTasks
     }, "*");
   }
@@ -283,8 +300,8 @@ function updateLocal(rawTaskDatas) {
  * @param errorMsg
  */
 function postError(errorMsg) {
-  LoggerModule.error("**** [WORKER] postError ****", errorMsg);
-  self.postMessage({
+  LoggerModule.error("[WORKER] postError", errorMsg);
+  postMessage({
     error: errorMsg.toString()
   }, "*");
 }

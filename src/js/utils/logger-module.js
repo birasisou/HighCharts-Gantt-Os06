@@ -9,18 +9,24 @@
  *
  * @type {{warn, log, error, toggleOn, info}}
  */
-let LoggerModule = (function () {
+function LOGGER_MODULE_FACTORY() {
+  let current_log_level = "log";
   return {
     log: console.log,
     info: console.info,
     warn: console.warn,
     error: console.error,
-    setDebug: function(isOn) {
-      this.log = (isOn === true || isOn === "log") ? console.log : function () {};
-      this.info = (isOn === true || isOn === "log" || isOn === "info") ? console.info : function () {};
-      this.warn = (isOn === true  || isOn === "log" || isOn === "info" || isOn === "warn") ? console.warn : function () {};
-      this.error = (isOn === true || isOn === "log" || isOn === "info" || isOn === "warn" || isOn === "error") ? console.error : function () {};
-      return isOn;
-    }
+    setDebug: function(logLevel) {
+      current_log_level = logLevel;
+      this.log = (logLevel === true || logLevel === "log") ? console.log : function () {};
+      this.info = (logLevel === true || logLevel === "log" || logLevel === "info") ? console.info : function () {};
+      this.warn = (logLevel === true  || logLevel === "log" || logLevel === "info" || logLevel === "warn") ? console.warn : function () {};
+      this.error = (!logLevel) ? function () {} : console.error;
+      return logLevel;
+    },
+    getCurrent_log_level: function () { return current_log_level; }
   }
-}());
+}
+
+// Instance globale
+let LoggerModule = new LOGGER_MODULE_FACTORY();
