@@ -74,18 +74,31 @@ function GanttRenderingModule () {
         series: {
           animation: false,
           dataLabels: {
-            enabled: true
+            enabled: true,
             // format: '{point.name}' // todo custom formatter, surtout si pre/suffix/img, etc...
+            formatter: function() {
+              let tmp = this.key;
+              if (this.point.completed && this.point.completed.amount && typeof this.point.completed.amount === "number")
+                tmp += " (" + this.point.completed.amount*100 + "%)";
+              return tmp;
+            }
+            /*
+            formatter: function(e) {
+              let tmp = this.key;
+              return tmp;
+            }//*/
           }
         },
+        /*
         dataLabels: {
           enabled: true,
-          format: '{point.name}',
+          // format: '{point.name}',
+
           style: {
             cursor: 'default',
             pointerEvents: 'none'
           }
-        },
+        },//*/
       },
       yAxis: {
         type: 'category',
@@ -99,7 +112,7 @@ function GanttRenderingModule () {
         }
       }],
       tooltip: {
-        xDateFormat: '%a %d %b, %H:%M'
+        xDateFormat: '%a %d %b %Y, %H:%M'
       },
       series: []
     };
@@ -149,6 +162,16 @@ function GanttRenderingModule () {
         enabled: true,
           selected: 0
       };
+
+    // set MIN WIDTH for scrollable Area (> que scrollbar, car pour scollbar il faut définir la taille en valeurs de X et qu'on a des dates...)
+    if (parametreUrlOris.asRaw["minwidth"]) {
+      let numberValue = new OrisData(parametreUrlOris.asRaw["minwidth"]).asNumber();
+      if (numberValue)
+        BASE_CONFIG.chart.scrollablePlotArea = {
+          minWidth: numberValue,
+          scrollPositionX: 1
+        };
+    }
 
     return currentConfig = BASE_CONFIG;
     // return currentConfig; // { config: currentConfig };
