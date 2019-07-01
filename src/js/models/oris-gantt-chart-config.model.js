@@ -146,21 +146,11 @@ function GanttRenderingModule () {
             formatter: function() {
               let str = this.point.label;
               if (this.point.completed && this.point.completed.amount && typeof this.point.completed.amount === "number")
-                str += " (" + this.point.completed.amount*100 + "%)";
+                str += " (" + (this.point.completed.amount*100).toFixed(0) + "%)";
               return str;
             } //*/
           }
-        },
-        /*
-        dataLabels: {
-          enabled: true,
-          // format: '{point.name}',
-
-          style: {
-            cursor: 'default',
-            pointerEvents: 'none'
-          }
-        },//*/
+        }
       },
       yAxis: {
         type: 'category',
@@ -300,11 +290,11 @@ function GanttRenderingModule () {
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
     LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:");
-    LoggerModule.log("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
-    LoggerModule.log("formattedYAxisAndData.data", formattedYAxisAndData.data);
+    console.log("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
+    console.log("formattedYAxisAndData.data", formattedYAxisAndData.data);
 
     console.error("new Series(formattedYAxisAndData.data)", new Series(formattedYAxisAndData.data));
-
+    debugger;
     chartObj.update({
       yAxis: {
         categories: formattedYAxisAndData.categories

@@ -291,8 +291,8 @@ function updateLocal(rawTaskDatas) {
 
   // Informer des changements de valeurs OU s'il n'y
   if (Object.keys(updatedTasks).length > 0        // nouvelles datas
-    || Object.keys(orisTaskById).length === 0     // signaler qu'il n'y a pas de données dans la base (pour "showNoData()")
-    || Object.keys(updatedTasks).length !== Object.keys(orisTaskById).length  //
+    // || Object.keys(orisTaskById).length === 0     // pour "showNoData()"
+    // || Object.keys(updatedTasks).length !== Object.keys(orisTaskById).length  //
   ) {
     postMessage({
       updatedTasks: orisTaskById // updatedTasks TOUT renvoyer car méthode naïve

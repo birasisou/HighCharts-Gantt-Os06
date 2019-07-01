@@ -77,18 +77,18 @@ function OrisGanttTask(data_row, oris_config) {
   if (typeof this.userOptions["completed"] === "number") {
     if (this.userOptions["completed"] > 1)
       this.userOptions["completed"] = this.userOptions["completed"] / 100;
-      if (this.userOptions["completed"] >= 0 && this.userOptions["completed"] <= 1)  // todo Autoriser entre 0 et 100 ?
-        this.userOptions["completed"] = { amount: this.userOptions["completed"] };
+    if (this.userOptions["completed"] >= 0 && this.userOptions["completed"] <= 1)  // todo Autoriser entre 0 et 100 ?
+        this.userOptions["completed"] = { amount: Number(Number(this.userOptions["completed"]).toFixed(2)) };
   } else
     this.userOptions["completed"] = null;
 
   /**
    * Fixe le problème de mise à jour de milestone à tâche et vice-versa
-   * https://github.com/highcharts/highcharts/issues/11158
-   */
+   * @Issue https://github.com/highcharts/highcharts/issues/11158
+   *
   this.userOptions["marker"] = {
     symbol: null
-  };
+  }; //*/
 }
 
 /**
