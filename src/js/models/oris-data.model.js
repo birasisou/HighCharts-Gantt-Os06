@@ -167,11 +167,14 @@ OrisData.prototype.asDateObject = function () {
     : (this.dateValue = this.tryParseDate());
 };
 OrisData.prototype.tryParseDate = function () {
+  if (!this.value && this.value !== 0)
+    return undefined;
+
   if (this.value instanceof Date)
     return this.value;
 
   if (typeof this.value === "number"    // on autorise les timestamps
-   ||SHARED.isIsoDate(this.value))      // format ISO
+   || SHARED.isIsoDate(this.value))      // format ISO
     return new Date(this.value);
   else if (SHARED.isFrenchShortDate(this.value)) {  // On transforme DD/MM/YYYY en MM/DD/YYYY
     let tmp = null;

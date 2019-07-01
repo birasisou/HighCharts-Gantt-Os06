@@ -110,7 +110,7 @@ function autoUpdateData(url) {
     })            // traiter les données
     .catch(function (err) {
       postError(err.message);
-      throw err;
+      // throw err;
     })             // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
     //.finally(function (arg) {
     .then(function (arg) {
@@ -206,7 +206,7 @@ function customJsonParse(response) {
     a = JSON.parse(response);
     return a;
   } catch (e) {
-    LoggerModule.info("tried to Parse:", response);
+    LoggerModule.warn("Tried to Parse:", response);
     throw Error("[WORKER.customJsonParse] Unable to parse response to JSON. " + e.message);
   }
 }
@@ -276,8 +276,24 @@ function updateLocal(rawTaskDatas) {
     updatedTasks[currentOrisTask.getRaw('id')] = orisTaskById[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
   }
 
-  // Informer des changements de valeurs
-  if (Object.keys(updatedTasks).length > 0) {
+  /**
+   * @GitHub-Issue #8
+   * Détecter une suppression côté serveur
+   * todo faire marcher
+   *
+  let validTasksIds = Object.keys(orisTaskById).sort(arr_sort),
+    rawTasksIds = rawTaskDatas.map(function (task) {
+      return task.id;
+    }).sort(arr_sort);
+  // console.info("sorted validTasksIds", validTasksIds);
+  // console.info("sorted rawTasksIds", rawTasksIds); // */
+
+
+  // Informer des changements de valeurs OU s'il n'y
+  if (Object.keys(updatedTasks).length > 0        // nouvelles datas
+    || Object.keys(orisTaskById).length === 0     // signaler qu'il n'y a pas de données dans la base (pour "showNoData()")
+    || Object.keys(updatedTasks).length !== Object.keys(orisTaskById).length  //
+  ) {
     postMessage({
       updatedTasks: orisTaskById // updatedTasks TOUT renvoyer car méthode naïve
     }, "*");
@@ -306,3 +322,32 @@ function postError(errorMsg) {
   }, "*");
 }
 
+// todo à chier ? ou mal utilisé
+function arr_sort(x,y) {
+  let pre = ['string' , 'number' , 'bool'];
+  if(typeof x!== typeof y )return pre.indexOf(typeof y) - pre.indexOf(typeof x);
+
+  if(x === y)return 0;
+  else return (x > y)?1:-1;
+}
+
+
+function postData(data) {
+  var xhr = new XMLHttpRequest();
+
+  var url = window.location.href;
+  console.log("url", url);
+
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json");
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      console.log("xhr.responseText", xhr.responseText);
+      var json = JSON.parse(xhr.responseText);
+      console.log("json", json);
+    }
+  };
+  let stringifiedData = JSON.stringify(data);
+  xhr.send(stringifiedData);
+}

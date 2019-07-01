@@ -215,105 +215,6 @@ describe('Oris Gantt Task Model', function () {
       expect(notIsoStartTask.userOptions['milestone']).toBeFalsy();
     });
 
-    // END
-    it('if END is missing', function () {
-      // Missing START date
-      let noEndData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-
-          "col-milestone": DATA.false.asString
-        },
-        noEndGanttTask = new OrisGanttTask(noEndData, orisConfig);
-
-      expect(noEndGanttTask.isValidTask()).toBe(false);
-
-      expect(noEndGanttTask.userOptions['id']).toBeTruthy();
-      expect(noEndGanttTask.userOptions['start']).toBeTruthy();
-      expect(noEndGanttTask.userOptions['end']).toBeFalsy();
-      expect(noEndGanttTask.userOptions['milestone']).toBeFalsy();
-    });
-    it('if END is empty', function () {
-      let emptyEndData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-          "col-end": DATA.emptyString,
-          "col-milestone": DATA.false.asString
-        },
-        emptyEndGanttTask = new OrisGanttTask(emptyEndData, orisConfig);
-
-      expect(emptyEndGanttTask.isValidTask()).toBe(false);
-
-      expect(emptyEndGanttTask.userOptions['id']).toBeTruthy();
-      expect(emptyEndGanttTask.userOptions['start']).toBeTruthy();
-      expect(emptyEndGanttTask.userOptions['end']).toBeFalsy();
-      expect(emptyEndGanttTask.userOptions['milestone']).toBeFalsy();
-    });
-    it('if END is undefined', function () {
-      let undefinedEndData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-          "col-end": DATA.undefined,
-          "col-milestone": DATA.false.asString
-        },
-        undefinedEndTask = new OrisGanttTask(undefinedEndData, orisConfig);
-
-      expect(undefinedEndTask.isValidTask()).toBe(false);
-
-      expect(undefinedEndTask.userOptions['id']).toBeTruthy();
-      expect(undefinedEndTask.userOptions['start']).toBeTruthy();
-      expect(undefinedEndTask.userOptions['end']).toBeFalsy();
-      expect(undefinedEndTask.userOptions['milestone']).toBeFalsy();
-    });
-    it('if END is null', function () {
-      let nullEndData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-          "col-end": DATA.null,
-          "col-milestone": DATA.false.asString
-        },
-        nullEndTask = new OrisGanttTask(nullEndData, orisConfig);
-
-      expect(nullEndTask.isValidTask()).toBe(false);
-
-      expect(nullEndTask.userOptions['id']).toBeTruthy();
-      expect(nullEndTask.userOptions['start']).toBeTruthy();
-      expect(nullEndTask.userOptions['end']).toBeFalsy();
-      expect(nullEndTask.userOptions['milestone']).toBeFalsy();
-    });
-    it('if END is invalid', function () {
-      let invalidEndData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-          "col-end": "aze",
-          "col-milestone": DATA.false.asString
-        },
-        invalidEndTask = new OrisGanttTask(invalidEndData, orisConfig);
-
-      expect(invalidEndTask.isValidTask()).toBe(false);
-
-      expect(invalidEndTask.userOptions['id']).toBeTruthy();
-      expect(invalidEndTask.userOptions['start']).toBeTruthy();
-      expect(invalidEndTask.userOptions['end']).toBeFalsy();
-      expect(invalidEndTask.userOptions['milestone']).toBeFalsy();
-    });
-    it('if END is OK (string) not ISO-8601 (Zulu time)', function () {
-      let notIsoEndData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-          "col-end": DATA.end.asGMT,   // timestamp !== Zulu ISO
-          "col-milestone": DATA.undefined
-        },
-        notIsoEndTask = new OrisGanttTask(notIsoEndData, orisConfig);
-
-      expect(notIsoEndTask.isValidTask()).toBe(false);
-
-      expect(notIsoEndTask.userOptions['id']).toBeTruthy();
-      expect(notIsoEndTask.userOptions['start']).toBeTruthy();
-      expect(notIsoEndTask.userOptions['end']).toBeFalsy();
-      expect(notIsoEndTask.userOptions['milestone']).toBeFalsy();
-    });
-
     it('if END is LESS THAN START value', function () {
       let endLessThanStartData = {
           "col-id": "ALED",
@@ -330,47 +231,6 @@ describe('Oris Gantt Task Model', function () {
       expect(endLessThanStartTask.userOptions['end']).toBeTruthy();
       expect(endLessThanStartTask.userOptions['start']).toBeGreaterThan(endLessThanStartTask.userOptions['end']);
       expect(endLessThanStartTask.userOptions['milestone']).toBeFalsy();
-    });
-    it('if END is OK but IS-MILESTONE is also set to true', function () {
-      let endAndMilestoneData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-          "col-end": DATA.end.asString,
-          "col-milestone": DATA.true.asString
-        },
-        endAndMilestoneTask = new OrisGanttTask(endAndMilestoneData, orisConfig);
-
-      expect(endAndMilestoneTask.isValidTask()).toBe(false);
-      expect(endAndMilestoneTask.userOptions['id']).toBeTruthy();
-      expect(endAndMilestoneTask.userOptions['start']).toBeTruthy();
-      expect(endAndMilestoneTask.userOptions['end']).toBeTruthy();
-      expect(endAndMilestoneTask.userOptions['milestone']).toBeTruthy();
-    });
-    it('if both END and IS-MILESTONE are invalid/false (END invalid but !IS-MILESTONE)', function () {
-      let endAndMilestoneData = {
-          "col-id": DATA.id.asString,
-          "col-start": DATA.start.asString,
-          "col-end": DATA.undefined,
-          "col-milestone": DATA.null
-        },
-        endAndMilestoneTask = new OrisGanttTask(endAndMilestoneData, orisConfig);
-
-      expect(endAndMilestoneTask.isValidTask()).toBe(false);
-      expect(endAndMilestoneTask.userOptions['id']).toBeTruthy();
-      expect(endAndMilestoneTask.userOptions['start']).toBeTruthy();
-      expect(endAndMilestoneTask.userOptions['end']).toBeFalsy();
-      expect(endAndMilestoneTask.userOptions['milestone']).toBeFalsy();
-    });
-
-    it('if object is empty', function () {
-      let emptyObj = {},
-        emptyObjTask = new OrisGanttTask(emptyObj, orisConfig);
-
-      expect(emptyObjTask.isValidTask()).toBe(false);
-      expect(emptyObjTask.userOptions['id']).toBeUndefined();
-      expect(emptyObjTask.userOptions['start']).toBeUndefined();
-      expect(emptyObjTask.userOptions['end']).toBeUndefined();
-      expect(emptyObjTask.userOptions['milestone']).toBeUndefined();
     });
 
     it('if an argument is undefined (throws)', function () {
@@ -402,6 +262,16 @@ describe('Oris Gantt Task Model', function () {
       expect(okNotMilestoneTask.userOptions['end']).toBeTruthy();
       expect(okNotMilestoneTask.userOptions['milestone']).toBeFalsy();
     });
+    it('if object is empty', function () {
+      let emptyObj = {},
+        emptyObjTask = new OrisGanttTask(emptyObj, orisConfig);
+
+      expect(emptyObjTask.isValidTask()).toBe(true);
+      expect(emptyObjTask.userOptions['id']).toBeUndefined();
+      expect(emptyObjTask.userOptions['start']).toBeUndefined();
+      expect(emptyObjTask.userOptions['end']).toBeUndefined();
+      expect(emptyObjTask.userOptions['milestone']).toBeFalsy();
+    });
     it('if ID, START are valid, END is unset/invalid and IS-MILESTONE is true', function () {
       let okMilestone = {
           "col-id": DATA.id.asString,
@@ -432,6 +302,136 @@ describe('Oris Gantt Task Model', function () {
       expect(okMilestoneTask2.userOptions['start']).toBeTruthy();
       expect(okMilestoneTask2.userOptions['end']).toBeUndefined();
       expect(okMilestoneTask2.userOptions['milestone']).toBeTruthy();
+    });
+
+
+    // END
+    it('if both END and IS-MILESTONE are invalid/false (END invalid but !IS-MILESTONE)', function () {
+      let endAndMilestoneData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": DATA.undefined,
+          "col-milestone": DATA.null
+        },
+        endAndMilestoneTask = new OrisGanttTask(endAndMilestoneData, orisConfig);
+
+      expect(endAndMilestoneTask.isValidTask()).toBe(true);
+      expect(endAndMilestoneTask.userOptions['id']).toBeTruthy();
+      expect(endAndMilestoneTask.userOptions['start']).toBeTruthy();
+      expect(endAndMilestoneTask.userOptions['end']).toBeFalsy();
+      expect(endAndMilestoneTask.userOptions['milestone']).toBeTruthy();
+    });
+    it('if END be OK (string) not ISO-8601 (Zulu time)', function () {
+      let notIsoEndData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": DATA.end.asGMT,   // timestamp !== Zulu ISO
+          "col-milestone": DATA.undefined
+        },
+        notIsoEndTask = new OrisGanttTask(notIsoEndData, orisConfig);
+
+      expect(notIsoEndTask.isValidTask()).toBe(true);
+
+      expect(notIsoEndTask.userOptions['id']).toBeTruthy();
+      expect(notIsoEndTask.userOptions['start']).toBeTruthy();
+      expect(notIsoEndTask.userOptions['end']).toBeFalsy();
+      expect(notIsoEndTask.userOptions['milestone']).toBeTruthy();
+    });
+    it('if END is OK but IS-MILESTONE is also set to true', function () {
+      let endAndMilestoneData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": DATA.end.asString,
+          "col-milestone": DATA.true.asString
+        },
+        endAndMilestoneTask = new OrisGanttTask(endAndMilestoneData, orisConfig);
+
+      expect(endAndMilestoneTask.isValidTask()).toBe(true);
+      expect(endAndMilestoneTask.userOptions['id']).toBeTruthy();
+      expect(endAndMilestoneTask.userOptions['start']).toBeTruthy();
+      expect(endAndMilestoneTask.userOptions['end']).toBeTruthy();
+      expect(endAndMilestoneTask.userOptions['milestone']).toBeFalsy();
+    });
+    it('if END is missing', function () {
+      // Missing START date
+      let noEndData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+
+          "col-milestone": DATA.false.asString
+        },
+        noEndGanttTask = new OrisGanttTask(noEndData, orisConfig);
+
+      expect(noEndGanttTask.isValidTask()).toBe(true);
+
+      expect(noEndGanttTask.userOptions['id']).toBeTruthy();
+      expect(noEndGanttTask.userOptions['start']).toBeTruthy();
+      expect(noEndGanttTask.userOptions['end']).toBeFalsy();
+      expect(noEndGanttTask.userOptions['milestone']).toBeTruthy();
+    });
+    it('if END is empty', function () {
+      let emptyEndData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": DATA.emptyString,
+          "col-milestone": DATA.false.asString
+        },
+        emptyEndGanttTask = new OrisGanttTask(emptyEndData, orisConfig);
+
+      expect(emptyEndGanttTask.isValidTask()).toBe(true);
+
+      expect(emptyEndGanttTask.userOptions['id']).toBeTruthy();
+      expect(emptyEndGanttTask.userOptions['start']).toBeTruthy();
+      expect(emptyEndGanttTask.userOptions['end']).toBeFalsy();
+      expect(emptyEndGanttTask.userOptions['milestone']).toBeTruthy();
+    });
+    it('if END is undefined', function () {
+      let undefinedEndData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": DATA.undefined,
+          "col-milestone": DATA.false.asString
+        },
+        undefinedEndTask = new OrisGanttTask(undefinedEndData, orisConfig);
+
+      expect(undefinedEndTask.isValidTask()).toBe(true);
+
+      expect(undefinedEndTask.userOptions['id']).toBeTruthy();
+      expect(undefinedEndTask.userOptions['start']).toBeTruthy();
+      expect(undefinedEndTask.userOptions['end']).toBeFalsy();
+      expect(undefinedEndTask.userOptions['milestone']).toBeTruthy();
+    });
+    it('if END is null', function () {
+      let nullEndData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": DATA.null,
+          "col-milestone": DATA.false.asString
+        },
+        nullEndTask = new OrisGanttTask(nullEndData, orisConfig);
+
+      expect(nullEndTask.isValidTask()).toBe(true);
+
+      expect(nullEndTask.userOptions['id']).toBeTruthy();
+      expect(nullEndTask.userOptions['start']).toBeTruthy();
+      expect(nullEndTask.userOptions['end']).toBeFalsy();
+      expect(nullEndTask.userOptions['milestone']).toBeTruthy();
+    });
+    it('if END is invalid', function () {
+      let invalidEndData = {
+          "col-id": DATA.id.asString,
+          "col-start": DATA.start.asString,
+          "col-end": "aze",
+          "col-milestone": DATA.false.asString
+        },
+        invalidEndTask = new OrisGanttTask(invalidEndData, orisConfig);
+
+      expect(invalidEndTask.isValidTask()).toBe(true);
+
+      expect(invalidEndTask.userOptions['id']).toBeTruthy();
+      expect(invalidEndTask.userOptions['start']).toBeTruthy();
+      expect(invalidEndTask.userOptions['end']).toBeFalsy();
+      expect(invalidEndTask.userOptions['milestone']).toBeTruthy();
     });
   });
 });

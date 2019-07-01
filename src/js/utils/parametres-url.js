@@ -103,7 +103,4 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
       throw new EXCEPTIONS.NoMandatoryUrlParameterDetected(missingParameters.toString() + ' is/are missing');
   }
 
-  this.getJSON = function (callback) {
-
-  }
 }

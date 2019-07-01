@@ -32,7 +32,8 @@ module.exports = function(config) {
     // list of files / patterns to exclude
     exclude: [
       '../src/js/dist/all-in-one-worker.js',
-      '../src/js/index.js'
+      '../src/js/index.js',
+      './protractor/*.js'
     ],       //fichier concaténé avec GULP mais qui, du coup, redéclare des "let" (ce qui est interdit)
 
     // preprocess matching files before serving them to the browser
@@ -97,7 +98,7 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: 0 //Infinity
   };
 
   // CUSTOM inline arguments

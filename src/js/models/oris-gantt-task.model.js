@@ -82,6 +82,13 @@ function OrisGanttTask(data_row, oris_config) {
   } else
     this.userOptions["completed"] = null;
 
+  /**
+   * Fixe le problème de mise à jour de milestone à tâche et vice-versa
+   * https://github.com/highcharts/highcharts/issues/11158
+   */
+  this.userOptions["marker"] = {
+    symbol: null
+  };
 }
 
 /**
@@ -105,9 +112,10 @@ OrisGanttTask.prototype.isValidTask = function () {
   // END ?absent?/empty/invalide/null/undefined ET Date valide ET START >= END ET !MILESTONE
   // (soit)
   // END est UNDEFINED ET milestone = true
-  if (id && start
-    && (((end || end === 0) || isMilestone) && (Boolean(end) !== Boolean(isMilestone) || end === 0 && !isMilestone)) // END ou MILESTONE doit être valide (et 0, en nombre/timestamp, doit compter comme vrai)
-    && (start <= end || (!end && end !== 0)))
+  if (id && ((start
+            && (((end || end === 0) || isMilestone) && (Boolean(end) !== Boolean(isMilestone) || end === 0 && !isMilestone)) // END ou MILESTONE doit être valide (et 0, en nombre/timestamp, doit compter comme vrai)
+            && (start <= end || (!end && end !== 0)))
+      || (!start && !end)))
     return true;
 
   LoggerModule.info("[ID:" + id + "] n'est pas une donnée valide");

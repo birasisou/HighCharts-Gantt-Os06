@@ -55,13 +55,15 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           format: 'asTimestamp'
         },
         name: { // {string} texte apparant sur la tâche
-          url_param: 'name',
+          url_param: 'category',
+          // url_param: 'name',
           format: 'asString'
         },
-        milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
+        /* Automatiquement calculé maintenant
+          milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
           url_param: 'is-milestone',
           format: 'asBoolean'
-        },
+        }, //*/
         category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
           url_param: 'category',
           format: 'asString'
@@ -84,8 +86,17 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           url_param: 'owner',
           format: 'asString'
         },
-        icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) u
+        icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) css INLINE à partir de la base64 ?
           url_param: 'icon',
+          format: 'asString'
+        },
+        label: {
+          // url_param: 'label',
+          url_param: 'name',
+          format: 'asString'
+        },
+        parent: {
+          url_param: 'parent',
           format: 'asString'
         }
       }

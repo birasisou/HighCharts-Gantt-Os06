@@ -33,6 +33,73 @@ function GanttRenderingModule () {
   }
 
   /**
+   * Fixe le fait que la zone de labels de l'axe Y deviennent invisibles lorsque l'on update
+   * https://github.com/highcharts/highcharts/issues/8862
+   *
+   * @param chart
+   *    L'instance du graphique HighCharts
+   */
+  function invisibleYAxisWorkaround(chart) {
+    if (!chart)
+      return;
+
+    // workaround start
+    let H = Highcharts,
+      container = chart.container,
+      fixedRenderer = chart.fixedRenderer;
+    if (!container || !fixedRenderer)
+      return;
+    // These elements are moved over to the fixed renderer and stay fixed
+    // when the user scrolls the chart.
+    [
+      chart.inverted ?
+        '.highcharts-xaxis' :
+        '.highcharts-yaxis',
+      chart.inverted ?
+        '.highcharts-xaxis-labels' :
+        '.highcharts-yaxis-labels',
+      '.highcharts-contextbutton',
+      '.highcharts-credits',
+      '.highcharts-legend',
+      '.highcharts-subtitle',
+      '.highcharts-title',
+      '.highcharts-legend-checkbox'
+    ].forEach(function(className) {
+      H.each(chart.container.querySelectorAll(className), function(elem) {
+        (
+          elem.namespaceURI === fixedRenderer.SVG_NS ?
+            fixedRenderer.box :
+            fixedRenderer.box.parentNode
+        ).appendChild(elem);
+        elem.style.pointerEvents = 'auto';
+      });
+    });
+    // workaround end
+  }
+
+  /**
+   * Fixe le fait que l'arrière plan semi-transparent de la zone des labels de l'axe Y
+   * ne se colorait que jusqu'à la première catégorie contenant des sous-catégories
+   * https://github.com/highcharts/highcharts/issues/11114
+   *
+   * @param chart
+   *    L'instance du graphique HighCharts
+   */
+  function uncompleteOverlayBackgroundWorkaround(chart) {
+    if (!chart || !chart.scrollableMask)
+      return;
+
+    setTimeout(function(){
+      try {
+        chart.applyFixed();
+      } catch (e) {
+        LoggerModule.warn("[uncompleteOverlayBackgroundWorkaround] Error ", e);
+        return;
+      }
+    }, 0);
+  }
+
+  /**
    *
    * @param parametreUrlOris
    * @param tasks
@@ -55,18 +122,17 @@ function GanttRenderingModule () {
             window.postMessage({
               chartLoaded: true
             }, "*");
+          },
+          redraw: function () {
+            try {
+              invisibleYAxisWorkaround(this);
+              uncompleteOverlayBackgroundWorkaround(this);
+            } catch (e) {
+              LoggerModule.warn("[chart.events.redraw] Error", e);
+            }
           }
         }
       },
-      /*
-      navigator: ,
-      scrollbar: {
-        enabled: true
-      },
-      rangeSelector: {
-        enabled: true,
-        selected: 0
-      },//*/
       credits: { enabled: false },
       title: { text: null },
       subtitle: { text: null },
@@ -76,17 +142,13 @@ function GanttRenderingModule () {
           dataLabels: {
             enabled: true,
             // format: '{point.name}' // todo custom formatter, surtout si pre/suffix/img, etc...
+            //*
             formatter: function() {
-              let tmp = this.key;
+              let str = this.point.label;
               if (this.point.completed && this.point.completed.amount && typeof this.point.completed.amount === "number")
-                tmp += " (" + this.point.completed.amount*100 + "%)";
-              return tmp;
-            }
-            /*
-            formatter: function(e) {
-              let tmp = this.key;
-              return tmp;
-            }//*/
+                str += " (" + this.point.completed.amount*100 + "%)";
+              return str;
+            } //*/
           }
         },
         /*
@@ -112,20 +174,52 @@ function GanttRenderingModule () {
         }
       }],
       tooltip: {
-        xDateFormat: '%a %d %b %Y, %H:%M'
+        xDateFormat: '%a %d %b %Y, %H:%M',
+        useHTML: true,
+        formatter: function () {
+          LoggerModule.log("this", this);
+
+          // NAME
+          let str = "<span>" + this.point.label + "</span>";
+
+          // CATEGORY
+          str += "<br><span><b>" + this.yCategory + "</b></span>";
+
+          // START
+          if (this.x)
+            str += "<br><small>Début: " + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x) + "</small>";  // todo format date
+
+          // END
+          if (this.x2)
+            str += "<br><small>Fin: " + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x2) + "</small>";
+
+          // COMPLETED
+          if (this.point.completed && this.point.completed.amount) {
+            let amount = this.point.completed.amount;
+            if (amount <= 1)
+              amount = amount * 100;
+            str += "<br><small>Avancement: " + amount + "%</small>";
+          }
+
+          // OWNER
+          if (this.point.owner)
+            str += "<br><small>Responsable: " + this.point.owner + "</small>";
+
+          return str;
+        }
       },
       series: []
     };
 
-    // TODO implement
-    // set yAxis.CATEGORIES
+    // set CATEGORIES
     BASE_CONFIG.yAxis.categories = yCategories;
-    //
-    // BASE_CONFIG.yAxis.categories =  { uniqueNames: true };
+    // BASE_CONFIG.yAxis =  { uniqueNames: true };
+    // TODO rendre ça mandatory car c'est juste "plus mieux"
     if (parametreUrlOris.asRaw["uniquenames"] === "true")
       BASE_CONFIG.yAxis =  { uniqueNames: true };
 
     // set SERIES
+    console.warn(new Series(tasks));
     BASE_CONFIG.series.push(new Series(tasks)); // TODO gérer plusieurs séries
 
     // set TITLE
@@ -168,8 +262,7 @@ function GanttRenderingModule () {
       let numberValue = new OrisData(parametreUrlOris.asRaw["minwidth"]).asNumber();
       if (numberValue)
         BASE_CONFIG.chart.scrollablePlotArea = {
-          minWidth: numberValue,
-          scrollPositionX: 1
+          minWidth: numberValue
         };
     }
 
@@ -209,6 +302,8 @@ function GanttRenderingModule () {
     LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:");
     LoggerModule.log("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
     LoggerModule.log("formattedYAxisAndData.data", formattedYAxisAndData.data);
+
+    console.error("new Series(formattedYAxisAndData.data)", new Series(formattedYAxisAndData.data));
 
     chartObj.update({
       yAxis: {
@@ -269,8 +364,9 @@ function GanttRenderingModule () {
     },
     getChart: function () {
       return chartObj;
-    },    // todo est-ce qu'il est référencé / se mettra à jour
+    },
     draw: drawChart,
+
     update: updateChart,
 
     Series: Series,

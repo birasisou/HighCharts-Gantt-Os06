@@ -12,7 +12,7 @@ describe("Worker functions", function () {
 
 
   beforeEach(function () {
-    // LoggerModule.setDebug("error");
+    //  LoggerModule.setDebug("log");
 
     mock_data = {
       valid: [
@@ -30,7 +30,7 @@ describe("Worker functions", function () {
           d1: "2019-04-01T09:00:00.000Z",
           d2: "2019-04-18T09:00:00.000Z",
           cat: "Category 1",
-          bool: "",
+          bool: "false",
           rgb: "0f0",
           percentage: "0.4"
         },
@@ -45,7 +45,7 @@ describe("Worker functions", function () {
         }
       ],
       invalid: [
-        {
+        /*{
           uniqueID: "id-invalid-2",         // Ne peut pas être une milestone (bool=true) ET avoir une date de fin (D2)
           d1: "2019-05-17T06:49:13.878Z",
           d2: "2019-05-18T09:00:00.000Z",
@@ -53,7 +53,7 @@ describe("Worker functions", function () {
           bool: "true",
           rgb: "000",
           percentage: ""
-        },
+        }, //*/
         {
           uniqueID: "id-invalid-3",       // d2 < d1
           d1: "2019-04-19T09:00:00.000Z",
@@ -219,7 +219,7 @@ describe("Worker functions", function () {
       setTimeout(function () {
         let request = jasmine.Ajax.requests.mostRecent();
         request.respondWith(fake_response.status_404);
-      }, 500);
+      }, 0);
 
     });
 
@@ -251,7 +251,7 @@ describe("Worker functions", function () {
 
             window.removeEventListener("message", aze, false);
             done();
-          }, 500);
+          }, 0);
         }
       };
 
@@ -285,7 +285,7 @@ describe("Worker functions", function () {
 
             window.removeEventListener("message", aze, false);
             done();
-          }, 500);
+          }, 0);
         }
       };
 
@@ -319,7 +319,7 @@ describe("Worker functions", function () {
 
             window.removeEventListener("message", aze, false);
             done();
-          }, 500);
+          }, 0);
         }
       };
       window.addEventListener("message", aze);
@@ -371,7 +371,7 @@ describe("Worker functions", function () {
 
             window.removeEventListener("message", aze, false);
             done();
-          }, 500);
+          }, 0);
         }
       };
       window.addEventListener("message", aze);
@@ -431,7 +431,7 @@ describe("Worker functions", function () {
     setTimeout(function () {
       let request = jasmine.Ajax.requests.mostRecent();
       request.respondWith(fake_response.success_mixed);
-    }, 500);
+    }, 0);
 
   });
 
@@ -442,7 +442,7 @@ describe("Worker functions", function () {
     let customJsonParseSpy = spyOn(window, 'customJsonParse').and.callThrough();
     let extractDataSpy = spyOn(window, 'extractData').and.callThrough();
     let updateLocalSpy = spyOn(window, 'updateLocal').and.callThrough();
-    let postErrorSpy = spyOn(window, 'postError').and.callThrough();
+    let postErrorSpy = spyOn(window, 'postError');
 
     let finalValidDatas = {},
       finalinValidDatas = {};
@@ -464,6 +464,9 @@ describe("Worker functions", function () {
           expect(updateLocalSpy).toHaveBeenCalled();
           expect(postErrorSpy).not.toHaveBeenCalled();
 
+          console.log("\n\n\n\n\n\n\n");
+          console.log("finalValidDatas", finalValidDatas);
+          console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
           expect(finalValidDatas).toEqual(expected_gantt_oris_data.valid);
 
           expect(finalinValidDatas).toEqual({});
@@ -471,7 +474,7 @@ describe("Worker functions", function () {
           window.removeEventListener("message", aze, false);
           // async Jasmine... J'ai pas compris
           done()
-        }, 100);
+        }, 0); // 100);
       }
     };
     window.addEventListener("message", aze);
@@ -484,7 +487,7 @@ describe("Worker functions", function () {
     setTimeout(function () {
       let request = jasmine.Ajax.requests.mostRecent();
       request.respondWith(fake_response.success_only_valid);
-    }, 500);
+    }, 0);
 //*/
   });
 

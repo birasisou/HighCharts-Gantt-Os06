@@ -231,17 +231,15 @@ function SHARED_FACTORY() {
      * @return {boolean}
      */
     isFrenchShortDate: function (str) {
-      if (!/^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(str)) return false;
-      let tmp = null;
-      if (str.indexOf("/"))
-        tmp = str.split("/");
-      else
-        tmp = str.split("-");
-
+      if (!(/^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(str))) return false;
+      let tmp = (str.indexOf("/")) ? str.split("/") : str.split("-");
+      LoggerModule.log("[isFrenchShortDate] tmp", tmp);
       // On transforme DD/MM/YYYY en MM/DD/YYYY
       let d = new Date(tmp[1] + "/" + tmp[0] + "/" + tmp[2]);
-      return ((d.toISOString() === str || d.toISOString() === (str.slice(0, -1)+".000Z"))
-        && d.getTime() === d.getTime()); // false si Invalid Date car (NaN === NaN) => false
+      LoggerModule.log("[isFrenchShortDate] date", d);
+
+      // return ((d.toISOString() === str || d.toISOString() === (str.slice(0, -1)+".000Z")) &&
+      return d.getTime() === d.getTime(); // false si Invalid Date car (NaN === NaN) => false
     },
 
     /**

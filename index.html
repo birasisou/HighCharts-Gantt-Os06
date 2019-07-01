@@ -7,8 +7,13 @@
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <title>Gantt Oris</title>
 
-  <link rel="stylesheet" href="src/lib/font-awesome-5.7.2/css/font-awesome.min.css">
-  <link rel="stylesheet" href="src/css/index.css">
+  <!-- LIB -->
+  <link rel="stylesheet" type="text/css" href="src/lib/font-awesome-5.7.2/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="src/lib/font-awesome-5.7.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="src/lib/alertifyjs/css/alertify.css">
+  <link rel="stylesheet" type="text/css" href="src/lib/alertifyjs/css/themes/default.css">
+
+  <link rel="stylesheet" type="text/css" href="src/css/index.css">
 
 </head>
 
@@ -32,23 +37,26 @@
 
 
   <!-- LIB -->
-  <script src="./src/lib/highcharts/highcharts-gantt.src.js"></script>
+  <script src="src/lib/highcharts/highcharts-gantt.src.js"></script>
+  <script src="src/lib/highcharts/modules/no-data-to-display.js"></script>
+  <script src="src/lib/alertifyjs/alertify.min.js"></script>
 
   <!-- UI -->
   <script src="src/js/UI/loading-overlay-handler.js"></script>
+  <script src="src/js/UI/alertifyjs-custom-alerts.js"></script>
 
   <!-- SHARED -->
-  <script src="./src/js/utils/logger-module.js"></script>
-  <script src="./src/js/utils/exceptions.js"></script>
-  <script src="./src/js/utils/shared.js"></script>
-  <script src="./src/js/utils/parametres-url.js"></script>
-  <script src="./src/js/utils/parametres-url-oris.js"></script>
+  <script src="src/js/utils/logger-module.js"></script>
+  <script src="src/js/utils/exceptions.js"></script>
+  <script src="src/js/utils/shared.js"></script>
+  <script src="src/js/utils/parametres-url.js"></script>
+  <script src="src/js/utils/parametres-url-oris.js"></script>
 
   <!-- Models -->
-  <script src="./src/js/models/oris-data.model.js"></script>
-  <script src="./src/js/models/oris-gantt-task.model.js"></script>
-  <script src="./src/js/models/oris-gantt-chart-config.model.js"></script>
+  <script src="src/js/models/oris-data.model.js"></script>
+  <script src="src/js/models/oris-gantt-task.model.js"></script>
+  <script src="src/js/models/oris-gantt-chart-config.model.js"></script>
 
-  <script src="./src/js/index.js"></script>
+  <script src="src/js/index.js"></script>
 </body>
 </html>
