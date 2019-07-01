@@ -209,7 +209,7 @@ function GanttRenderingModule () {
       BASE_CONFIG.yAxis =  { uniqueNames: true };
 
     // set SERIES
-    console.warn(new Series(tasks));
+    //LoggerModule.warn(new Series(tasks));
     BASE_CONFIG.series.push(new Series(tasks)); // TODO gérer plusieurs séries
 
     // set TITLE
@@ -290,11 +290,11 @@ function GanttRenderingModule () {
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
     LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:");
-    console.log("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
-    console.log("formattedYAxisAndData.data", formattedYAxisAndData.data);
+    // console.log("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
+    // console.log("formattedYAxisAndData.data", formattedYAxisAndData.data);
 
-    console.error("new Series(formattedYAxisAndData.data)", new Series(formattedYAxisAndData.data));
-    debugger;
+    // console.error("new Series(formattedYAxisAndData.data)", new Series(formattedYAxisAndData.data));
+
     chartObj.update({
       yAxis: {
         categories: formattedYAxisAndData.categories
