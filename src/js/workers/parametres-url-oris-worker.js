@@ -55,8 +55,8 @@ let PUB_SUB = (function(){
 
 // @TO_PRIVATE
 let WORKER_CONFIG = {}; // ParametreUrlOris récupéré de la page principale
-// "BD locale" des tâches (instancié
-let orisTaskById = {};      // Row by ID, dictionnaire/hashmap des tâches (OrisGanttTask)
+// "BD locale" des tâches
+let ORIS_TASKS_BY_ID = {};      // Row by ID, dictionnaire/hashmap des tâches (OrisGanttTask)
 
 // TODO implémenter côté main page
 let ALLOW_INVALID = false,
@@ -243,9 +243,11 @@ function updateLocal(rawTaskDatas) {
 
   LoggerModule.log("[updateLocal] rawTaskDatas", rawTaskDatas);
 
-  let updatedTasks = {},  // Nouvelles tâches à afficher / MàJ dans le graphique
-      invalidTasks = {},  // Tâches invalides, seront renvoyés à la page principale et signalées via popup
-      length = rawTaskDatas.length;
+  let validTasksUserOptions = {},  // Tâches valides
+    updatedTasks = {},  // Nouvelles tâches à afficher / MàJ dans le graphique
+    invalidTasks = {},    // Tâches invalides, seront renvoyés à la page principale et signalées via popup
+
+    length = rawTaskDatas.length;
 
   // stocker les nouvelles valeurs et informer la page principale des changements
   while (length--) {
@@ -254,13 +256,16 @@ function updateLocal(rawTaskDatas) {
     // TODO try / catch car throw si pas le
     let currentOrisTask = new OrisGanttTask(rawTaskDatas[length], WORKER_CONFIG),
       //ancienne valeur pour cette tâche
-      oldTask = orisTaskById[currentOrisTask.getRaw('id')];
+      oldTask = ORIS_TASKS_BY_ID[currentOrisTask.getRaw('id')];
 
     // Ignorer les tâches "invalides" TODO (puis SIGNALER à la page principale)
     if (!currentOrisTask.isValidTask()) {
       invalidTasks[currentOrisTask.getRaw('id')] = currentOrisTask.rawUserOptions;
       continue;
     }
+
+    // Stocker la Tâche valide
+    validTasksUserOptions[currentOrisTask.getRaw('id')] = currentOrisTask.rawUserOptions;
 
     // Ne rien faire si TOUTES les valeurs sont les mêmes
     if (oldTask !== undefined
@@ -270,32 +275,40 @@ function updateLocal(rawTaskDatas) {
       continue;
     }
 
-    // Remplacer la valeur et enregistrer ce remplacement
+    // Remplacer la valeur et enregistrer ce remplacement pour le signaler
     // TODO signaler ce remplacement (pour l'instant on est en mode naif
     LoggerModule.info("updated or new ", currentOrisTask.userOptions);
-    updatedTasks[currentOrisTask.getRaw('id')] = orisTaskById[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
+    updatedTasks[currentOrisTask.getRaw('id')] = ORIS_TASKS_BY_ID[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
   }
 
   /**
    * @GitHub-Issue #8
-   * Détecter une suppression côté serveur
-   * todo faire marcher
+   * todo Détecter une suppression côté serveur
    *
-  let validTasksIds = Object.keys(orisTaskById).sort(arr_sort),
+  let validTasksIds = Object.keys(ORIS_TASKS_BY_ID).sort(arr_sort),
     rawTasksIds = rawTaskDatas.map(function (task) {
       return task.id;
     }).sort(arr_sort);
   // console.info("sorted validTasksIds", validTasksIds);
   // console.info("sorted rawTasksIds", rawTasksIds); // */
-
+  let deletedTasksIds = SHARED.arrayDifference(Object.keys(ORIS_TASKS_BY_ID), Object.keys(validTasksUserOptions));
+  if (deletedTasksIds.length) {
+    console.info("IDs to delete", deletedTasksIds);
+    let length = deletedTasksIds.length;
+    while (length--) {
+      console.log("deleting deletedTasksIds[length]", deletedTasksIds[length]);
+      delete ORIS_TASKS_BY_ID[deletedTasksIds[length]];
+    }
+  }
 
   // Informer des changements de valeurs OU s'il n'y
-  if (Object.keys(updatedTasks).length > 0        // nouvelles datas
-    // || Object.keys(orisTaskById).length === 0     // pour "showNoData()"
-    // || Object.keys(updatedTasks).length !== Object.keys(orisTaskById).length  //
+  if (Object.keys(updatedTasks).length > 0          // nouvelles datas
+    || Object.keys(ORIS_TASKS_BY_ID).length === 0   // pour "showNoData()"
+    || deletedTasksIds.length                       // signaler une suppresion
+    // || Object.keys(updatedTasks).length !== Object.keys(ORIS_TASKS_BY_ID).length  //
   ) {
     postMessage({
-      updatedTasks: orisTaskById // updatedTasks TOUT renvoyer car méthode naïve
+      updatedTasks: ORIS_TASKS_BY_ID // updatedTasks TOUT renvoyer car méthode naïve
     }, "*");
   }
   // Informer de l'existence de valeurs invalides dans la BD

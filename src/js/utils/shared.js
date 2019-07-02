@@ -243,19 +243,33 @@ function SHARED_FACTORY() {
     },
 
     /**
+     * https://stackoverflow.com/questions/1187518/how-to-get-the-difference-between-two-arrays-in-javascript
+     * Compare two arrays (of primitive values) and returns
+     * @param {Array} arr1
+     * @param {Array} arr2
+     *
+     * @return {Array} array of the elements from the first Array NOT CONTAINED in the second (NOT symmetric difference)
+     */
+    arrayDifference: function (arr1, arr2) {
+      return arr1.filter(function (i) {
+        return arr2.indexOf(i) < 0;
+      });
+    },
+
+    /**
      * Importe dynamiquement un script
      * @param {String} url
      */
     loadJsScript: function(url) {
-    if (arguments.length < 1)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel url]");
+      if (arguments.length < 1)
+        throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel url]");
 
-    let script = document.createElement("script");  // create a script DOM node
-    script.src = url;  // set its src to the provided URL
+      let script = document.createElement("script");  // create a script DOM node
+      script.src = url;  // set its src to the provided URL
 
-    document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+      document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+    }
   }
-}
 }
 
 // Objet global comme avant
