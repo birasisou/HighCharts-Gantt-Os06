@@ -1,3 +1,5 @@
+moment.locale('fr');  // Set the default/global locale
+
 // document ready todo ou instancier dans le "vrai" document.ready
 
 /**
@@ -47,6 +49,8 @@ try {
       GANTT_RENDERING_MODULE = new GanttRenderingModule(),
       // UI
       LOADING_OVERLAY_HANDLER = new LoadingOverlayHandler(HTML_LOADER_ID),
+      TASK_EDITOR_MODAL = null,
+
       // Worker
       WORKER = null,
       WORKER_MESSAGE_HANDLER = null;
@@ -62,6 +66,7 @@ try {
        * Initialisation et UI
        **/
       LOADING_OVERLAY_HANDLER.showLoading();
+      TASK_EDITOR_MODAL = new TASK_EDITOR_MODAL_FACTORY();
 
       /**
        *  General messages (should never happen)
@@ -138,16 +143,6 @@ try {
       if (typeof worker !== "object")
         throw new EXCEPTIONS.InvalidArgumentExcepetion("workerMessageHandler n'accepte qu'un objet Worker en paramètre");
 
-      /*
-      Fournir timestamp
-      todo utile ?
-      let lastReceived = {
-        message: undefined,
-        updatedTasks: undefined,
-        invalidTasks
-      };
-      // */
-
       // todo sortir ?
       let caseHandling = {
         error: function (errMsg) {
@@ -181,6 +176,16 @@ try {
             }
           } else  // update
             GANTT_RENDERING_MODULE.update(PARAMETRES_URL_ORIS_NO_FUNCTIONS, updatedTasksMsg);
+
+          // MàJ des <select> du modal
+          TASK_EDITOR_MODAL.setChartOptions({
+            yAxis: {
+              categories: GANTT_RENDERING_MODULE.getChart().series[0].yAxis.categories
+            },
+            series: {
+              data: GANTT_RENDERING_MODULE.getChart().series[0].userOptions.data
+            }
+          })
         },
         done: function (doneMsg) {  // todo remplacer par un success/failure. On ne veut pas masquer mtn car potentiellement encore en train de dessiner
           LoggerModule.info("[INDEX.workerMessageHandler] 'Finally done' received", doneMsg);
@@ -230,6 +235,7 @@ try {
     })
       .catch(function (err) {
         LoggerModule.error("[INDEX.init] An error occured during page initialisation", err);
+        throw err;
         // LOADING_OVERLAY_HANDLER.hideLoading();
       })
       .then(function () {
@@ -255,11 +261,15 @@ try {
         return GANTT_RENDERING_MODULE;
       },
       getChart: function () {
-        return APP_MODULE.getGanttRenderingModule().getChart();
+        return GANTT_RENDERING_MODULE.getChart();
+        // return APP_MODULE.getGanttRenderingModule().getChart();
+      },
+      getTaskEditor: function () {
+        return TASK_EDITOR_MODAL;
       }
     }
   })();
 } catch (e) {
   LoggerModule.error("Page initialisation error:", e);
-  alertify.postErrorAlert(e.description)
+  alertify.postErrorAlert(e.description || e.message);
 }

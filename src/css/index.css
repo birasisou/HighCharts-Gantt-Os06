@@ -69,3 +69,40 @@ div#loading-overlay {
         transform: rotate(1800deg);
     }
 }
+
+/* Masquer le formulaire servant de template */
+#secret-santa {
+    display: none;
+}
+/* L'afficher lorsqu'il est dans le popup */
+.ajs-content #secret-santa {
+    display: inline-block;
+}
+/*
+  Pour changer la taille du popup, il faut le rendre "resizable"
+  mais ceci rajoute une scrollbar lors que l'on afficher le DateTimePicker
+*/
+.alertify.ajs-resizable .ajs-body .ajs-content {
+    overflow: visible;
+}
+/*
+  Masquer le widget sur lequel il faut cliquer pour redimensionner le popup:
+  On ne veut pas rendre ça possible car on a "overflow:visible"
+*/
+.ajs-dialog .ajs-handle {
+    display: none !important;
+}
+
+.form-control,
+.input-group-text,
+.custom-select,
+.bootstrap-select .btn,
+.bootstrap-select .dropdown-menu{
+    border-radius: 0 !important;
+}
+
+/* Cohérence de style entre Bootstrap 4 et la librairie pour les <select> */
+.bootstrap-select button {
+    background: #fff;
+    border-color: #dae0e5;
+}
