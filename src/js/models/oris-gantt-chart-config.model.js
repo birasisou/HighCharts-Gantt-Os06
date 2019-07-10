@@ -108,6 +108,8 @@ function GanttRenderingModule () {
    */
   // TODO obligé d'exposer pour pouvoir tester...
   function initOrisGanttChartConfigModel (parametreUrlOris, yCategories, tasks) {
+    let day = 1000 * 60 * 60 * 24; // nombre de ms dans une journée
+
     if (arguments.length < 3)
       throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel constructor]");
 
@@ -256,26 +258,49 @@ function GanttRenderingModule () {
         };
     }
 
+    // enable EDIT
+    if (parametreUrlOris.asRaw["edit"] === "true") {
+      // TODO events
+      BASE_CONFIG.plotOptions.series.allowPointSelect = true;
+      BASE_CONFIG.plotOptions.series.point = {
+        events: {
+          // select: updateRemoveButtonStatus,
+          // unselect: updateRemoveButtonStatus,
+          // remove: updateRemoveButtonStatus
+        }
+      };
+
+      // TODO initialise UI
+
+      // Enable Drag/Drop
+      BASE_CONFIG.plotOptions.series.dragDrop = {
+        draggableX: true,
+          draggableY: true,
+          dragPrecisionX: day / 4 // Snap to eight hours
+      }
+    }
+
     return currentConfig = BASE_CONFIG;
     // return currentConfig; // { config: currentConfig };
   }
 
   function drawChart (parametreUrlOris, rawTaskDatas) {
-      // TODO check param integrity/type/etc...
-      if (arguments.length !== 2)
-        throw new EXCEPTIONS.MissingArgumentExcepetion("[GanttRenderingModule.categoryToIndex] 'parametreUrlOris' and/or 'rawTaskDatas' argument missing");
+    // TODO check param integrity/type/etc...
+    if (arguments.length !== 2)
+      throw new EXCEPTIONS.MissingArgumentExcepetion("[GanttRenderingModule.categoryToIndex] 'parametreUrlOris' and/or 'rawTaskDatas' argument missing");
 
-      // formatter les données
-      let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
-      LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
+    // formatter les données
+    let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
+    console.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
 
-      // Init config
-      let highChartConfig = new initOrisGanttChartConfigModel(parametreUrlOris, formattedYAxisAndData.categories, formattedYAxisAndData.data);
-      // todo ne pas formatter les données et utiliser { yAxis: { uniqueNames: true } }
+    // Init config
+    let highChartConfig = new initOrisGanttChartConfigModel(parametreUrlOris, formattedYAxisAndData.categories, formattedYAxisAndData.data);
+    // todo ne pas formatter les données et utiliser { yAxis: { uniqueNames: true } }
 
-      chartObj = Highcharts.ganttChart(CONTAINER_ID, highChartConfig);
+    // console.warn("highChartConfig", highChartConfig);
+
+    chartObj = Highcharts.ganttChart(CONTAINER_ID, highChartConfig);
   }
-
 
   /**
    * Méthode naïve pour mettre à jour le graphique lors que de nouvelles données sont reçues
@@ -290,15 +315,15 @@ function GanttRenderingModule () {
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
     LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:");
-    // console.log("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
-    // console.log("formattedYAxisAndData.data", formattedYAxisAndData.data);
+    // console.warn("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
+    // console.warn("formattedYAxisAndData.data", formattedYAxisAndData.data);
 
     // console.error("new Series(formattedYAxisAndData.data)", new Series(formattedYAxisAndData.data));
 
     chartObj.update({
       yAxis: {
-        categories: formattedYAxisAndData.categories
-      },
+        categories: formattedYAxisAndData.categories  // no need quand &uniqueNames
+      }, //*/
       series: [new Series(formattedYAxisAndData.data)]
     });
     LoggerModule.info("Done updating");

@@ -1,11 +1,4 @@
 /**
- * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
- * TODO Vu qu'on ne peut pas importer de script dans un Web Worker (erreur de MIME), il faut C/C ce code.
- * TODO il faut donc penser à le faire à chaque fois que le code est modifié
- * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
- */
-
-/**
  * @Subclass of ParametresUrl
  *
  * @param {string} pageUri
@@ -40,7 +33,14 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
         // suffix
         // idefix
       },
-      data:{
+      data: {
+        // ID unique, automatique, d'un Point Oris
+        // On ajoute "manuellement" '&_id=id'
+        vline: {
+          url_param: '_id',
+          format: 'asString'
+        },
+
         id: { // {unique string} id de la tâche @MANDATORY
           url_param: 'id',    //paramètre URL contenant la colonne correspondante
           //format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
@@ -117,14 +117,13 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     ID_ORIS: undefined
   };
 
-
   /**
    * Extends basic init()
    */
   this.init = (function (oldInit) {
     return function() {
       //obligé de le dupliquer/rappeler ici pour ce qui suit.
-      this.page_location = SHARED.stringToLocation(this.pageUri);   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
+      this.page_location = SHARED.stringToLocation(this.pageUri + "&_id=id");   //nécessite une URI valide, c-à-d qui commence par un protocole (ftp, https, etc...)
 
       this.USER_INFOS.ID_ORIS = generateID_Oris.call(this);
       this.USER_INFOS.HOST = generateHost.call(this);
@@ -159,7 +158,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
   /**
    * Génère l'URL du webservice Oris permettant de communiquer avec la base
-   *  location.host inclu automatiquement le port s'il existe
+   *  location.host inclut automatiquement le port s'il existe
    *
    * @return {string} l'URI du WebService distribuant les données des de la BD
    */
@@ -167,7 +166,33 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     return this.page_location.protocol + "//" + this.USER_INFOS.HOST + "/"
       + this.USER_INFOS.ID_ORIS + "/"
       + this.asRaw[this.CONSTANTS.PATH_KEY]   //&data
-      + genererParamData.call(this);
+      + genererParamData.call(this)
+      + "&_id=id";  // On veut stocker l'ID unique en tant que "vline" mais &vline fait foirer la requête
+  };
+
+  /**
+   * Génère l'URL permettant la requête POST modifiant la valeur d'un "Point" dans la base
+   *
+   * @param {Object} datas
+   *  données (userOptions) du Point à MàJ
+   *    /!\ DOIT IMPÉRATIVEMENT CONTENIR L'ATTRIBUT vline
+   */
+  this.generateWebserviceUpdateUrl = function(datas) {
+    console.info("datas", datas);
+
+    if (typeof datas !== "object")
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + datas);
+
+    if (!datas.vline && !datas.vline !== 0)
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit contenir l'attribut vline");
+
+    let url = this.webserviceUrl.slice(0, this.webserviceUrl.indexOf("?"))
+      + "?act=modif&json=true";
+    // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
+    for (let data in datas) {
+      url += "&" + data + "=" + datas[data];
+    }
+    return url;
   };
 
   /**

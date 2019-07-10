@@ -178,17 +178,6 @@ function WORKER_GET(url) {
       reject(Error("[GET.onerror] Network Error "+ req.statusText +"(" + req.status + ")"));
     };
 
-    // Timeout après 60s
-    //req.timeout = 5000;
-
-    /*
-    req.ontimeout = function(e) {
-      LoggerModule.error("Request Timeout e:", e);
-      LoggerModule.error("Request Timeout req.statusText:", req.statusText);
-      LoggerModule.error("Request Timeout req.status:", req.status);
-      reject(Error("Request Timeout"))
-    }; //*/
-
     // Make the request
     req.send();
   });

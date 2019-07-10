@@ -27,6 +27,13 @@ function OrisGanttTask(data_row, oris_config) {
     // Les clés userOptions HighCharts
     oris_config_HC_CONFIG_KEYS = oris_config.CONSTANTS.HC_CONFIG_KEYS.data;   //  *    parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS.data
 
+  // RAJOUTER LA CLEF UNIQUE ORIS "vline"
+  /*boot
+  oris_config_HC_CONFIG_KEYS.vline = {
+    url_param: 'vline',
+    format: 'asString'
+  };  // todo PAS ICI ??? */
+
   // Valeur brute d'un userOption
   this.rawUserOptions = {};
   // Objet OrisValue d'un userOption
