@@ -97,11 +97,10 @@ function SHARED_FACTORY() {
         else
           throw new EXCEPTIONS.NoParametersDetectedInURI('Query string should start with "?"');
       }
-      //{string} sous partie de l'URI commençant au "?" (équivaut à window.page_location.search)
-      //parametresUrl.locationSearch = _pageUri.substr(debutParam);
+      // {string} sous partie de l'URI commençant au "?" (équivaut à window.page_location.search)
       parametresUrl.locationSearch = _location.search;
 
-      //EXCEPTIONS: URI vide et/ou sans paramètres GET
+      // EXCEPTIONS: URI vide et/ou sans paramètres GET
       if (parametresUrl.locationSearch.indexOf("=") < 0) {
         if (_isEmptyAllowed)
           return parametresUrl;
@@ -274,6 +273,76 @@ function SHARED_FACTORY() {
       var txt = document.createElement('textarea');
       txt.innerHTML = html;
       return txt.value;
+    },
+
+    /**
+     * Remplace, s'il existe, le paramètre de l'URL par la valeur spécifiée
+     *
+     * @param {String} url
+     *    chaîne de caractères où l'on va chercher le paramètre
+     * @param {String} param
+     *    clef (paramètre) à trouver
+     * @param {String} newValue
+     *
+     */
+    addOrReplaceUrlParam: function (url, param, newValue) {
+      if (!url || !param)
+        throw new EXCEPTIONS.InvalidArgumentExcepetion("[SHARED.addOrReplaceUrlParam] URL or Param argument ");
+      newValue = newValue || "";
+
+      let symbol = "&";
+
+      let paramStart = url.indexOf(symbol + param + "=");
+      if (paramStart < 0) {	// potentiellement, il est le premier param... c'est pour ça qu'il faudrait plutôt utiliser un regex
+        symbol = "?";
+        paramStart = url.indexOf(symbol + param + "=");
+        if (paramStart < 0)	// n'existe pas
+          return url + "&" + param + "=" + newValue;
+      }
+
+      let paramEnd = url.indexOf("&", paramStart+1);
+      if (paramEnd < 0)	//	s'il est le dernier paramètre donc pas de "&" après
+        paramEnd = url.length;
+
+      // Enlever le paramètre de l'URL
+      return url.replace(url.substring(paramStart, paramEnd), (symbol + param +"=" + newValue));
+    },
+
+    promiseGET: function (url) {
+      // Return a new promise.
+      return new Promise(function(resolve, reject) {
+        // Do the usual XHR stuff
+        let req = new XMLHttpRequest();
+        req.open('GET', url, true);
+
+        req.onload = function() {
+          LoggerModule.log("[GET.onload] req.status", req.status);
+          // This is called even on 404 etc
+          // so check the status
+          if (req.status === 200) {
+            LoggerModule.log("[GET.onload] req.response", req.response);
+            resolve(req.response);
+          }
+          else {
+            // Otherwise reject with the status text
+            // which will hopefully be a meaningful error
+            let msg = "[GET.onload] req.status !== 200. \nActual req.status: " + req.status;
+            LoggerModule.error(msg);
+            reject(Error(msg));
+          }
+        };
+
+        // Handle network errors
+        req.onerror = function(e) {
+          LoggerModule.error("[GET.onerror] Network Error. e:", e);
+          LoggerModule.error("[GET.onerror] Network Error. xhr.statusText: ", "'" + req.statusText + "'");
+          LoggerModule.error("[GET.onerror] Network Error. xhr.status:", req.status);
+          reject(Error("[GET.onerror] Network Error "+ req.statusText +"(" + req.status + ")"));
+        };
+
+        // Make the request
+        req.send();
+      });
     }
   }
 }

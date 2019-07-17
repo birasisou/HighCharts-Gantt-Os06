@@ -25,7 +25,7 @@
 <body>
   <div class="container-fluid" id="root">
     <!-- LOADING -->
-    <div id="loading-overlay" class="overlay ">
+    <div id="loading-overlay" class="overlay active">
 
       <div id="loading-position" class="centered">
         <div id="loading-spinner" class="lds-hourglass"></div>
@@ -33,7 +33,21 @@
       </div>
     </div>
 
-    <div id="container"></div>
+    <div id="graph-container"></div>
+
+    <form id="task-search-widget" onsubmit="return false;">
+      <div class="form-row">
+        <div class="form-group col-2">
+          <label for="task-search-input">Recherche</label>
+          <div class="input-group">
+            <input id="task-search-input" type="text" class="form-control" placeholder="" autocomplete="true">
+            <div class="input-group-append">
+              <button class="input-group-text text-success"><i class="fa fa-search"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
 
     <form id="secret-santa" class="container">
       <div class="form-row">
@@ -44,7 +58,7 @@
 
         <div class="form-group offset-2 col-5">
           <label for="task-id-input">ID</label>
-          <input type="text" class="form-control" id="task-id-input" placeholder="ID">
+          <input type="text" class="form-control" id="task-id-input" readonly placeholder="ID">
         </div>
 
         <div hidden class="form-group">
@@ -57,7 +71,7 @@
         <div class="form-group col-5">
           <label for="task-start-input">Début</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="task-start-input" placeholder="Début" value="">
+            <input type="text" class="form-control cursor-pointer" id="task-start-input" placeholder="Début" value="">
             <div class="input-group-append">
               <span class="input-group-text fa fa-calendar"></span>
             </div>
@@ -66,7 +80,7 @@
         <div class="form-group offset-2 col-5">
           <label for="task-end-input">Fin</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="task-end-input" placeholder="Fin" value="">
+            <input type="text" class="form-control cursor-pointer" id="task-end-input" placeholder="Fin" value="">
             <div class="input-group-append">
               <span class="input-group-text fa fa-calendar"></span>
             </div>
@@ -78,17 +92,17 @@
         <div class="form-group col-5">
           <label for="task-completed-input">Avancement</label>
           <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">%</span>
-            </div>
             <input id="task-completed-input" type="number" class="form-control" placeholder="Avancement" min="0"
                    max="100" step="1">
+            <div class="input-group-append">
+              <span class="input-group-text">%</span>
+            </div>
           </div>
         </div>
 
         <div class="form-group offset-2 col-5 colorpicker-component">
           <label for="task-color-input">Couleur</label>
-          <input id="task-color-input" type="text" value="" class="form-control"/>
+          <input id="task-color-input" type="text" value="" placeholder="Automatique" autocomplete="false" class="form-control cursor-pointer"/>
           <span class="input-group-addon"><i></i></span>
         </div>
       </div>
@@ -96,12 +110,18 @@
       <div class="form-row">
         <div class="form-group col-5">
           <label for="task-category-input">Catégorie</label>
-
+          <!--
             <select class="browser-default custom-select" id="task-category-input" onmousedown="if(this.options.length>5){this.size=5;}"  onchange='this.removeAttribute("size");' onblur='this.removeAttribute("size");'>
               <option value=""></option>
-            </select>
-
+            </select>-->
+          <select class="selectpicker form-control" id="task-category-input" data-size="5" title="Aucune">
+            <!--
+              <select class="browser-default custom-select" id="task-dependency-input" onmousedown="if(this.options.length>5){this.size=5;}"  onchange='this.removeAttribute("size");' onblur='this.removeAttribute("size");'>
+            -->
+            <option value=""></option>
+          </select>
         </div>
+
         <div class="form-group offset-2 col-5">
           <label for="task-dependency-input">Dépendance</label>
           <select class="selectpicker form-control" id="task-dependency-input" data-size="5" title="Aucune">
@@ -121,16 +141,16 @@
   <script src="src/lib/jquery/jquery.min.js"></script>
   <script src="src/lib/momentjs/moment.js"></script>
   <script src="src/lib/momentjs/locale/fr.js" charset="UTF-8"></script>
+  <script src="src/lib/momentjs/moment-timezone-with-data-1970-2030.js"></script>
   <script src="src/lib/highcharts/highcharts-gantt.src.js"></script>
   <script src="src/lib/highcharts/modules/no-data-to-display.js"></script>
+  <script src="src/lib/highcharts/modules/draggable-points.src.js"></script>
   <script src="src/lib/alertifyjs/alertify.min.js"></script>
   <script src="src/lib/popper/popper.min.js"></script>
   <script src="src/lib/bootstrap/js/bootstrap.min.js"></script>
   <script src="src/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
   <script src="src/lib/bootstrap-select/js/bootstrap-select.min.js"></script>
   <script src="src/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
-  <!--
-  -->
 
   <!-- Polyfill -->
   <script src="src/js/polyfill/includes.polyfill.js"></script>

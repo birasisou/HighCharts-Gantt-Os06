@@ -70,7 +70,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
         },
         dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
           url_param: 'dependency',
-          format: 'asString'
+          format: 'asStringOrFalse'
         },
         completed: { // {number} nombre entre 0 et 1 (il s'agit d'un pourcentage) désignant l'avancement d'une tâche
           url_param: 'complete',
@@ -91,7 +91,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           format: 'asString'
         },
         label: {
-          // url_param: 'label',
+          // url_param: 'label', // 'desc',
           url_param: 'name',
           format: 'asString'
         },

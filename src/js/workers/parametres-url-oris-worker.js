@@ -63,7 +63,6 @@ let ALLOW_INVALID = false,
   IS_MONITORING = true,
   MONITORING_DELAY = 3000; // delay entre deux mise à jours (en ms)
 
-
 //Début du worker
 // TODO NE SURTOUT PAS IMPORTER SINON LA PAGE PRINCIPALE VA EXECUTER (enfin non, car elle ne recevra jamais de .CONFIG, mais ...)
 self.onmessage = function(event) {
@@ -71,6 +70,9 @@ self.onmessage = function(event) {
   if (event.data.CONFIG) {
     LoggerModule.log("[WORKER.ONMESSAGE] event.data.CONFIG received");
     WORKER_CONFIG = event.data.CONFIG;
+
+    MONITORING_DELAY = WORKER_CONFIG.asRaw["refresh"] ? (Number(WORKER_CONFIG.asRaw["refresh"]) * 1000) : 3000; // delay entre deux mise à jours (en ms)
+    LoggerModule.info("MONITORING_DELAY", MONITORING_DELAY);
   }
   if (event.data.START_AUTO) {
     LoggerModule.info("[WORKER.ONMESSAGE] event.data.START_AUTO received.", "Stopping monitoring after current loop");
@@ -148,7 +150,8 @@ function fakeFinally(arg) {
 function WORKER_GET(url) {
   LoggerModule.log("[WORKER.WORKER_GET] url", url);
   // Return a new promise.
-  return new Promise(function(resolve, reject) {
+  return SHARED.promiseGET(url);
+  /* return new Promise(function(resolve, reject) {
     // Do the usual XHR stuff
     let req = new XMLHttpRequest();
     req.open('GET', url, true);
@@ -180,7 +183,7 @@ function WORKER_GET(url) {
 
     // Make the request
     req.send();
-  });
+  }); // */
 }
 
 /**
@@ -282,10 +285,10 @@ function updateLocal(rawTaskDatas) {
   // console.info("sorted rawTasksIds", rawTasksIds); // */
   let deletedTasksIds = SHARED.arrayDifference(Object.keys(ORIS_TASKS_BY_ID), Object.keys(validTasksUserOptions));
   if (deletedTasksIds.length) {
-    console.info("IDs to delete", deletedTasksIds);
+    LoggerModule.info("IDs to delete", deletedTasksIds);
     let length = deletedTasksIds.length;
     while (length--) {
-      console.log("deleting deletedTasksIds[length]", deletedTasksIds[length]);
+      LoggerModule.log("deleting deletedTasksIds[length]", deletedTasksIds[length]);
       delete ORIS_TASKS_BY_ID[deletedTasksIds[length]];
     }
   }
@@ -296,8 +299,18 @@ function updateLocal(rawTaskDatas) {
     || deletedTasksIds.length                       // signaler une suppresion
     // || Object.keys(updatedTasks).length !== Object.keys(ORIS_TASKS_BY_ID).length  //
   ) {
+    // Clone pour faire des opérations avant de POST sans que ça ne soit pris en compte lors de la "détection de modifications"
+    let tasksToPush = JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID));
+    LoggerModule.log("tasksToPush ", tasksToPush);
+
+    /**
+     * S'assurer de ne pas envoyer de valeurs non-existantes pour l'attribut parent
+     */
+    if (WORKER_CONFIG.asRaw["parent"])
+      tasksToPush = clearParentIds(tasksToPush);
+
     postMessage({
-      updatedTasks: ORIS_TASKS_BY_ID // updatedTasks TOUT renvoyer car méthode naïve
+      updatedTasks: tasksToPush // todo Ne plus utiliser la version naïve d'updatedTasks (TOUT renvoyer)
     }, "*");
   }
   // Informer de l'existence de valeurs invalides dans la BD
@@ -311,6 +324,69 @@ function updateLocal(rawTaskDatas) {
     updatedTasks: updatedTasks,
     invalidTasks: invalidTasks
   };
+}
+
+/**
+ * Pour éviter une erreur HighCharts, on supprime les valeurs de l'attribut "parent" référençant un ID n'existant pas
+ *
+ * @param {Object} tasks
+ *    Objet où la clé est l'ID du Point
+ *
+ * @returns {Object}
+ */
+function clearParentIds(tasks) {
+  let distinctIds = Object.keys(tasks);
+
+  for (let key in tasks) {
+    if (distinctIds.indexOf(tasks[key]["parent"]) < 0) { // Aucun Point ne possède l'ID spécifié dans l'attribut &parent de ce Point
+      LoggerModule.warn("Aucun Point avec comme ID " + tasks[key]["parent"]
+        + " n'existe (référencé par l'attribut 'parent' du Point '" + key + "').", "La valeur a été remplacée par 'null'");
+
+      /**
+       * Créer un "faux" Point afin de garder le concept de groupes
+       */
+      if (WORKER_CONFIG.asRaw["fakeparent"] === "true") { // TODO /!\ Ceci est async
+        console.error("Création de faux parents...");
+        let fakeParentId = tasks[key]["parent"];
+        // Ne créer un faux groupe que s'il y a une valeur valide à
+        if (typeof fakeParentId !== "undefined" && typeof fakeParentId !== "object") {
+          /*
+          WORKER_GET(SHARED.addOrReplaceUrlParam(WORKER_CONFIG.webserviceUrl, "fil", fakeParentId))
+            .then(customJsonParse)
+            .then(extractData)
+            .then(function (datas) {
+              // Normalement, vu que l'on fait un &fil=<ID>, l'ID doit être unique et on ne doit avoir qu'une seule valeur dans le JSON
+              let data = datas[0];
+              if (fakeParentId !== data.id)
+              tasks[fakeParentId] = {
+                id: fakeParentId,
+                name: data[WORKER_CONFIG.asRaw["name"]]    // TODO faire une requête GET avec &fil=fakeParentId pour récupérer le nom de
+              };
+              distinctIds.push(tasks[key]["parent"]);
+            })
+            // En cas d'Erreur, on supprime simplement la référence
+            .catch(function (err) {
+              LoggerModule.error(err);
+              postError(err);
+              tasks[key]["parent"] = null;
+            });
+          //*/
+            tasks[fakeParentId] = {
+              id: fakeParentId,
+              name: fakeParentId    // TODO faire une requête GET avec &fil=fakeParentId pour récupérer le nom de
+            };
+            distinctIds.push(tasks[key]["parent"]);
+        }
+      } else {
+        /**
+         * Supprimer la référence
+         */
+        tasks[key]["parent"] = null;
+      }
+    }
+  }
+
+  return tasks;
 }
 
 /**

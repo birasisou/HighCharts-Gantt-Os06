@@ -43,7 +43,7 @@ html, body {
 }
 div#loading-overlay {
     display: none;
-    z-index: 10;
+    z-index: 2000;
     opacity: 0.95;
     background: #444;
     position: absolute;
@@ -51,8 +51,10 @@ div#loading-overlay {
     left: 0;
     top: 0;
     right: 0;
+    cursor: wait;
 }
-#loading-overlay.active {
+#loading-overlay.active,
+#task-search-widget.active {
     display: block;
 }
 
@@ -71,7 +73,8 @@ div#loading-overlay {
 }
 
 /* Masquer le formulaire servant de template */
-#secret-santa {
+#secret-santa,
+#task-search-widget {
     display: none;
 }
 /* L'afficher lorsqu'il est dans le popup */
@@ -92,6 +95,14 @@ div#loading-overlay {
 .ajs-dialog .ajs-handle {
     display: none !important;
 }
+.alertify .ajs-footer .ajs-buttons .ajs-button.ajs-cancel {
+    color: #c32828;
+}
+.alertify .ajs-footer .ajs-buttons .ajs-button.ajs-ok {
+    color: #28a745;
+    outline: auto 1px;
+}
+
 
 .form-control,
 .input-group-text,
@@ -100,9 +111,19 @@ div#loading-overlay {
 .bootstrap-select .dropdown-menu{
     border-radius: 0 !important;
 }
+input.cursor-pointer {
+    cursor: pointer;
+}
+input[disabled],
+input[readonly] {
+    cursor: not-allowed;
+}
 
 /* Cohérence de style entre Bootstrap 4 et la librairie pour les <select> */
 .bootstrap-select button {
     background: #fff;
     border-color: #dae0e5;
+}
+.dropdown-toggle::after {
+    color: #495057;
 }

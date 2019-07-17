@@ -53,6 +53,8 @@ function TASK_EDITOR_MODAL_FACTORY () {
       category: document.getElementById(inputId("category")),
       dependency: document.getElementById(inputId("dependency")),
       vline: document.getElementById(inputId("vline"))
+
+      // TODO Add custom Labels (responsable, icon, etc...)
     },
     DATERANGEPICKER_CONFIG = {
     "singleDatePicker": true,
@@ -105,10 +107,19 @@ function TASK_EDITOR_MODAL_FACTORY () {
     allowInputToggle: true,
     locale: 'fr'
   });
+  $(INPUTS["end"]).datetimepicker({
+    allowInputToggle: true,
+    locale: 'fr'
+  });
+  $(INPUTS["start"]).on("dp.change", function (e) {
+    $(INPUTS["end"]).data("DateTimePicker").minDate(e.date);
+  });
+  $(INPUTS["end"]).on("dp.change", function (e) {
+    $(INPUTS["start"]).data("DateTimePicker").maxDate(e.date);
+  });
+
   // todo ????
-  $(INPUTS["end"]).datetimepicker();
-  // todo ????
-  // MàJ le dateMin/dateMax de end/start en fonction de la date choisie
+  // TODO MàJ le dateMin/dateMax de end/start en fonction de la date choisie
   /*
   $(INPUTS["start"]).on('apply.daterangepicker', function (ev, picker) {
     console.warn("ev", ev);
@@ -157,24 +168,29 @@ function TASK_EDITOR_MODAL_FACTORY () {
     if (!taskOptions)
       throw new EXCEPTIONS.InvalidArgumentExcepetion("initInputs");
 
-    //
     for (let input in INPUTS) {
       console.warn("taskOptions['"+input+"']",taskOptions[input]);
       if (!INPUTS[input])
         continue;
 
-      if (typeof taskOptions[input] !== "object"
-        && typeof taskOptions[input] !== "undefined"
-        && (taskOptions[input] || taskOptions[input] === 0))
+      if (typeof taskOptions[input] !== "object"              // null
+        && typeof taskOptions[input] !== "undefined"          // undefined
+        && (taskOptions[input] || taskOptions[input] === 0))  // Number (0 compte comme false donc on doit l'autoriser manuellement)
       {
         taskOptions[input] = SHARED.decodeHTML(taskOptions[input]);
         if (input === "start" || input === "end") {
-          $(INPUTS[input]).data("DateTimePicker").date(moment(taskOptions[input]));
+          $(INPUTS[input]).data("DateTimePicker").date(moment(Number(taskOptions[input])));
+          // INPUTS[input].value = moment(taskOptions[input]).format("DD/MM/YYYY");
           // data('DateTimePicker').date(moment(taskOptions[input]).format("DD/MM/YYYY"));
-          //$(INPUTS[input]).data('daterangepicker').setEndDate(moment(taskOptions[input]).format("DD/MM/YYYY")); // todo ? supporter les heures ?
-        } else
+          // $(INPUTS[input]).data('daterangepicker').setEndDate(moment(taskOptions[input]).format("DD/MM/YYYY")); // todo ? supporter les heures ?
+          if (!taskOptions[input])
+            INPUTS[input].disabled = true;
+        } else if (input === "color")
+          $(INPUTS[input]).data('colorpicker').setValue(taskOptions[input]);
+        else
           INPUTS[input].value = taskOptions[input];
-        INPUTS[input].disabled = false;
+
+        INPUTS[input].disabled = (input === "category" && APP_MODULE.getParametresUrlOrisNoFunction().asRaw.parent);
       }
       else if (typeof taskOptions[input] === "object" && input === "completed") {
         INPUTS["completed"].value = (Number(taskOptions["completed"]["amount"]) <= 1) ? Number(taskOptions["completed"]["amount"])*100 : Number(taskOptions["completed"]["amount"]);
@@ -182,7 +198,11 @@ function TASK_EDITOR_MODAL_FACTORY () {
       }
       else {
         INPUTS[input].value = "";
-        INPUTS[input].disabled = true;
+        /**
+         * @Github #Issue update de/vers une milestone cause un bug graphique
+         * donc on désactive les inputs si les dates sont invalides initialement
+         */
+        INPUTS[input].disabled = input === "start" || input === "end";
       }
     }
   }
@@ -193,8 +213,10 @@ function TASK_EDITOR_MODAL_FACTORY () {
    * @returns {HTMLElement}
    * @constructor
    */
-  function SelectOption(value) {
+  function SelectOption(value, subtext) {
     let option = document.createElement("option");
+    if (subtext)
+      option.setAttribute("data-subtext", subtext);
     option.innerText = option.value = value;
     return option;
   }
@@ -211,11 +233,6 @@ function TASK_EDITOR_MODAL_FACTORY () {
     if (!select || typeof select !== "object") // DOM HTMLElement est un objet
       return;
 
-    //console.error("concat:", [""].concat(optionValues));
-
-    //$(select).selectpicker('val', ([""].concat(optionValues)));
-    //return;
-
     // Vider le select
     select.innerText = "";
     // Ajouter l'option "vide"
@@ -223,7 +240,8 @@ function TASK_EDITOR_MODAL_FACTORY () {
     // Ajouter les options, s'il y en a
     if (optionValues)
       for (let i=0, l=optionValues.length; i<l; ++i) {
-        select.innerHTML += new SelectOption(optionValues[i]).outerHTML;
+        if (optionValues[i])
+          select.innerHTML += new SelectOption(optionValues[i].id, optionValues[i].name).outerHTML;
       }
 
     // Appliquer les changements à la librairie
@@ -251,7 +269,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
 
     // todo update only if different
     currentDataIds = newDataIds;
-    setSelectorOptions(INPUTS["dependency"], newDataIds);
+    setSelectorOptions(INPUTS["dependency"], newDataIds); //todo ajouter subtext --> NAME equivalent
   }
 
   /**
@@ -272,7 +290,12 @@ function TASK_EDITOR_MODAL_FACTORY () {
       updateYAxisCategories(options.yAxis.categories);
 
     if (options.series && options.series.data)
-      updateDataIds(options.series.data.map(function(e){return e.id}));
+      updateDataIds(options.series.data.map(function(e){
+        return {
+          id: e.id,
+          name: e.name
+        }
+      }));
   }
 
   function showTaskEditor(taskOptions) {
@@ -291,14 +314,13 @@ function TASK_EDITOR_MODAL_FACTORY () {
     initInputs(taskOptions);
 
     //show as confirm
-    INSTANCE = alertify.confirm(div, function(){
+    INSTANCE = alertify.confirm(div/*, function(){
       // todo ???? NE SE LANCE PAS
-      alert("TODO implémenter TryPostData");
       alertify.success('Valider'); // todo TryPostData
     }, function(){
       // todo ???? NE SE LANCE PAS
       alertify.error('Aucune modification');
-    }).set({
+    }//*/).set({
       padding: false,
       title: "Édition de tâche",
       movable: false,
@@ -308,13 +330,14 @@ function TASK_EDITOR_MODAL_FACTORY () {
       reverseButtons: true,
       transition: "zoom",
       onshow: function () {
-        // todo ???? NE SE LANCE PAS
         $(INPUTS["category"]).selectpicker('refresh');
         $(INPUTS["dependency"]).selectpicker('refresh');
-        alertify.message('confirm was shown.');
+        alertify.message('Editor was shown.');
       },
       onok: function () {
-        alertify.notify('TODO: IMPLEMENT + RETURN FALSE', 'error', 3, function(){  console.log('TODO: IMPLEMENT + RETURN FALSE'); });
+        alertify.notify('TODO: IMPLEMENT + RETURN FALSE', 'error', 3, function(){
+          console.log('TODO: IMPLEMENT + RETURN FALSE');
+        });
         ONOK_HANDLER();
         return false;  // empêcher le modal de se fermer
       }
@@ -334,6 +357,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
     //   return false; // <-- Pour ne pas fermer le modal avant la fin de la requête
 
     // todo show loading
+    APP_MODULE.getLoadingSpinnerHandler().showLoading();
     //  try POST request
     //  onsuccess
     //   hideLoading
@@ -344,244 +368,91 @@ function TASK_EDITOR_MODAL_FACTORY () {
     //   ? hideModal ?
     //   error notification
 
-    // show Loading
-    APP_MODULE.getLoadingSpinnerHandler().showLoading();
-
     // format data
     let formattedData = {},
-      asRawParams = APP_MODULE.parametresUrlOrisNoFunction().asRaw;
+      asRawParams = APP_MODULE.getParametresUrlOrisNoFunction().asRaw,
+      HC_CONFIG_KEYS = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS;
     for (let input in INPUTS) {
-      if (asRawParams[APP_MODULE.CONSTANTS.HC_CONFIG_KEYS.data[input].url_param])
-        formattedData[APP_MODULE.CONSTANTS.HC_CONFIG_KEYS.data[input].url_param] = INPUTS[input].value;
+      if (asRawParams[HC_CONFIG_KEYS.data[input].url_param]
+        && !INPUTS[input].disabled) { // ne pas MàJ les paramètres disabled (notamment les catégories en mode &uniqueNames, enfin &parent, et ID car ultra important)
+        formattedData[asRawParams[HC_CONFIG_KEYS.data[input].url_param]] = (input === "start" || input === "end") ? $(INPUTS[input]).data("DateTimePicker").date()._d.toISOString() : INPUTS[input].value;
+      }
     }
-    console.warn("[ONOK_HANDLER]", formattedData);
+    // Forcer l'ajout de l'attribut vline car faire une requête avec &id=vline causait une erreur
+    formattedData["vline"] = INPUTS["vline"].value;
+    // Formatter, potentiellement, la couleur (la base n'accepte pas de '#')
+    if (formattedData["color"] && formattedData["color"][0] === "#")
+      formattedData["color"] = INPUTS["color"].value.slice(1); // on enlève le "#" initial car on ne peut pas le push dans la BD
+
+    console.warn("[ONOK_HANDLER] formattedData", formattedData);
 
     // todo tryPostData
-    new Promise(function (resolve, reject) {
-      let xhr = new XMLHttpRequest(),
-        url = APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData);
+    // Generate & encode URI
+    let url = encodeURI(APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData));
 
-      console.warn("UPDATE URL", url);
+    console.warn("Point update URL", url);
 
-      xhr.open("GET", url, true);
-
-      xhr.onload = function() {
-        LoggerModule.log("[GET.onload] req.status", xhr.status);
-        // This is called even on 404 etc
-        // so check the status
-        if (xhr.status === 200) {
-          LoggerModule.log("[GET.onload] req.response", xhr.response);
-          resolve(xhr.response);
-        } else {
-          // Otherwise reject with the status text
-          // which will hopefully be a meaningful error
-          let msg = "[GET.onload] req.status !== 200. \nActual req.status: " + xhr.status;
-          LoggerModule.error(msg);
-          reject(Error(msg));
-        }
-      };
-
-      // Handle network errors
-      xhr.onerror = function(e) {
-        LoggerModule.error("[GET.onerror] Network Error. e:", e);
-        LoggerModule.error("[GET.onerror] Network Error. xhr.statusText: ", "'" + xhr.statusText + "'");
-        LoggerModule.error("[GET.onerror] Network Error. xhr.status:", xhr.status);
-        reject(Error("[GET.onerror] Network Error "+ xhr.statusText +"(" + xhr.status + ")"));
-      };
-
-      xhr.send();
-    })
-      // parse to JSON
+    // GET
+    SHARED.promiseGET(url)
+      // JSON Parse
       .then(function (response) {
+        LoggerModule.warn("Trying to parse:", response);
         try {
           return JSON.parse(response);
         } catch (e) {
-          LoggerModule.warn("Tried to Parse:", response);
+          LoggerModule.warn("But got Error", e);
           throw Error("Unable to parse response to JSON. " + e.message);
         }
       })
-      // extract root from JSON
+      // extract root
       // /!\ The rootName doesn't contain the additional "s" (GET => rootName is "<something>s"; POST => rootName is "<something>") /!\
       .then(function (json) {
-        let root = json[APP_MODULE.parametresUrlOrisNoFunction().rootName.slice(0, -1)];
+        let root = json[APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1)];  // sans le "s" bonus
         if (!root)
-          throw new Error("Unable to extract root (" + APP_MODULE.parametresUrlOrisNoFunction().rootName.slice(0, -1) + ") from JSON", json);
+          throw new Error("Unable to extract root (" + APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1) + ") from JSON", json);
         return root;
       })
-      // The server replies with its stored value for the given vline ID. We have to check if this data is what we pushed (success) or different (failed)
-      .then(function () {
+      // The server replies with its stored value for the given vline ID.
+      // We have to check if this data is what we pushed (success) or different (failed)
+      // AND
+      // In this case, the root contains the Object (usually, it's an Array of Objects)
+      .then(function (root) {
+        // TODO check values
+        //    hide modal
+        let postedTask = new OrisGanttTask(formattedData, APP_MODULE.getParametresUrlOrisNoFunction()),
+          actualTask = new OrisGanttTask(root, APP_MODULE.getParametresUrlOrisNoFunction());
 
+        console.info("postedTask", postedTask);
+        console.info("actualTask", actualTask);
+
+        // On ne compare que les valeurs modifiées
+        // et on les formatte en userOptions
+        for (let attr in formattedData) {
+          console.info("(userOptions' value) Is formattedData[" + attr + "]: " + postedTask["userOptions"][attr]
+            + ", === to root[" + attr + "]: " + actualTask["userOptions"][attr] + " ?");
+          if (actualTask["userOptions"][attr] !== postedTask["userOptions"][attr]) {
+            LoggerModule.error("La valeur ('" + attr + "')du formulaire sont différentes de celles récupérées depuis le serveur");
+            throw "Mise à jour du Point échouée";
+          }
+        }
+        alertify.success("Mise à jour réussie", 1);
+        INSTANCE.close();
       })
       .catch(function (err) {
         LoggerModule.error("Data update error:", err);
-        alertify.postErrorAlert(err.description || err.message);
+        alertify.postErrorAlert(err.description || err.message || err);
       })
-      .then(function () {
-        postError()
-      })
+      /*
+      .then(function (e) {
+        alertify.notify("finally ??");
+        // Le chargement se cachera lorsque la page principale recevra de nouvelles valeurs du Worker
+        // APP_MODULE.getLoadingSpinnerHandler().hideLoading();
+        return true; // masquer le modal ?
+      }) // */
   }
 
   function ONCANCEL_HANDLER() {
     // todo rien de particulier ?
-  }
-
-
-
-  /**
-   * Initialiser date-pickers / color-picker
-   */
-  // todo disable les inputs potentiellement non renseignés dans asRaw (couleur, etc...)
-  function factory(){
-    return {
-      // The dialog startup function
-      // This will be called each time the dialog is invoked
-      // For example: alertify.myDialog( data );
-      main:function(params){
-        // manipulate parameters and set options
-        this.setting('myProp', data);
-      },
-      // The dialog setup function
-      // This should return the dialog setup object ( buttons, focus and options overrides ).
-      setup:function(){
-        return {
-          /* buttons collection */
-          buttons:[
-
-            /*button defintion*/
-            {
-              /* button label */
-              text: 'OK',
-
-              /*bind a keyboard key to the button */
-              key: 27,
-
-              /* indicate if closing the dialog should trigger this button action */
-              invokeOnClose: false,
-
-              /* custom button class name  */
-              className: alertify.defaults.theme.ok,
-
-              /* custom button attributes  */
-              attrs:{attribute:'value'},
-
-              /* Defines the button scope, either primary (default) or auxiliary */
-              scope:'auxiliary',
-
-              /* The will conatin the button DOMElement once buttons are created */
-              element:undefined
-            }
-          ],
-
-          /* default focus */
-          focus:{
-            /* the element to receive default focus, has differnt meaning based on value type:
-                number:     action button index.
-                string:     querySelector to select from dialog body contents.
-                function:   when invoked, should return the focus element.
-                DOMElement: the focus element.
-                object:     an object that implements .focus() and .select() functions.
-            */
-            element: 0,
-
-            /* indicates if the element should be selected on focus or not*/
-            select: false
-
-          },
-          /* dialog options, these override the defaults */
-          options: {
-            title: "Task Editor",
-            // ? pinned: ...,
-            movable: false,
-            maximizable: false,
-            pin: true,  // useless car modal
-            transition: "zoom",
-            // ? padding: false,
-            /*
-            // todo HANDLERS
-            oncancel: ...,  // modal fermé (bouton "Annuler" ou l'overlay)
-            onclose:...,    // tout le temps (Ok et Cancel)
-            onclosing: ..., // "return false" empêche le modal de se fermer. À voir si onok permet de 'stall' également
-            onok: ...       // bouton "Valider"
-            //*/
-          }
-        };
-      },
-      // This will be called once the dialog DOM has been created, just before its added to the document.
-      // Its invoked only once.
-      build: function () {
-        // todo disable les inputs non-renseignés dans parametres-url
-
-        // Do custom DOM manipulation here, accessible via this.elements
-
-        // this.elements.root           ==> Root div
-        // this.elements.dimmer         ==> Modal dimmer div
-        // this.elements.modal          ==> Modal div (dialog wrapper)
-        // this.elements.dialog         ==> Dialog div
-        // this.elements.reset          ==> Array containing the tab reset anchor links
-        // this.elements.reset[0]       ==> First reset element (button).
-        // this.elements.reset[1]       ==> Second reset element (button).
-        // this.elements.header         ==> Dialog header div
-        // this.elements.body           ==> Dialog body div
-        // this.elements.content        ==> Dialog body content div
-        // this.elements.footer         ==> Dialog footer div
-        // this.elements.resizeHandle   ==> Dialog resize handle div
-
-        // Dialog commands (Pin/Maximize/Close)
-        // this.elements.commands           ==> Object containing  dialog command buttons references
-        // this.elements.commands.container ==> Root commands div
-        // this.elements.commands.pin       ==> Pin command button
-        // this.elements.commands.maximize  ==> Maximize command button
-        // this.elements.commands.close     ==> Close command button
-
-        // Dialog action buttons (Ok, cancel ... etc)
-        // this.elements.buttons                ==>  Object containing  dialog action buttons references
-        // this.elements.buttons.primary        ==>  Primary buttons div
-        // this.elements.buttons.auxiliary      ==>  Auxiliary buttons div
-
-        // Each created button will be saved with the button definition inside buttons collection
-        // this.__internal.buttons[x].element
-
-      },
-      // This will be called each time the dialog is shown
-      prepare: function () {
-        // todo init en fonction du "currentTask"
-        // Do stuff that should be done every time the dialog is shown.
-      },
-      // This will be called each time an action button is clicked.
-      callback: function (closeEvent) {
-        //The closeEvent has the following properties
-        //
-        // index: The index of the button triggering the event.
-        // button: The button definition object.
-        // cancel: When set true, prevent the dialog from closing.
-      },
-      // To make use of AlertifyJS settings API, group your custom settings into a settings object.
-      settings: {
-        myProp: 'value'
-      },
-      // AlertifyJS will invoke this each time a settings value gets updated.
-      settingUpdated: function (key, oldValue, newValue) {
-        // Use this to respond to specific setting updates.
-        switch (key) {
-          case 'myProp':
-            // Do something when 'myProp' changes
-            break;
-        }
-      },
-      // listen to internal dialog events.
-      hooks: {
-        // triggered when the dialog is shown, this is seperate from user defined onshow
-        onshow: function () {
-        },
-        // triggered when the dialog is closed, this is seperate from user defined onclose
-        onclose: function () {
-        },
-        // triggered when a dialog option gets updated.
-        // IMPORTANT: This will not be triggered for dialog custom settings updates ( use settingUpdated instead).
-        onupdate: function () {
-        }
-      }
-    }
   }
 
   return {
@@ -590,8 +461,8 @@ function TASK_EDITOR_MODAL_FACTORY () {
     setChartOptions: updateChartOptions,
 
     initAndShow: function (taskOptions) { showTaskEditor(taskOptions); },
-    hide: function () { INSTANCE.hide(); },
-    show: function () { INSTANCE.show(); }
+    hide: function () { INSTANCE.close(); },
+    show: function () { INSTANCE.showModal(); } // n'aura pas le bon style
 
 
 

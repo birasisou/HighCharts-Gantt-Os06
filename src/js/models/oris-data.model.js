@@ -75,6 +75,15 @@ OrisData.prototype.asRaw = function () {
 OrisData.prototype.asString = function () {
   return (this.value || this.value === false || this.value === 0) ? ("" + this.value) : undefined;
 };
+/**
+ * Récupérer la valeur sous forme de String
+ *    (bien souvent ça sera déjà le cas dans asRaw, mais au cas où
+ *     mais ID, Category, etc... doivent impérativement être des String)
+ * @return {string|false}
+ */
+OrisData.prototype.asStringOrFalse = function () {
+  return this.asString() || false;
+};
 
 /**
  * Récupérer la valeur sous forme booléenne

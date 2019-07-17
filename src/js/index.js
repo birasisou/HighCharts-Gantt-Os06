@@ -1,45 +1,93 @@
-moment.locale('fr');  // Set the default/global locale
-
-// document ready todo ou instancier dans le "vrai" document.ready
-
-/**
- * Traduire en Français
- * todo Rendre ça optionnel via url ?
- */
-Highcharts.setOptions({
-    lang: {
-      loading: 'Chargement...',
-      months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
-      weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi','Jeudi', 'Vendredi', 'Samedi'],
-      shortMonths: ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juill', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'],
-      exportButtonTitle: 'Exporter',
-      printButtonTitle: 'Imprimer',
-      rangeSelectorFrom: 'De',
-      rangeSelectorTo: 'À',
-      rangeSelectorZoom: 'Période',
-      downloadCSV: 'Télécharger au format CSV',
-      downloadJPEG: 'Télécharger au format JPEG',
-      downloadPDF: 'Télécharger au format PDF',
-      downloadPNG: 'Télécharger au format PNG',
-      downloadSVG: 'Télécharger au format SVG',
-      downloadXLS: 'Télécharger au format XLS',
-      printChart: 'Imprimer',
-      // resetZoom: "Reset",
-      // resetZoomTitle: "Reset,
-      thousandsSep: " ",
-      decimalPoint: ','
-    }
-  }
-);
 let APP_MODULE;
 try {
   APP_MODULE = (function () {
+    /**
+     * Log Level
+     * On veut, par défaut, toujours imprimer les erreurs dans la console
+     */
     LoggerModule.setDebug("error");
+
+    /**
+     * Initialiser Page UI
+     */
+    let TASK_SEARCH_WIDGET = document.getElementById("task-search-widget");
+    TASK_SEARCH_WIDGET.className += "active"; // TODO ne l'afficher qu'à la fin de l'initialisation globale ?
+    TASK_SEARCH_WIDGET.addEventListener("submit", function() {
+      let newUrl = SHARED.addOrReplaceUrlParam(location.href, 'fil', document.getElementById("task-search-input").value);
+      LoggerModule.warn("Changement d'URL", newUrl);
+      window.location.replace(newUrl);
+      return false;
+    });
+
+    /**
+     * On ne supporte que "en" et "fr". Il faut en installer d'autres si on veut les supporter
+     * https://github.com/moment/moment/tree/develop/locale
+     */
+    let PREFERED_LANGUAGE = (window.location.search.indexOf("lang=fr") > -1) ? "fr" : (window.navigator.userLanguage || window.navigator.language);
+    console.log("Detected language:", PREFERED_LANGUAGE);
+    moment.locale(PREFERED_LANGUAGE);
+    /**
+     * Toujours utiliser l'offset UTC du navigateur
+     */
+    Highcharts.setOptions({
+      time: {
+        /**
+         * Use moment-timezone.js to return the timezone offset for individual
+         * timestamps, used in the X axis labels and the tooltip header.
+         */
+        getTimezoneOffset: function (timestamp) {
+          let zone = moment.tz.guess(true);   // Détection automatique, sans storage dans le cache
+          return -moment.tz(timestamp, zone).utcOffset();
+        }
+      }
+    });
+
+    /**
+     * @GitHub
+     * @Issue https://github.com/highcharts/highcharts/issues/10942
+     *    En attendant, la version 1.7.3 pour le fix officiel, il faut utiliser ce @workaround
+     *
+    Highcharts.addEvent(Highcharts.Axis, 'afterBreaks', function() {
+      this.series.forEach(function(series) {
+        series.data.forEach(function(point) {
+          point.graphicOverlay = point.graphicOverlay && point.graphicOverlay.destroy();
+        });
+      });
+    }); // */
+
+    /**
+     * Traduire en Français si besoin
+     */
+    if (PREFERED_LANGUAGE === "fr")
+      Highcharts.setOptions({
+        lang: {
+          loading: 'Chargement...',
+          months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+          weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+          shortMonths: ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juill', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'],
+          exportButtonTitle: 'Exporter',
+          printButtonTitle: 'Imprimer',
+          rangeSelectorFrom: 'De',
+          rangeSelectorTo: 'À',
+          rangeSelectorZoom: 'Période',
+          downloadCSV: 'Télécharger au format CSV',
+          downloadJPEG: 'Télécharger au format JPEG',
+          downloadPDF: 'Télécharger au format PDF',
+          downloadPNG: 'Télécharger au format PNG',
+          downloadSVG: 'Télécharger au format SVG',
+          downloadXLS: 'Télécharger au format XLS',
+          printChart: 'Imprimer',
+          // resetZoom: "Reset",
+          // resetZoomTitle: "Reset,
+          thousandsSep: " ",
+          decimalPoint: ','
+        }
+      });
 
     /**
      * @private and/or GLOBAL
      */
-      // référence to Global Scope (window)
+    // référence to Global Scope (window)
     let self = this,
       HTML_LOADER_ID = "loading-overlay",
 
@@ -80,6 +128,7 @@ try {
           LOADING_OVERLAY_HANDLER.hideLoading();
         } else if (e.data.chartLoaded) {
           // todo startMonitoring
+          //  fait côté Worker
           /*
           WORKER.postMessage({
             START_AUTO: true
@@ -160,7 +209,7 @@ try {
           alertify.error(errMsg, 1.5)
         },
         invalidTasks: function (invalidTasksMsg) {
-          LoggerModule.warn("[INDEX.workerMessageHandler] Invalid tasks received", invalidTasksMsg)
+          LoggerModule.info("[INDEX.workerMessageHandler] Invalid tasks received", invalidTasksMsg)
           // todo popup msg
         },
         updatedTasks: function (updatedTasksMsg) {
@@ -216,7 +265,7 @@ try {
      * Démarre le Worker, attache les écouteurs de messages et lui dit de démarrer
      */
     function startWorker() {
-      // /!\ SYNCHRONE /!\ TODO Passer en async Promise
+      // /!\ SYNCHRONE /!\ TODO Passer en async Promise ?
       WORKER = evalWorker("./src/js/workers/parametres-url-oris-worker.js");
 
       // todo Ajouter le message Handler
@@ -245,10 +294,13 @@ try {
 
     // todo ? isDebug == dev --> exposer les getters etc...
     return {
+      getPreferedLanguage: function () {
+        return PREFERED_LANGUAGE;
+      },
       getParametresUrlOris: function () {
         return PARAMETRES_URL_ORIS;
       },
-      parametresUrlOrisNoFunction: function () {
+      getParametresUrlOrisNoFunction: function () {
         return PARAMETRES_URL_ORIS_NO_FUNCTIONS;
       },
       getWorker: function () {

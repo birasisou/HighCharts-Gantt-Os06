@@ -7,7 +7,27 @@ function GanttRenderingModule () {
    * @Private
    */
   // ID de l'élément DOM cible (<div>) pour dessiner le graphique
-  let CONTAINER_ID = "container";
+  let CONTAINER_ID = "graph-container",
+    EVENT_HANDLER = {
+      point: {
+        select: function(event, param2, param3, param4) {
+          alertify.success("Task Selected Event");
+          // TODO
+          console.warn("TODO: to implement");
+        },
+        unselect: function(event, param2, param3, param4) {
+          alertify.success("Task Unselected Event");
+          // TODO
+          console.warn("TODO: to implement");
+        },
+        remove: function(event, param2, param3, param4) {
+          alertify.success("Task Removed Event");
+          // TODO
+          console.warn("TODO: to implement");
+        }
+      }
+    };
+
 
   /**
    * @public
@@ -159,10 +179,27 @@ function GanttRenderingModule () {
         categories: []
       },
       xAxis: [{
-        currentDateIndicator: true
-      },{
+        /*
+        dateTimeLabelFormats: {
+          millisecond: '%H:%M:%S.%L',
+          second: '%H:%M:%S',
+          minute: '%H:%M',
+          hour: '%H:%M',
+          day: '%a %e %b',
+                            day: {
+                                list: ['%A %e %B', '%a %e %b', '%E']
+                            },
+          week: '%e %b',
+          month: '%b \'%y',
+          year: '%Y'
+        }, // */
+        currentDateIndicator: true,
+        minPadding: 0.01,
+        maxPadding: 0.01,
+        minTickInterval: 86400000 // 1 Day: 24 * 3600000 = 86400000
+      }, { // Le 2e axe X est la ligne des "semaines"
         labels: {
-          format: 'Semaine {value:%W}'
+          format: (APP_MODULE.getPreferedLanguage() === "fr" ? 'Semaine' : 'Week') + ' {value:%W}'
         }
       }],
       tooltip: {
@@ -205,10 +242,12 @@ function GanttRenderingModule () {
 
     // set CATEGORIES
     BASE_CONFIG.yAxis.categories = yCategories;
-    // BASE_CONFIG.yAxis =  { uniqueNames: true };
-    // TODO rendre ça mandatory car c'est juste "plus mieux"
-    if (parametreUrlOris.asRaw["uniquenames"] === "true")
-      BASE_CONFIG.yAxis =  { uniqueNames: true };
+    // if (parametreUrlOris.asRaw["uniquenames"] === "true")
+      // BASE_CONFIG.yAxis =  { uniqueNames: true };
+    /**
+     * Détecter ("calculer") yAxis.uniqueNames
+     */
+    BASE_CONFIG.yAxis =  { uniqueNames: true };
 
     // set SERIES
     //LoggerModule.warn(new Series(tasks));
@@ -264,25 +303,28 @@ function GanttRenderingModule () {
       BASE_CONFIG.plotOptions.series.allowPointSelect = true;
       BASE_CONFIG.plotOptions.series.point = {
         events: {
-          // select: updateRemoveButtonStatus,
-          // unselect: updateRemoveButtonStatus,
-          // remove: updateRemoveButtonStatus
+          select: EVENT_HANDLER.point.select,
+          unselect: EVENT_HANDLER.point.unselect,
+          remove: EVENT_HANDLER.point.remove
         }
       };
 
       // TODO initialise UI
-
+      //    Inclure une librairie ?
       // Enable Drag/Drop
       BASE_CONFIG.plotOptions.series.dragDrop = {
+        liveRedraw: false,
         draggableX: true,
-          draggableY: true,
-          dragPrecisionX: day / 4 // Snap to eight hours
+        draggableY: true,
+        dragPrecisionX: day / 2 // Snap to eight hours
       }
     }
 
     return currentConfig = BASE_CONFIG;
     // return currentConfig; // { config: currentConfig };
   }
+
+
 
   function drawChart (parametreUrlOris, rawTaskDatas) {
     // TODO check param integrity/type/etc...
@@ -291,13 +333,12 @@ function GanttRenderingModule () {
 
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
-    console.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
+    LoggerModule.log("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
 
     // Init config
     let highChartConfig = new initOrisGanttChartConfigModel(parametreUrlOris, formattedYAxisAndData.categories, formattedYAxisAndData.data);
     // todo ne pas formatter les données et utiliser { yAxis: { uniqueNames: true } }
 
-    // console.warn("highChartConfig", highChartConfig);
 
     chartObj = Highcharts.ganttChart(CONTAINER_ID, highChartConfig);
   }
@@ -314,11 +355,7 @@ function GanttRenderingModule () {
 
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
-    LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:");
-    // console.warn("formattedYAxisAndData.categories", formattedYAxisAndData.categories);
-    // console.warn("formattedYAxisAndData.data", formattedYAxisAndData.data);
-
-    // console.error("new Series(formattedYAxisAndData.data)", new Series(formattedYAxisAndData.data));
+    LoggerModule.error("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
 
     chartObj.update({
       yAxis: {
