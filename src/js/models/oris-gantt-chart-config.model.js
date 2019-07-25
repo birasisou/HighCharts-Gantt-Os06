@@ -6,34 +6,88 @@ function GanttRenderingModule () {
   /**
    * @Private
    */
-  // ID de l'élément DOM cible (<div>) pour dessiner le graphique
-  let CONTAINER_ID = "graph-container",
+  let CONTAINER_ID = "graph-container", // ID de l'élément DOM cible (<div>) pour dessiner le graphique
     EVENT_HANDLER = {
       point: {
-        select: function(event, param2, param3, param4) {
-          alertify.success("Task Selected Event");
-          // TODO
-          console.warn("TODO: to implement");
+        select: function(event, options) {
+          DOM_REF.editButtons.edit.disabled = false;
+          // MàJ la référence vers le point selectionné
+          selectedPoint = this;
+          alertify.success("Task Selected Event", 0.75);
+
+
         },
-        unselect: function(event, param2, param3, param4) {
-          alertify.success("Task Unselected Event");
+        unselect: function(event, options) {
+          // Décalage pour cohérence
+          setTimeout(function() {
+            document.getElementById("task-edit-button").disabled = !chartObj.getSelectedPoints().length;
+          }, 10);
+
+          TOAST.success({ body: "Task Unselected Event", delay:750 });
+          // alertify.success("Task Unselected Event", 0.75);
           // TODO
           console.warn("TODO: to implement");
+
+          // return false;
         },
-        remove: function(event, param2, param3, param4) {
-          alertify.success("Task Removed Event");
+        remove: function(event, options) {
+          alertify.success("Task Removed Event", 0.5);
           // TODO
           console.warn("TODO: to implement");
-        }
+          return false;
+        },
+        /*
+        drag: function (event, options) {
+          alertify.success("Task Drag Event", 0.5);
+          // TODO
+          console.warn("TODO: to implement");
+          // return false;
+        },
+        dragStart: function (event, options) {
+          alertify.success("Task DragStart Event", 0.5);
+          // TODO
+          console.warn("TODO: to implement");
+          // return false;
+        }, // */
+        drop: function (event) {
+          console.log("drop.event", event);
+          // TODO formatter event.newPoint.start et .end
+
+          alertify.error("Task Drop Event", 1);
+          // TODO
+          //    faire la requête pour le point déplacé
+          //    if (OK)
+          //      alertify.success
+          //    else
+          //      alertify.
+
+          let formattedData = SHARED.formatDataOptionsToPost(event.target.options, APP_MODULE.getParametresUrlOrisNoFunction());
+          console.error("formattedData", formattedData);
+
+          console.warn("TODO: to implement");
+          return false;
+        },
+      }
+    },
+
+    /**
+     * Référence aux boutons d'édition de tâche
+     * @type {DOM}
+     */
+    DOM_REF = {
+      editButtons: {
+        add: null,
+        edit: null,
+        remove: null
       }
     };
-
 
   /**
    * @public
    */
   let currentConfig = null,
-      chartObj = null;
+      chartObj = null,
+      selectedPoint = null;
 
   /**
    * HighChart series Object
@@ -160,13 +214,20 @@ function GanttRenderingModule () {
       subtitle: { text: null },
       plotOptions: {
         series: {
+          marker: {
+            states: {
+              select: {
+                fillColor: "red"
+              }
+            }
+          },
           animation: false,
           dataLabels: {
             enabled: true,
             // format: '{point.name}' // todo custom formatter, surtout si pre/suffix/img, etc...
             //*
             formatter: function() {
-              let str = this.point.label;
+              let str = this.point.label || "";
               if (this.point.completed && this.point.completed.amount && typeof this.point.completed.amount === "number")
                 str += " (" + (this.point.completed.amount*100).toFixed(0) + "%)";
               return str;
@@ -187,7 +248,7 @@ function GanttRenderingModule () {
           hour: '%H:%M',
           day: '%a %e %b',
                             day: {
-                                list: ['%A %e %B', '%a %e %b', '%E']
+                                list: ['%A %e %B', '%a %e %b', '%E']    // enlever les caractères inutiles
                             },
           week: '%e %b',
           month: '%b \'%y',
@@ -206,33 +267,31 @@ function GanttRenderingModule () {
         xDateFormat: '%a %d %b %Y, %H:%M',
         useHTML: true,
         formatter: function () {
-          LoggerModule.log("this", this);
-
           // NAME
-          let str = "<span>" + this.point.label + "</span>";
+          let str = this.point.label ? "<span>" + this.point.label + "</span><br>" : "";
 
           // CATEGORY
-          str += "<br><span><b>" + this.yCategory + "</b></span>";
+          str += "<span><b>" + this.yCategory + "</b></span>";
 
           // START
           if (this.x)
-            str += "<br><small>Début: " + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x) + "</small>";  // todo format date
+            str += "<br><small>Début:&nbsp;" + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x) + "</small>";  // todo format date
 
           // END
           if (this.x2)
-            str += "<br><small>Fin: " + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x2) + "</small>";
+            str += "<br><small>Fin:&nbsp;" + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x2) + "</small>";
 
           // COMPLETED
           if (this.point.completed && this.point.completed.amount) {
             let amount = this.point.completed.amount;
             if (amount <= 1)
               amount = amount * 100;
-            str += "<br><small>Avancement: " + amount + "%</small>";
+            str += "<br><small>Avancement:&nbsp;" + amount + "%</small>";
           }
 
           // OWNER
           if (this.point.owner)
-            str += "<br><small>Responsable: " + this.point.owner + "</small>";
+            str += "<br><small>Responsable:&nbsp;" + this.point.owner + "</small>";
 
           return str;
         }
@@ -305,7 +364,20 @@ function GanttRenderingModule () {
         events: {
           select: EVENT_HANDLER.point.select,
           unselect: EVENT_HANDLER.point.unselect,
-          remove: EVENT_HANDLER.point.remove
+          remove: EVENT_HANDLER.point.remove,
+          dragStart: EVENT_HANDLER.point.dragStart,
+          drag: EVENT_HANDLER.point.drag,
+          drop: EVENT_HANDLER.point.drop
+        }
+      };
+
+      BASE_CONFIG.plotOptions.gantt = {
+        states: {
+          select: {
+            color: undefined, // ne pas changer la couleur du point sélectionné
+            borderColor: "rgba(10, 240, 80, 0.6)", // "rgba(10, 190, 255, 0.5)", // "#0043ff", // "#83ff8d"
+            borderWidth: 2.5
+          }
         }
       };
 
@@ -315,9 +387,52 @@ function GanttRenderingModule () {
       BASE_CONFIG.plotOptions.series.dragDrop = {
         liveRedraw: false,
         draggableX: true,
-        draggableY: true,
+        draggableY: true, // ne fonctionne pas en mode "uniqeNames"
         dragPrecisionX: day / 2 // Snap to eight hours
+      };
+
+      let editWidget = document.getElementById("task-edit-widget");
+      let editButtonStyles = {
+        add: {
+          class: "success",
+          icon: "fa-plus",
+          label: "Add"
+        },
+        edit: {
+          class: "primary",
+          icon: "fa-edit",
+          label: "Edit"
+        },
+        remove: {
+          class: "danger",
+          icon: "fa-trash",
+          label: "Remove"
+        }
+      };
+
+      for (let key in DOM_REF.editButtons) {
+        let div = document.createElement("div");
+        div.classList.add("btn-group", "col-4");
+
+        let btn = document.createElement("button");
+        btn.id = "task-" + key + "-button";
+        btn.disabled = true;
+        btn.classList.add("btn", "btn-" + editButtonStyles[key]["class"]);  // , "col-3", "mr-1"
+        btn.innerHTML = '<i class="fa ' + editButtonStyles[key]["icon"] + '"></i>&nbsp;' + editButtonStyles[key]["label"];
+
+        div.appendChild(btn);
+        editWidget.appendChild(div);
+        DOM_REF.editButtons[key] = btn;
       }
+      DOM_REF.editButtons["edit"].addEventListener("click", function () {
+        APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options)
+      });
+
+      // Déselectionner le Point avec la touche "Échap"
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && selectedPoint)
+          selectedPoint.select(false);
+      });
     }
 
     return currentConfig = BASE_CONFIG;
@@ -417,6 +532,11 @@ function GanttRenderingModule () {
     getChart: function () {
       return chartObj;
     },
+
+    getSelectedPoints: function () {
+      return chartObj.getSelectedPoints();
+    },
+
     draw: drawChart,
 
     update: updateChart,

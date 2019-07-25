@@ -290,6 +290,7 @@ function SHARED_FACTORY() {
         throw new EXCEPTIONS.InvalidArgumentExcepetion("[SHARED.addOrReplaceUrlParam] URL or Param argument ");
       newValue = newValue || "";
 
+      /*
       let symbol = "&";
 
       let paramStart = url.indexOf(symbol + param + "=");
@@ -304,8 +305,16 @@ function SHARED_FACTORY() {
       if (paramEnd < 0)	//	s'il est le dernier paramètre donc pas de "&" après
         paramEnd = url.length;
 
-      // Enlever le paramètre de l'URL
       return url.replace(url.substring(paramStart, paramEnd), (symbol + param +"=" + newValue));
+      // */
+
+      // Version Regex
+      let match = url.match(new RegExp("[\?|&]" + param + "=([^&]+)"));
+
+      // Remplacer le paramètre de l'URL
+      // OU
+      // juste l'ajouter
+      return match ? url.replace(match[0], match[0][0] + param + "=" + newValue) : (url + "&" + param + "=" + newValue);  // Pas besoin d'encodeURIComponent
     },
 
     promiseGET: function (url) {
@@ -343,6 +352,26 @@ function SHARED_FACTORY() {
         // Make the request
         req.send();
       });
+    },
+
+    formatDataOptionsToPost: function (dataOptions, parametresUrlOrisNoFunction) {
+      let hcConfigKeys = parametresUrlOrisNoFunction.CONSTANTS.HC_CONFIG_KEYS.data,
+        asRaw = parametresUrlOrisNoFunction.asRaw,
+        formattedData = {};
+
+      for (let key in hcConfigKeys) {
+        let orisColumn = asRaw[hcConfigKeys[key]["url_param"]];
+        if (!orisColumn)
+          continue;
+
+        console.warn("key", key);
+        console.info("orisColumn", orisColumn);
+        console.info("newValue", dataOptions[key]);
+
+        formattedData[orisColumn] = dataOptions[key];
+      }
+
+      return formattedData;
     }
   }
 }

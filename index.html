@@ -23,6 +23,9 @@
 </head>
 
 <body>
+  <!-- Toast Area Container, à placer avant le reste de la plage car la position est relative au parent -->
+  <div class="position-absolute w-100 p-4 d-flex flex-column align-items-end" id="toast-container"></div>
+
   <div class="container-fluid" id="root">
     <!-- LOADING -->
     <div id="loading-overlay" class="overlay active">
@@ -35,20 +38,28 @@
 
     <div id="graph-container"></div>
 
-    <form id="task-search-widget" onsubmit="return false;">
-      <div class="form-row">
-        <div class="form-group col-2">
-          <label for="task-search-input">Recherche</label>
-          <div class="input-group">
-            <input id="task-search-input" type="text" class="form-control" placeholder="" autocomplete="true">
-            <div class="input-group-append">
-              <button class="input-group-text text-success"><i class="fa fa-search"></i></button>
+    <div id="widget-area" class="row mt-3">
+      <!-- Search widget &fil= -->
+      <div class="col">
+        <form id="task-search-widget" class="col-12 active" onsubmit="return false;">
+          <div class="form-group">
+            <div class="input-group">
+              <input id="task-search-input" type="text" class="form-control" placeholder="Recherche" autocomplete="true">
+              <div class="input-group-append">
+                <button class="input-group-text text-success"><i class="fa fa-search"></i></button>
+              </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
-    </form>
 
+      <!-- Edition buttons (Add/Edit/Remove) -->
+      <div id="task-edit-widget" class="col-12 offset-md-1 col-md-7 btn-toolbar">
+      </div>
+    </div>
+
+
+    <!-- Point editor modal -->
     <form id="secret-santa" class="container">
       <div class="form-row">
         <div class="form-group col-5">
@@ -102,7 +113,7 @@
 
         <div class="form-group offset-2 col-5 colorpicker-component">
           <label for="task-color-input">Couleur</label>
-          <input id="task-color-input" type="text" value="" placeholder="Automatique" autocomplete="false" class="form-control cursor-pointer"/>
+          <input id="task-color-input" type="text" value="" placeholder="Automatique" autocomplete="off" class="form-control cursor-pointer"/>
           <span class="input-group-addon"><i></i></span>
         </div>
       </div>
@@ -110,14 +121,7 @@
       <div class="form-row">
         <div class="form-group col-5">
           <label for="task-category-input">Catégorie</label>
-          <!--
-            <select class="browser-default custom-select" id="task-category-input" onmousedown="if(this.options.length>5){this.size=5;}"  onchange='this.removeAttribute("size");' onblur='this.removeAttribute("size");'>
-              <option value=""></option>
-            </select>-->
           <select class="selectpicker form-control" id="task-category-input" data-size="5" title="Aucune">
-            <!--
-              <select class="browser-default custom-select" id="task-dependency-input" onmousedown="if(this.options.length>5){this.size=5;}"  onchange='this.removeAttribute("size");' onblur='this.removeAttribute("size");'>
-            -->
             <option value=""></option>
           </select>
         </div>
@@ -157,7 +161,9 @@
 
   <!-- UI -->
   <script src="src/js/UI/loading-overlay-handler.js"></script>
+  <script src="src/js/UI/bootstrap-toast-handler.js"></script>
   <script src="src/js/UI/alertifyjs-custom-alerts.js"></script>
+  <script src="src/js/UI/task-edit-modal.js"></script>
 
   <!-- SHARED -->
   <script src="src/js/utils/logger-module.js"></script>
@@ -171,6 +177,8 @@
   <script src="src/js/models/oris-gantt-task.model.js"></script>
   <script src="src/js/models/oris-gantt-chart-config.model.js"></script>
 
+
   <script src="src/js/index.js"></script>
+
 </body>
 </html>

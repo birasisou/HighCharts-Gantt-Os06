@@ -59,11 +59,6 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           // url_param: 'name',
           format: 'asString'
         },
-        /* Automatiquement calculé maintenant
-          milestone: {  // {boolean} true => il s'agit d'une milestone (un losange à une date fixe et pas une zone)
-          url_param: 'is-milestone',
-          format: 'asBoolean'
-        }, //*/
         category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
           url_param: 'category',
           format: 'asString'
@@ -99,13 +94,21 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           url_param: 'parent',
           format: 'asString'
         }
-      }
+      },
+      flippedData: {}
     },
 
     PATH_KEY: "data",                     //clé du paramètres GET contenant le chemin de l'URI du webservice
 
     ROOT_NAME_IDENTIFIER: "_gestion.ini"  //identificateur du nom de base Oris (utilisé pour récupérer un sub-string du nom complet)
   };
+
+  /**
+   * On aura besoin de la liaison inverse (du paramètre GET, query, à l'userOptions HighCharts
+   */
+  for (let option in this.CONSTANTS.HC_CONFIG_KEYS.data) {
+    this.CONSTANTS.HC_CONFIG_KEYS.flippedData[this.CONSTANTS.HC_CONFIG_KEYS.data[option]["url_param"]] = option;
+  }
 
   //Hériter de ParametresUrl
   ParametresUrl.call(this, pageUri, isEmptyAllowed, isAlreadyDecoded);
@@ -178,7 +181,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
    *    /!\ DOIT IMPÉRATIVEMENT CONTENIR L'ATTRIBUT vline
    */
   this.generateWebserviceUpdateUrl = function(datas) {
-    console.info("datas", datas);
+    console.info("[generateWebserviceUpdateUrl] input param", datas);
 
     if (typeof datas !== "object")
       throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + datas);
@@ -192,7 +195,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     for (let data in datas) {
       url += "&" + data + "=" + datas[data];
     }
-    return url;
+    return encodeURI(url);
   };
 
   /**

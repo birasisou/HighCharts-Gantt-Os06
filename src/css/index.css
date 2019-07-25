@@ -81,6 +81,9 @@ div#loading-overlay {
 .ajs-content #secret-santa {
     display: inline-block;
 }
+#task-edit-widget {
+    display: table;
+}
 /*
   Pour changer la taille du popup, il faut le rendre "resizable"
   mais ceci rajoute une scrollbar lors que l'on afficher le DateTimePicker
@@ -103,19 +106,26 @@ div#loading-overlay {
     outline: auto 1px;
 }
 
-
 .form-control,
 .input-group-text,
 .custom-select,
 .bootstrap-select .btn,
-.bootstrap-select .dropdown-menu{
+.bootstrap-select .dropdown-menu,
+#task-edit-widget .btn {
     border-radius: 0 !important;
+    white-space: nowrap;
 }
+#task-edit-button,
+#task-delete-button {
+    margin-left: 0px;
+}
+
 input.cursor-pointer {
     cursor: pointer;
 }
 input[disabled],
-input[readonly] {
+input[readonly],
+.btn:disabled{
     cursor: not-allowed;
 }
 
@@ -126,4 +136,11 @@ input[readonly] {
 }
 .dropdown-toggle::after {
     color: #495057;
+}
+/* Sinon, les Toast sont derrière HighCharts */
+#toast-container {
+    bottom: 0;
+}
+.toast {
+    z-index: 1;
 }
