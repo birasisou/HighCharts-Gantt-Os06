@@ -375,7 +375,7 @@ OrisGanttTask.prototype.isValidTask = function () {
   // (soit)
   // END ?absent?/empty/invalide/null/undefined ET Date valide ET START &gt;= END ET !MILESTONE
   // (soit)
-  // END est UNDEFINED ET milestone = true
+  // END est UNDEFINED ET  true
   if (id &amp;&amp; start
     &amp;&amp; (((end || end === 0) || isMilestone) &amp;&amp; (Boolean(end) !== Boolean(isMilestone) || end === 0 &amp;&amp; <span class="branch-7 cbranch-no" title="branch not covered" >!isMilestone)</span>) // END ou MILESTONE doit être valide (et 0, en nombre/timestamp, doit compter comme vrai)
     &amp;&amp; (start &lt;= end || (!end &amp;&amp; end !== 0)))

@@ -1,28 +1,6 @@
-/**
- Old LOADER
-#loading-position {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+html, body {
+  font-family: "Droid Sans","Helvetica Neue","Verdana", "Helvetica","Arial",sans-serif;
 }
-#loading-label {
-    color:white;
-    font-size:xx-large;
-    text-align: center;
-    display: block;
-    text-align: center;
-}
-#loading-overlay {
-    cursor: wait;
-    z-index: 1069;
-    position: fixed;
-}
-#progressbar {
-    margin: auto;
-}
- */
-
 /*
  *  Hourglass Spinner
  */
@@ -65,7 +43,7 @@
 }
 div#loading-overlay {
     display: none;
-    z-index: 1;
+    z-index: 2000;
     opacity: 0.95;
     background: #444;
     position: absolute;
@@ -73,8 +51,10 @@ div#loading-overlay {
     left: 0;
     top: 0;
     right: 0;
+    cursor: wait;
 }
-#loading-overlay.active {
+#loading-overlay.active,
+#task-search-widget.active {
     display: block;
 }
 
@@ -90,4 +70,77 @@ div#loading-overlay {
     100% {
         transform: rotate(1800deg);
     }
+}
+
+/* Masquer le formulaire servant de template */
+#secret-santa,
+#task-search-widget {
+    display: none;
+}
+/* L'afficher lorsqu'il est dans le popup */
+.ajs-content #secret-santa {
+    display: inline-block;
+}
+#task-edit-widget {
+    display: table;
+}
+/*
+  Pour changer la taille du popup, il faut le rendre "resizable"
+  mais ceci rajoute une scrollbar lors que l'on afficher le DateTimePicker
+*/
+.alertify.ajs-resizable .ajs-body .ajs-content {
+    overflow: visible;
+}
+/*
+  Masquer le widget sur lequel il faut cliquer pour redimensionner le popup:
+  On ne veut pas rendre ça possible car on a "overflow:visible"
+*/
+.ajs-dialog .ajs-handle {
+    display: none !important;
+}
+.alertify .ajs-footer .ajs-buttons .ajs-button.ajs-cancel {
+    color: #c32828;
+}
+.alertify .ajs-footer .ajs-buttons .ajs-button.ajs-ok {
+    color: #28a745;
+    outline: auto 1px;
+}
+
+.form-control,
+.input-group-text,
+.custom-select,
+.bootstrap-select .btn,
+.bootstrap-select .dropdown-menu,
+#task-edit-widget .btn {
+    border-radius: 0 !important;
+    white-space: nowrap;
+}
+#task-edit-button,
+#task-delete-button {
+    margin-left: 0px;
+}
+
+input.cursor-pointer {
+    cursor: pointer;
+}
+input[disabled],
+input[readonly],
+.btn:disabled{
+    cursor: not-allowed;
+}
+
+/* Cohérence de style entre Bootstrap 4 et la librairie pour les <select> */
+.bootstrap-select button {
+    background: #fff;
+    border-color: #dae0e5;
+}
+.dropdown-toggle::after {
+    color: #495057;
+}
+/* Sinon, les Toast sont derrière HighCharts */
+#toast-container {
+    bottom: 0;
+}
+.toast {
+    z-index: 1;
 }

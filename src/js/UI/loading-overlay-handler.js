@@ -5,13 +5,15 @@
  * @constructor
  */
 LoadingOverlayHandler = function (spinnerId) {
-  let spinnerRef = document.getElementById(spinnerId);
+  let spinnerRef = document.getElementById(spinnerId),
+    loadingMessage = document.getElementById("loading-label");
   if (null === spinnerRef)
     throw new Error("No DOM element found for given ID: '" + spinnerId + "'");
 
   return {
     spinner: spinnerRef,
-    showLoading: function () {
+    showLoading: function (msg) {
+      loadingMessage.innerText = msg || "Chargement";
       spinnerRef.classList.add("active");
     },
     hideLoading: function () {
