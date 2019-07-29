@@ -75,6 +75,15 @@ OrisData.prototype.asRaw = function () {
 OrisData.prototype.asString = function () {
   return (this.value || this.value === false || this.value === 0) ? ("" + this.value) : undefined;
 };
+/**
+ * Récupérer la valeur sous forme de String
+ *    (bien souvent ça sera déjà le cas dans asRaw, mais au cas où
+ *     mais ID, Category, etc... doivent impérativement être des String)
+ * @return {string|false}
+ */
+OrisData.prototype.asStringOrFalse = function () {
+  return this.asString() || false;
+};
 
 /**
  * Récupérer la valeur sous forme booléenne
@@ -167,11 +176,14 @@ OrisData.prototype.asDateObject = function () {
     : (this.dateValue = this.tryParseDate());
 };
 OrisData.prototype.tryParseDate = function () {
+  if (!this.value && this.value !== 0)
+    return undefined;
+
   if (this.value instanceof Date)
     return this.value;
 
   if (typeof this.value === "number"    // on autorise les timestamps
-   ||SHARED.isIsoDate(this.value))      // format ISO
+   || SHARED.isIsoDate(this.value))      // format ISO
     return new Date(this.value);
   else if (SHARED.isFrenchShortDate(this.value)) {  // On transforme DD/MM/YYYY en MM/DD/YYYY
     let tmp = null;

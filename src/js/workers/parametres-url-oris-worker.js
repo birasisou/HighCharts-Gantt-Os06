@@ -55,14 +55,13 @@ let PUB_SUB = (function(){
 
 // @TO_PRIVATE
 let WORKER_CONFIG = {}; // ParametreUrlOris récupéré de la page principale
-// "BD locale" des tâches (instancié
-let orisTaskById = {};      // Row by ID, dictionnaire/hashmap des tâches (OrisGanttTask)
+// "BD locale" des tâches
+let ORIS_TASKS_BY_ID = {};      // Row by ID, dictionnaire/hashmap des tâches (OrisGanttTask)
 
 // TODO implémenter côté main page
 let ALLOW_INVALID = false,
   IS_MONITORING = true,
   MONITORING_DELAY = 3000; // delay entre deux mise à jours (en ms)
-
 
 //Début du worker
 // TODO NE SURTOUT PAS IMPORTER SINON LA PAGE PRINCIPALE VA EXECUTER (enfin non, car elle ne recevra jamais de .CONFIG, mais ...)
@@ -71,6 +70,9 @@ self.onmessage = function(event) {
   if (event.data.CONFIG) {
     LoggerModule.log("[WORKER.ONMESSAGE] event.data.CONFIG received");
     WORKER_CONFIG = event.data.CONFIG;
+
+    MONITORING_DELAY = WORKER_CONFIG.asRaw["refresh"] ? (Number(WORKER_CONFIG.asRaw["refresh"]) * 1000) : 3000; // delay entre deux mise à jours (en ms)
+    LoggerModule.info("MONITORING_DELAY", MONITORING_DELAY);
   }
   if (event.data.START_AUTO) {
     LoggerModule.info("[WORKER.ONMESSAGE] event.data.START_AUTO received.", "Stopping monitoring after current loop");
@@ -110,7 +112,7 @@ function autoUpdateData(url) {
     })            // traiter les données
     .catch(function (err) {
       postError(err.message);
-      throw err;
+      // throw err;
     })             // S'il y a une erreur, on informe la page principale TODO: arrêter la boucle? OU permettre à la page principale d'arrêter la couble
     //.finally(function (arg) {
     .then(function (arg) {
@@ -148,7 +150,8 @@ function fakeFinally(arg) {
 function WORKER_GET(url) {
   LoggerModule.log("[WORKER.WORKER_GET] url", url);
   // Return a new promise.
-  return new Promise(function(resolve, reject) {
+  return SHARED.promiseGET(url);
+  /* return new Promise(function(resolve, reject) {
     // Do the usual XHR stuff
     let req = new XMLHttpRequest();
     req.open('GET', url, true);
@@ -178,20 +181,9 @@ function WORKER_GET(url) {
       reject(Error("[GET.onerror] Network Error "+ req.statusText +"(" + req.status + ")"));
     };
 
-    // Timeout après 60s
-    //req.timeout = 5000;
-
-    /*
-    req.ontimeout = function(e) {
-      LoggerModule.error("Request Timeout e:", e);
-      LoggerModule.error("Request Timeout req.statusText:", req.statusText);
-      LoggerModule.error("Request Timeout req.status:", req.status);
-      reject(Error("Request Timeout"))
-    }; //*/
-
     // Make the request
     req.send();
-  });
+  }); // */
 }
 
 /**
@@ -206,7 +198,7 @@ function customJsonParse(response) {
     a = JSON.parse(response);
     return a;
   } catch (e) {
-    LoggerModule.info("tried to Parse:", response);
+    LoggerModule.warn("Tried to Parse:", response);
     throw Error("[WORKER.customJsonParse] Unable to parse response to JSON. " + e.message);
   }
 }
@@ -243,9 +235,11 @@ function updateLocal(rawTaskDatas) {
 
   LoggerModule.log("[updateLocal] rawTaskDatas", rawTaskDatas);
 
-  let updatedTasks = {},  // Nouvelles tâches à afficher / MàJ dans le graphique
-      invalidTasks = {},  // Tâches invalides, seront renvoyés à la page principale et signalées via popup
-      length = rawTaskDatas.length;
+  let validTasksUserOptions = {},  // Tâches valides
+    updatedTasks = {},  // Nouvelles tâches à afficher / MàJ dans le graphique
+    invalidTasks = {},    // Tâches invalides, seront renvoyés à la page principale et signalées via popup
+
+    length = rawTaskDatas.length;
 
   // stocker les nouvelles valeurs et informer la page principale des changements
   while (length--) {
@@ -254,13 +248,16 @@ function updateLocal(rawTaskDatas) {
     // TODO try / catch car throw si pas le
     let currentOrisTask = new OrisGanttTask(rawTaskDatas[length], WORKER_CONFIG),
       //ancienne valeur pour cette tâche
-      oldTask = orisTaskById[currentOrisTask.getRaw('id')];
+      oldTask = ORIS_TASKS_BY_ID[currentOrisTask.getRaw('id')];
 
     // Ignorer les tâches "invalides" TODO (puis SIGNALER à la page principale)
     if (!currentOrisTask.isValidTask()) {
       invalidTasks[currentOrisTask.getRaw('id')] = currentOrisTask.rawUserOptions;
       continue;
     }
+
+    // Stocker la Tâche valide
+    validTasksUserOptions[currentOrisTask.getRaw('id')] = currentOrisTask.rawUserOptions;
 
     // Ne rien faire si TOUTES les valeurs sont les mêmes
     if (oldTask !== undefined
@@ -270,16 +267,50 @@ function updateLocal(rawTaskDatas) {
       continue;
     }
 
-    // Remplacer la valeur et enregistrer ce remplacement
+    // Remplacer la valeur et enregistrer ce remplacement pour le signaler
     // TODO signaler ce remplacement (pour l'instant on est en mode naif
     LoggerModule.info("updated or new ", currentOrisTask.userOptions);
-    updatedTasks[currentOrisTask.getRaw('id')] = orisTaskById[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
+    updatedTasks[currentOrisTask.getRaw('id')] = ORIS_TASKS_BY_ID[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
   }
 
-  // Informer des changements de valeurs
-  if (Object.keys(updatedTasks).length > 0) {
+  /**
+   * @GitHub-Issue #8
+   * todo Détecter une suppression côté serveur
+   *
+  let validTasksIds = Object.keys(ORIS_TASKS_BY_ID).sort(arr_sort),
+    rawTasksIds = rawTaskDatas.map(function (task) {
+      return task.id;
+    }).sort(arr_sort);
+  // console.info("sorted validTasksIds", validTasksIds);
+  // console.info("sorted rawTasksIds", rawTasksIds); // */
+  let deletedTasksIds = SHARED.arrayDifference(Object.keys(ORIS_TASKS_BY_ID), Object.keys(validTasksUserOptions));
+  if (deletedTasksIds.length) {
+    LoggerModule.info("IDs to delete", deletedTasksIds);
+    let length = deletedTasksIds.length;
+    while (length--) {
+      LoggerModule.log("deleting deletedTasksIds[length]", deletedTasksIds[length]);
+      delete ORIS_TASKS_BY_ID[deletedTasksIds[length]];
+    }
+  }
+
+  // Informer des changements de valeurs OU s'il n'y
+  if (Object.keys(updatedTasks).length > 0          // nouvelles datas
+    || Object.keys(ORIS_TASKS_BY_ID).length === 0   // pour "showNoData()"
+    || deletedTasksIds.length                       // signaler une suppresion
+    // || Object.keys(updatedTasks).length !== Object.keys(ORIS_TASKS_BY_ID).length  //
+  ) {
+    // Clone pour faire des opérations avant de POST sans que ça ne soit pris en compte lors de la "détection de modifications"
+    let tasksToPush = JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID));
+    LoggerModule.log("tasksToPush ", tasksToPush);
+
+    /**
+     * S'assurer de ne pas envoyer de valeurs non-existantes pour l'attribut parent
+     */
+    if (WORKER_CONFIG.asRaw["parent"])
+      tasksToPush = clearParentIds(tasksToPush);
+
     postMessage({
-      updatedTasks: orisTaskById // updatedTasks TOUT renvoyer car méthode naïve
+      updatedTasks: tasksToPush // todo Ne plus utiliser la version naïve d'updatedTasks (TOUT renvoyer)
     }, "*");
   }
   // Informer de l'existence de valeurs invalides dans la BD
@@ -296,6 +327,69 @@ function updateLocal(rawTaskDatas) {
 }
 
 /**
+ * Pour éviter une erreur HighCharts, on supprime les valeurs de l'attribut "parent" référençant un ID n'existant pas
+ *
+ * @param {Object} tasks
+ *    Objet où la clé est l'ID du Point
+ *
+ * @returns {Object}
+ */
+function clearParentIds(tasks) {
+  let distinctIds = Object.keys(tasks);
+
+  for (let key in tasks) {
+    if (distinctIds.indexOf(tasks[key]["parent"]) < 0) { // Aucun Point ne possède l'ID spécifié dans l'attribut &parent de ce Point
+      LoggerModule.warn("Aucun Point avec comme ID " + tasks[key]["parent"]
+        + " n'existe (référencé par l'attribut 'parent' du Point '" + key + "').", "La valeur a été remplacée par 'null'");
+
+      /**
+       * Créer un "faux" Point afin de garder le concept de groupes
+       */
+      if (WORKER_CONFIG.asRaw["fakeparent"] === "true") { // TODO /!\ Ceci est async
+        console.error("Création de faux parents...");
+        let fakeParentId = tasks[key]["parent"];
+        // Ne créer un faux groupe que s'il y a une valeur valide à
+        if (typeof fakeParentId !== "undefined" && typeof fakeParentId !== "object") {
+          /*
+          WORKER_GET(SHARED.addOrReplaceUrlParam(WORKER_CONFIG.webserviceUrl, "fil", fakeParentId))
+            .then(customJsonParse)
+            .then(extractData)
+            .then(function (datas) {
+              // Normalement, vu que l'on fait un &fil=<ID>, l'ID doit être unique et on ne doit avoir qu'une seule valeur dans le JSON
+              let data = datas[0];
+              if (fakeParentId !== data.id)
+              tasks[fakeParentId] = {
+                id: fakeParentId,
+                name: data[WORKER_CONFIG.asRaw["name"]]    // TODO faire une requête GET avec &fil=fakeParentId pour récupérer le nom de
+              };
+              distinctIds.push(tasks[key]["parent"]);
+            })
+            // En cas d'Erreur, on supprime simplement la référence
+            .catch(function (err) {
+              LoggerModule.error(err);
+              postError(err);
+              tasks[key]["parent"] = null;
+            });
+          //*/
+            tasks[fakeParentId] = {
+              id: fakeParentId,
+              name: fakeParentId    // TODO faire une requête GET avec &fil=fakeParentId pour récupérer le nom de
+            };
+            distinctIds.push(tasks[key]["parent"]);
+        }
+      } else {
+        /**
+         * Supprimer la référence
+         */
+        tasks[key]["parent"] = null;
+      }
+    }
+  }
+
+  return tasks;
+}
+
+/**
  * Renvoyer un message d'erreur (différent d'une exception proprement identifiée) à la page principale
  * @param errorMsg
  */
@@ -306,3 +400,32 @@ function postError(errorMsg) {
   }, "*");
 }
 
+// todo à chier ? ou mal utilisé
+function arr_sort(x,y) {
+  let pre = ['string' , 'number' , 'bool'];
+  if(typeof x!== typeof y )return pre.indexOf(typeof y) - pre.indexOf(typeof x);
+
+  if(x === y)return 0;
+  else return (x > y)?1:-1;
+}
+
+
+function postData(data) {
+  var xhr = new XMLHttpRequest();
+
+  var url = window.location.href;
+  console.log("url", url);
+
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json");
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      console.log("xhr.responseText", xhr.responseText);
+      var json = JSON.parse(xhr.responseText);
+      console.log("json", json);
+    }
+  };
+  let stringifiedData = JSON.stringify(data);
+  xhr.send(stringifiedData);
+}

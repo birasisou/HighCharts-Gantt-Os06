@@ -4,13 +4,23 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "test": "karma start test/karma.conf.js --single-run --captureExceptions"
+    "test": "karma start test/karma.conf.js --single-run --captureExceptions",
+    "webdriver-update": "webdriver-manager update",
+    "webdriver-start": "webdriver-manager start",
+    "daemon_selenium": "(webdriver-manager start &)",
+    "node-server-start": "node server.js",
+    "contractor-start": "contractor contractor.conf.js",
+    "test-UI": "npm run webdriver-update && npm run webdriver-start && npm run contractor-start",
+    "lazy": "npm run node-server-start && npm run webdriver-update && npm run webdriver-start && npm run contractor-start",
+    "ci": "start-server-and-test node-server-start 8080 test-UI",
+    "not_a_command": "https://stackoverflow.com/questions/36066695/running-protractor-when-webdriver-masornager-start-finishes"
   },
   "devDependencies": {
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.4.0",
     "gulp-uglify": "^3.0.2",
+    "http-server": "^0.11.1",
     "jasmine-ajax": "^4.0.0",
     "jasmine-core": "*",
     "karma": "^4.0.1",
@@ -20,6 +30,11 @@
     "karma-firefox-launcher": "^1.1.0",
     "karma-jasmine": "^2.0.1",
     "karma-jasmine-ajax": "^0.1.13",
-    "karma-verbose-reporter": "0.0.6"
+    "karma-verbose-reporter": "0.0.6",
+    "start-server-and-test": "^1.9.1"
+  },
+  "dependencies": {
+    "bootstrap-colorpicker": "^3.1.2",
+    "express": "^4.17.1"
   }
 }

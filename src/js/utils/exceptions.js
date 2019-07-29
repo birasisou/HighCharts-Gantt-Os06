@@ -1,4 +1,4 @@
-const EXCEPTIONS = {
+let EXCEPTIONS = {
   /**
    * Constructeur pour toutes les Exceptions
    *
@@ -54,6 +54,15 @@ const EXCEPTIONS = {
       msg);
   },
 
+  /**
+   * Exception renvoyée si un argument est manquant
+   *
+   * @param {string} msg
+   *   @default undefined
+   *   message complémentaire utilisé pour détailler l'erreur et faciliter le débug
+   *
+   * @constructor
+   */
   MissingArgumentExcepetion: function (msg) {
     EXCEPTIONS.DefaultException.call(this,
       "MissingArgumentExcepetion",
@@ -131,5 +140,14 @@ const EXCEPTIONS = {
       "XMLHttpBadRequestException",
       "XMLHttpRequest resulted with a status code of '400 Bad Request'",
       msg);
+  },
+
+  JsonSyntaxErrorException: function (msg) {
+    EXCEPTIONS.DefaultException.call(this,
+      "JsonSyntaxErrorException",
+      "Unable to parse to JSON",
+      msg);
   }
 };
+
+// module.exports = EXCEPTIONS; // Failed to load module script: The server responded with a non-JavaScript MIME type of "text/html". Strict MIME type checking is enforced for module scripts per HTML spec.

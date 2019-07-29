@@ -1,5 +1,5 @@
 /**
- * À hériter
+ * @ToExend
  * Sert de classe abstraite, de base (interface), aux objets permettant d'intéragir avec une nouvelle
  * (différent format de données / page_location /etc...) base de données
  *
@@ -25,17 +25,18 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
   this.isAlreadyDecoded = isAlreadyDecoded || false;
   this.isEmptyAllowed = isEmptyAllowed || false;
 
-  //@argument {string} windowLocation
+  // @argument {string} windowLocation
   this.pageUri = windowLocation;
-  //{Object} Location construit à partir de l'@argument windowLocation
+  // {Object} Location construit à partir de l'@argument windowLocation
   this.page_location = undefined;
 
-  //les tuples clé/valeur des paramètres GET récupérés dans l'url
+  // les tuples clé/valeur des paramètres GET récupérés dans l'url
   this.asRaw = {};     //valeur de chaque paramètre sous forme de {string}
   this.asArray = {};   //valeur de chaque paramètre sous forme d'array (séparation = "," virgule)
-  //Paramètres GET obligatoire (Exception renvoyée si l'un d'entre eux manque
+  // Paramètres GET obligatoire (Exception renvoyée si l'un d'entre eux manque
   this.MANDATORY_GET_PARAMETERS = [];
-  //Clé du JSON (reçu du webservice) contenant les données du graph
+  // Clé du JSON (reçu du webservice) contenant les données du graph.
+  // Contient un "s" supplémentaire lors d'un GET mais pas lors du POST
   this.rootName = undefined;
   //URL du webservice d'où on  récupère les données
   this.webserviceUrl = undefined;
@@ -103,7 +104,4 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
       throw new EXCEPTIONS.NoMandatoryUrlParameterDetected(missingParameters.toString() + ' is/are missing');
   }
 
-  this.getJSON = function (callback) {
-
-  }
 }

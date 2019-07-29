@@ -27,6 +27,13 @@ function OrisGanttTask(data_row, oris_config) {
     // Les clés userOptions HighCharts
     oris_config_HC_CONFIG_KEYS = oris_config.CONSTANTS.HC_CONFIG_KEYS.data;   //  *    parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS.data
 
+  // RAJOUTER LA CLEF UNIQUE ORIS "vline"
+  /*boot
+  oris_config_HC_CONFIG_KEYS.vline = {
+    url_param: 'vline',
+    format: 'asString'
+  };  // todo PAS ICI ??? */
+
   // Valeur brute d'un userOption
   this.rawUserOptions = {};
   // Objet OrisValue d'un userOption
@@ -77,11 +84,18 @@ function OrisGanttTask(data_row, oris_config) {
   if (typeof this.userOptions["completed"] === "number") {
     if (this.userOptions["completed"] > 1)
       this.userOptions["completed"] = this.userOptions["completed"] / 100;
-      if (this.userOptions["completed"] >= 0 && this.userOptions["completed"] <= 1)  // todo Autoriser entre 0 et 100 ?
-        this.userOptions["completed"] = { amount: this.userOptions["completed"] };
+    if (this.userOptions["completed"] >= 0 && this.userOptions["completed"] <= 1)  // todo Autoriser entre 0 et 100 ?
+        this.userOptions["completed"] = { amount: Number(Number(this.userOptions["completed"]).toFixed(2)) };
   } else
     this.userOptions["completed"] = null;
 
+  /**
+   * Fixe le problème de mise à jour de milestone à tâche et vice-versa
+   * @Issue https://github.com/highcharts/highcharts/issues/11158
+   *
+  this.userOptions["marker"] = {
+    symbol: null
+  }; //*/
 }
 
 /**
@@ -105,9 +119,10 @@ OrisGanttTask.prototype.isValidTask = function () {
   // END ?absent?/empty/invalide/null/undefined ET Date valide ET START >= END ET !MILESTONE
   // (soit)
   // END est UNDEFINED ET milestone = true
-  if (id && start
-    && (((end || end === 0) || isMilestone) && (Boolean(end) !== Boolean(isMilestone) || end === 0 && !isMilestone)) // END ou MILESTONE doit être valide (et 0, en nombre/timestamp, doit compter comme vrai)
-    && (start <= end || (!end && end !== 0)))
+  if (id && ((start
+            && (((end || end === 0) || isMilestone) && (Boolean(end) !== Boolean(isMilestone) || end === 0 && !isMilestone)) // END ou MILESTONE doit être valide (et 0, en nombre/timestamp, doit compter comme vrai)
+            && (start <= end || (!end && end !== 0)))
+      || (!start && !end)))
     return true;
 
   LoggerModule.info("[ID:" + id + "] n'est pas une donnée valide");

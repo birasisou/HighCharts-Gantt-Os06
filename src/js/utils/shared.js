@@ -97,11 +97,10 @@ function SHARED_FACTORY() {
         else
           throw new EXCEPTIONS.NoParametersDetectedInURI('Query string should start with "?"');
       }
-      //{string} sous partie de l'URI commençant au "?" (équivaut à window.page_location.search)
-      //parametresUrl.locationSearch = _pageUri.substr(debutParam);
+      // {string} sous partie de l'URI commençant au "?" (équivaut à window.page_location.search)
       parametresUrl.locationSearch = _location.search;
 
-      //EXCEPTIONS: URI vide et/ou sans paramètres GET
+      // EXCEPTIONS: URI vide et/ou sans paramètres GET
       if (parametresUrl.locationSearch.indexOf("=") < 0) {
         if (_isEmptyAllowed)
           return parametresUrl;
@@ -231,17 +230,29 @@ function SHARED_FACTORY() {
      * @return {boolean}
      */
     isFrenchShortDate: function (str) {
-      if (!/^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(str)) return false;
-      let tmp = null;
-      if (str.indexOf("/"))
-        tmp = str.split("/");
-      else
-        tmp = str.split("-");
-
+      if (!(/^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(str))) return false;
+      let tmp = (str.indexOf("/")) ? str.split("/") : str.split("-");
+      LoggerModule.log("[isFrenchShortDate] tmp", tmp);
       // On transforme DD/MM/YYYY en MM/DD/YYYY
       let d = new Date(tmp[1] + "/" + tmp[0] + "/" + tmp[2]);
-      return ((d.toISOString() === str || d.toISOString() === (str.slice(0, -1)+".000Z"))
-        && d.getTime() === d.getTime()); // false si Invalid Date car (NaN === NaN) => false
+      LoggerModule.log("[isFrenchShortDate] date", d);
+
+      // return ((d.toISOString() === str || d.toISOString() === (str.slice(0, -1)+".000Z")) &&
+      return d.getTime() === d.getTime(); // false si Invalid Date car (NaN === NaN) => false
+    },
+
+    /**
+     * https://stackoverflow.com/questions/1187518/how-to-get-the-difference-between-two-arrays-in-javascript
+     * Compare two arrays (of primitive values) and returns
+     * @param {Array} arr1
+     * @param {Array} arr2
+     *
+     * @return {Array} array of the elements from the first Array NOT CONTAINED in the second (NOT symmetric difference)
+     */
+    arrayDifference: function (arr1, arr2) {
+      return arr1.filter(function (i) {
+        return arr2.indexOf(i) < 0;
+      });
     },
 
     /**
@@ -249,15 +260,120 @@ function SHARED_FACTORY() {
      * @param {String} url
      */
     loadJsScript: function(url) {
-    if (arguments.length < 1)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel url]");
+      if (arguments.length < 1)
+        throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel url]");
 
-    let script = document.createElement("script");  // create a script DOM node
-    script.src = url;  // set its src to the provided URL
+      let script = document.createElement("script");  // create a script DOM node
+      script.src = url;  // set its src to the provided URL
 
-    document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+      document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+    },
+
+    decodeHTML: function (html) {
+      var txt = document.createElement('textarea');
+      txt.innerHTML = html;
+      return txt.value;
+    },
+
+    /**
+     * Remplace, s'il existe, le paramètre de l'URL par la valeur spécifiée
+     *
+     * @param {String} url
+     *    chaîne de caractères où l'on va chercher le paramètre
+     * @param {String} param
+     *    clef (paramètre) à trouver
+     * @param {String} newValue
+     *
+     */
+    addOrReplaceUrlParam: function (url, param, newValue) {
+      if (!url || !param)
+        throw new EXCEPTIONS.InvalidArgumentExcepetion("[SHARED.addOrReplaceUrlParam] URL or Param argument ");
+      newValue = newValue || "";
+
+      /*
+      let symbol = "&";
+
+      let paramStart = url.indexOf(symbol + param + "=");
+      if (paramStart < 0) {	// potentiellement, il est le premier param... c'est pour ça qu'il faudrait plutôt utiliser un regex
+        symbol = "?";
+        paramStart = url.indexOf(symbol + param + "=");
+        if (paramStart < 0)	// n'existe pas
+          return url + "&" + param + "=" + newValue;
+      }
+
+      let paramEnd = url.indexOf("&", paramStart+1);
+      if (paramEnd < 0)	//	s'il est le dernier paramètre donc pas de "&" après
+        paramEnd = url.length;
+
+      return url.replace(url.substring(paramStart, paramEnd), (symbol + param +"=" + newValue));
+      // */
+
+      // Version Regex
+      let match = url.match(new RegExp("[\?|&]" + param + "=([^&]+)"));
+
+      // Remplacer le paramètre de l'URL
+      // OU
+      // juste l'ajouter
+      return match ? url.replace(match[0], match[0][0] + param + "=" + newValue) : (url + "&" + param + "=" + newValue);  // Pas besoin d'encodeURIComponent
+    },
+
+    promiseGET: function (url) {
+      // Return a new promise.
+      return new Promise(function(resolve, reject) {
+        // Do the usual XHR stuff
+        let req = new XMLHttpRequest();
+        req.open('GET', url, true);
+
+        req.onload = function() {
+          LoggerModule.log("[GET.onload] req.status", req.status);
+          // This is called even on 404 etc
+          // so check the status
+          if (req.status === 200) {
+            LoggerModule.log("[GET.onload] req.response", req.response);
+            resolve(req.response);
+          }
+          else {
+            // Otherwise reject with the status text
+            // which will hopefully be a meaningful error
+            let msg = "[GET.onload] req.status !== 200. \nActual req.status: " + req.status;
+            LoggerModule.error(msg);
+            reject(Error(msg));
+          }
+        };
+
+        // Handle network errors
+        req.onerror = function(e) {
+          LoggerModule.error("[GET.onerror] Network Error. e:", e);
+          LoggerModule.error("[GET.onerror] Network Error. xhr.statusText: ", "'" + req.statusText + "'");
+          LoggerModule.error("[GET.onerror] Network Error. xhr.status:", req.status);
+          reject(Error("[GET.onerror] Network Error "+ req.statusText +"(" + req.status + ")"));
+        };
+
+        // Make the request
+        req.send();
+      });
+    },
+
+    formatDataOptionsToPost: function (dataOptions, parametresUrlOrisNoFunction) {
+      let hcConfigKeys = parametresUrlOrisNoFunction.CONSTANTS.HC_CONFIG_KEYS.data,
+        asRaw = parametresUrlOrisNoFunction.asRaw,
+        formattedData = {};
+
+      for (let key in hcConfigKeys) {
+        let orisColumn = asRaw[hcConfigKeys[key]["url_param"]];
+        if (!orisColumn)
+          continue;
+
+        console.warn("key", key);
+        console.info("orisColumn", orisColumn);
+        console.info("newValue", dataOptions[key]);
+
+        formattedData[orisColumn] = dataOptions[key];
+      }
+
+      return formattedData;
+    }
   }
-}
 }
 
 // Objet global comme avant
