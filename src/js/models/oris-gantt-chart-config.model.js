@@ -86,8 +86,7 @@ function GanttRenderingModule () {
     document.getElementById("delete-point-label").innerHTML += "&nbsp;<i>(ID: " + SHARED.decodeHTML(selectedPoint.options.id) + ")</i>";
   });
   document.getElementById("delete-point-button").addEventListener("click", function(event) {
-    console.log("Calling for deletion of #" + selectedPoint.id, selectedPoint.options);
-
+    LoggerModule.info("Calling for deletion of #" + selectedPoint.id, selectedPoint.options);
     APP_MODULE.getParametresUrlOris().tryDeletePoint(selectedPoint.options);
   });
 
@@ -446,7 +445,8 @@ function GanttRenderingModule () {
 
           let btn = document.createElement("button");
           btn.id = "task-" + key + "-button";
-          btn.disabled = true;
+          // Add button toujours activé
+          btn.disabled = key === "add" ? false : true;
           btn.classList.add("btn", "btn-" + currentButton["class"]);  // , "col-3", "mr-1"
           // Attributs
           for (let attrKey in currentButton.attributes) {
@@ -458,8 +458,12 @@ function GanttRenderingModule () {
           editWidget.appendChild(div);
           DOM_REF.editButtons[key] = btn;
         }
+        DOM_REF.editButtons["add"].addEventListener("click", function () {
+          APP_MODULE.getTaskEditor().initAndShow({}, true)
+        });
+
         DOM_REF.editButtons["edit"].addEventListener("click", function () {
-          APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options)
+          APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options, false)
         });
 
         /**

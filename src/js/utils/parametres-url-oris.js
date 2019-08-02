@@ -221,6 +221,23 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     return encodeURI(url);
   };
 
+  this.generateWebserviceAddUrl = function(userOptions) {
+    console.log("[generateWebserviceAddUrl] input param", userOptions);
+
+    if (typeof userOptions !== "object")
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + userOptions);
+
+    let url = this.generateWebserviceActionUrl("newvalid");
+    // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
+    for (let option in userOptions) {
+      url += "&" + option + "=" + userOptions[option];
+    }
+
+    // remove &id=&vline=
+
+    return encodeURI(url);
+  };
+
   /**
    * Génère l'URL permettant de supprimer un "Point" de la base
    *  (&act=kill)
@@ -302,7 +319,8 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       .catch(function (err) {
         let errorHeader = "Error while trying to delete #" + userOptions.id;
         LoggerModule.error(errorHeader, err);
-        //
+
+        // car pas possible d'utiliser "outdated"
         TOAST.removeTarget(initToast);
 
         TOAST.error({

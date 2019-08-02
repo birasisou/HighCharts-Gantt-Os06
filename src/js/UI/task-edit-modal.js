@@ -96,7 +96,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
     // Comportement spécial si on est mode "Création de Point"
     isAddEditor = isAddEditor || false;
 
-    LoggerModule.info("[initInputs] taskOptions", taskOptions);
+    console.info("[initInputs] taskOptions", taskOptions);
 
     for (let input in INPUTS) {
       if (!INPUTS[input])
@@ -128,12 +128,19 @@ function TASK_EDITOR_MODAL_FACTORY () {
         LoggerModule.warn("Pas de valeur pour INPUTS["+input+"]");
         INPUTS[input].value = "";
         /**
-         * @Github #Issue update de/vers une milestone cause un bug graphique
+         * @Github #9 Issue update de/vers une milestone cause un bug graphique
          * donc on désactive les inputs si les dates sont invalides initialement
          * OU
          * si on n'a pas l'ID de la colonne (!asRaw[input])
          */
-        INPUTS[input].disabled = input === "start" || input === "end" || !APP_MODULE.getParametresUrlOrisNoFunction().asRaw[APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.data[input].url_param];
+        INPUTS[input].disabled = !isAddEditor && (input === "start" || input === "end" || !APP_MODULE.getParametresUrlOrisNoFunction().asRaw[APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.data[input].url_param]);
+
+        /**
+         * @Github #9
+         * On n'autorise la suppression d'une date que lorsque l'on est en mode création car ça ne posera jamais de problème
+         */
+        if (isAddEditor && (input === "start" || input === "end"))
+          $(INPUTS[input]).data("DateTimePicker").showClear(true);
       }
     }
   }
@@ -255,11 +262,16 @@ function TASK_EDITOR_MODAL_FACTORY () {
    *
    * @param taskOptions
    *
+   * @param isAddEditor
    * @exposed
    */
-  function showTaskEditor(taskOptions) {
+  function showTaskEditor(taskOptions, isAddEditor) {
     if (!taskOptions)
       throw new EXCEPTIONS.InvalidArgumentExcepetion("showTaskEditor");
+
+    isAddEditor = isAddEditor || false;
+    if (isAddEditor)
+      console.error("Add Editor");
 
     let div = document.createElement('div');
     div.style.maxHeight = "400px";
@@ -270,12 +282,12 @@ function TASK_EDITOR_MODAL_FACTORY () {
 
     // todo datepicker / colorpicker / categories / dependencies
 
-    initInputs(taskOptions);
+    initInputs(taskOptions, isAddEditor);
 
     //show as confirm
     INSTANCE = alertify.confirm(div).set({
       padding: false,
-      title: "Task editor",
+      title: isAddEditor ? "Create task" : "Task editor",
       // movable: false,
       maximizable: false,
       resizable: true,
@@ -283,12 +295,12 @@ function TASK_EDITOR_MODAL_FACTORY () {
       reverseButtons: true,
       transition: "zoom",
       onshow: function () {
-        $(INPUTS["category"]).selectpicker('refresh');
+        $(INPUTS["category"]).selectpicker('refresh');  // todo allow Category Creation
         $(INPUTS["dependency"]).selectpicker('refresh');
         alertify.message('Editor was shown.');
       },
       onok: function () {
-        ONOK_HANDLER();
+        ONOK_HANDLER(isAddEditor);
         return false;  // empêcher le modal de se fermer  todo ne plus bloquer #26
       }
     }).resizeTo('40%', 550);
@@ -302,7 +314,8 @@ function TASK_EDITOR_MODAL_FACTORY () {
     // todo set input values + disable en fonction des asRaw + categories
   }
 
-  function ONOK_HANDLER() {
+  function ONOK_HANDLER(isAddEditor) {
+    isAddEditor = isAddEditor || false;
     // todo AppModule.tryPostRequest(datas) // se charge de show/hideLoading + doit appeler explicitement Modal.hide()
     //   return false; // <-- Pour ne pas fermer le modal avant la fin de la requête
 
@@ -329,7 +342,9 @@ function TASK_EDITOR_MODAL_FACTORY () {
       }
     }
     // Forcer l'ajout de l'attribut vline car faire une requête avec &id=vline causait une erreur
-    formattedData["vline"] = INPUTS["vline"].value;
+    if (!isAddEditor)
+      formattedData["vline"] = INPUTS["vline"].value;
+
     // Formatter, potentiellement, la couleur (la base n'accepte pas de '#')
     if (formattedData["color"] && formattedData["color"][0] === "#")
       formattedData["color"] = INPUTS["color"].value.slice(1); // on enlève le "#" initial car on ne peut pas le push dans la BD
@@ -337,10 +352,15 @@ function TASK_EDITOR_MODAL_FACTORY () {
     if (formattedData)
       LoggerModule.warn("[ONOK_HANDLER] formattedData", formattedData);
 
-    // Generate & encode URI
-    let url = APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData);
+    // Pour isAdd on osef des ID car on peut pas le deviner à l'avance
+    // En dûr TODO et useless ?
+    if (isAddEditor)
+      delete formattedData["id"]
 
-    LoggerModule.warn("Point update URL", url);
+    // Generate & encode URI
+    let url = isAddEditor ? APP_MODULE.getParametresUrlOris().generateWebserviceAddUrl(formattedData) : APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData);
+
+    console.warn("Point update URL", url);
 
     // GET
     SHARED.promiseGET(url)
@@ -414,7 +434,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
 
     setChartOptions: updateChartOptions,
 
-    initAndShow: function (taskOptions) { showTaskEditor(taskOptions); },
+    initAndShow: function (taskOptions, isAdd) { showTaskEditor(taskOptions, isAdd); },
     hide: function () { INSTANCE.close(); },
     show: function () { INSTANCE.showModal(); } // n'aura pas le bon style
 
