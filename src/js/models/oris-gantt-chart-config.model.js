@@ -4,13 +4,21 @@
 function GanttRenderingModule () {
 //let GanttRenderingModule = (function () {
   /**
-   * @Private
+   * @Variables
    */
-  let CONTAINER_ID = "graph-container", // ID de l'élément DOM cible (<div>) pour dessiner le graphique
+  // PUBLIC
+  let currentConfig = null,
+    self = this,
+    chartObj = null,
+    selectedPoint = null,
+    // PRIVATE
+    CONTAINER_ID = "graph-container", // ID de l'élément DOM cible (<div>) pour dessiner le graphique
     EVENT_HANDLER = {
       point: {
         select: function(event, options) {
-          DOM_REF.editButtons.edit.disabled = false;
+          setTaskButtonDisabledState(false);
+          // DOM_REF.editButtons.edit.disabled = false;
+          // DOM_REF.editButtons.delete.disabled = false;
           // MàJ la référence vers le point selectionné
           selectedPoint = this;
           alertify.success("Task Selected Event", 0.75);
@@ -21,6 +29,7 @@ function GanttRenderingModule () {
           // Décalage pour cohérence
           setTimeout(function() {
             document.getElementById("task-edit-button").disabled = !chartObj.getSelectedPoints().length;
+            document.getElementById("task-delete-button").disabled = !chartObj.getSelectedPoints().length;
           }, 10);
 
           TOAST.success({ body: "Task Unselected Event", delay:750 });
@@ -29,20 +38,7 @@ function GanttRenderingModule () {
           console.warn("TODO: to implement");
 
           // return false;
-        },
-        remove: function(event, options) {
-          alertify.success("Task Removed Event", 0.5);
-          // TODO
-          console.warn("TODO: to implement");
-          return false;
-        },
-        /*
-        drag: function (event, options) {
-          alertify.success("Task Drag Event", 0.5);
-          // TODO
-          console.warn("TODO: to implement");
-          // return false;
-        },
+        },/*
         dragStart: function (event, options) {
           alertify.success("Task DragStart Event", 0.5);
           // TODO
@@ -51,6 +47,7 @@ function GanttRenderingModule () {
         }, // */
         drop: function (event) {
           console.log("drop.event", event);
+          console.log("drop.this", this);
           // TODO formatter event.newPoint.start et .end
 
           alertify.error("Task Drop Event", 1);
@@ -65,29 +62,47 @@ function GanttRenderingModule () {
           console.error("formattedData", formattedData);
 
           console.warn("TODO: to implement");
+
           return false;
         },
       }
     },
-
-    /**
-     * Référence aux boutons d'édition de tâche
-     * @type {DOM}
-     */
+    // Référence aux boutons d'édition de tâches @type {DOM}
     DOM_REF = {
       editButtons: {
         add: null,
         edit: null,
-        remove: null
+        delete: null
       }
     };
 
   /**
-   * @public
+   * @Initialisation
+   * TODO faire ça ailleurs...
    */
-  let currentConfig = null,
-      chartObj = null,
-      selectedPoint = null;
+  /* Afficher le modal de suppression de point */
+  $("#delete-point-modal").on("show.bs.modal", function (event) {
+    document.getElementById("delete-point-label").innerText = SHARED.decodeHTML(selectedPoint.options.label);
+    document.getElementById("delete-point-label").innerHTML += "&nbsp;<i>(ID: " + SHARED.decodeHTML(selectedPoint.options.id) + ")</i>";
+  });
+  document.getElementById("delete-point-button").addEventListener("click", function(event) {
+    console.log("Calling for deletion of #" + selectedPoint.id, selectedPoint.options);
+
+    APP_MODULE.getParametresUrlOris().tryDeletePoint(selectedPoint.options);
+  });
+
+  /**
+   * Set l'attribut "disabled" des bouttons (implémentés) du task-edit-widget
+   * @param {boolean} isDisabled
+   *  value for "disabled" attribute (true -> button won't be clickable)
+   */
+  function setTaskButtonDisabledState(isDisabled) {
+    let supported = ["edit", "delete"],
+      i = supported.length;
+    while (i--) {
+      DOM_REF.editButtons[supported[i]].disabled = isDisabled;
+    }
+  }
 
   /**
    * HighChart series Object
@@ -240,15 +255,15 @@ function GanttRenderingModule () {
         categories: []
       },
       xAxis: [{
-        /*
+        //*
         dateTimeLabelFormats: {
           millisecond: '%H:%M:%S.%L',
           second: '%H:%M:%S',
           minute: '%H:%M',
           hour: '%H:%M',
-          day: '%a %e %b',
+          // day: '%a %e %b',
                             day: {
-                                list: ['%A %e %B', '%a %e %b', '%E']    // enlever les caractères inutiles
+                                list: ['%A %e %B', '%a %e %b', '%e %b', '%E']    // enlever les caractères inutiles
                             },
           week: '%e %b',
           month: '%b \'%y',
@@ -357,14 +372,19 @@ function GanttRenderingModule () {
     }
 
     // enable EDIT
-    if (parametreUrlOris.asRaw["edit"] === "true") {
+    /**
+     * @Réunion du 30 juillet 2019
+     *  L'édition est toujours activée
+     *  Les boutons d'édition et le champ de recherche sont masqués par défauts et
+     */
+    //if (parametreUrlOris.asRaw["edit"] === "true") {
       // TODO events
       BASE_CONFIG.plotOptions.series.allowPointSelect = true;
       BASE_CONFIG.plotOptions.series.point = {
         events: {
           select: EVENT_HANDLER.point.select,
           unselect: EVENT_HANDLER.point.unselect,
-          remove: EVENT_HANDLER.point.remove,
+          remove: EVENT_HANDLER.point.delete,
           dragStart: EVENT_HANDLER.point.dragStart,
           drag: EVENT_HANDLER.point.drag,
           drop: EVENT_HANDLER.point.drop
@@ -391,52 +411,116 @@ function GanttRenderingModule () {
         dragPrecisionX: day / 2 // Snap to eight hours
       };
 
-      let editWidget = document.getElementById("task-edit-widget");
-      let editButtonStyles = {
-        add: {
-          class: "success",
-          icon: "fa-plus",
-          label: "Add"
-        },
-        edit: {
-          class: "primary",
-          icon: "fa-edit",
-          label: "Edit"
-        },
-        remove: {
-          class: "danger",
-          icon: "fa-trash",
-          label: "Remove"
+    /**
+     * Ne pas réinstancier les boutons si on re-crée le graphe après l'avoir .destroy()
+     */
+    if (!DOM_REF.editButtons.edit) {
+
+        let editWidget = document.getElementById("task-edit-widget");
+        let editButtonStyles = {
+          add: {
+            class: "success",
+            icon: "fa-plus",
+            label: "Add"
+          },
+          edit: {
+            class: "primary",
+            icon: "fa-edit",
+            label: "Edit"
+          },
+          delete: {
+            class: "danger",
+            icon: "fa-trash",
+            label: "Delete",
+            attributes: {
+              "data-toggle": "modal",
+              "data-target": "#delete-point-modal"
+            }
+          }
+        };
+
+        for (let key in DOM_REF.editButtons) {
+          let currentButton = editButtonStyles[key];
+          let div = document.createElement("div");
+          div.classList.add("btn-group", "col-4");
+
+          let btn = document.createElement("button");
+          btn.id = "task-" + key + "-button";
+          btn.disabled = true;
+          btn.classList.add("btn", "btn-" + currentButton["class"]);  // , "col-3", "mr-1"
+          // Attributs
+          for (let attrKey in currentButton.attributes) {
+            btn.setAttribute(attrKey, currentButton.attributes[attrKey]);
+          }
+          btn.innerHTML = '<i class="fa ' + currentButton["icon"] + '"></i>&nbsp;' + currentButton["label"];
+
+          div.appendChild(btn);
+          editWidget.appendChild(div);
+          DOM_REF.editButtons[key] = btn;
         }
-      };
+        DOM_REF.editButtons["edit"].addEventListener("click", function () {
+          APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options)
+        });
 
-      for (let key in DOM_REF.editButtons) {
-        let div = document.createElement("div");
-        div.classList.add("btn-group", "col-4");
+        /**
+         * Ajouter le bouton permettant d'afficher / masquer "#widget-area"
+         *
+         * <button class="btn btn-dark collapsed" type="button" data-toggle="collapse" data-target="#widget-area" aria-expanded="false" aria-controls="widget-area"><i class="fa fa-cogs"></i></button>
+         */
+        /*
+        TODO ajouter le bouton "forceRefresh"
+          + déplacer les boutons avec seulement des icônes
+        <div id="widget-aze" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;">
+          <button id="widget-area-toggler" class="btn btn-primary border-0" data-toggle="collapse" data-target="#widget-area" aria-controls="widget-area" aria-expanded="true"><i class="fa fa-cogs"></i></button><div class="btn-group" role="group" aria-label="Basic example" style="
+            position: absolute;
+            left: 0;
+            top: 40px;">
+          <button type="button" class="btn btn-warning">
+            <i class="fa fa-wrench"></i>
+          </button>
+          <button type="button" class="btn btn-success">
+            <i class="fa fa-plus"></i>
+          </button>
+          <button type="button" class="btn btn-primary">
+            <i class="fa fa-edit"></i>
+          </button>
 
-        let btn = document.createElement("button");
-        btn.id = "task-" + key + "-button";
-        btn.disabled = true;
-        btn.classList.add("btn", "btn-" + editButtonStyles[key]["class"]);  // , "col-3", "mr-1"
-        btn.innerHTML = '<i class="fa ' + editButtonStyles[key]["icon"] + '"></i>&nbsp;' + editButtonStyles[key]["label"];
+          <button type="button" class="btn btn-danger">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+        </div>
+         */
+        let toggleButton = document.createElement("button");
+        toggleButton.id = "widget-area-toggler";
+        toggleButton.classList.add("btn", "btn-primary", "collapsed", "border-0");
+        toggleButton.setAttribute("data-toggle", "collapse");
+        toggleButton.setAttribute("data-target", "#widget-area");
+        toggleButton.setAttribute("aria-controls", "widget-area");
+        toggleButton.setAttribute("aria-expanded", "false");
+        toggleButton.innerHTML = "<i class='fa fa-cogs'></i>";
 
-        div.appendChild(btn);
-        editWidget.appendChild(div);
-        DOM_REF.editButtons[key] = btn;
-      }
-      DOM_REF.editButtons["edit"].addEventListener("click", function () {
-        APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options)
-      });
+        document.getElementById("widget-area").classList.add("collapse");
+        document.getElementById("widget-area").parentNode.appendChild(toggleButton);
 
-      // Déselectionner le Point avec la touche "Échap"
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && selectedPoint)
-          selectedPoint.select(false);
-      });
-    }
+
+
+        // Déselectionner le Point avec la touche "Échap"
+        // todo prevent Default sur l'écouteur du modal pour ne pas désélectionner ici
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && selectedPoint                                             // touche Échap
+            && !document.getElementById("delete-point-modal").classList.contains("show")  // Aucun modal d'ouvert (à ce moment là, Échap sert à fermer le modal
+            && (!APP_MODULE.getTaskEditor().getInstance()
+              || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().getInstance().isOpen())))
+            selectedPoint.select(false);
+        });
+      } // FIN init Buttons
 
     return currentConfig = BASE_CONFIG;
-    // return currentConfig; // { config: currentConfig };
   }
 
 
@@ -533,8 +617,15 @@ function GanttRenderingModule () {
       return chartObj;
     },
 
-    getSelectedPoints: function () {
-      return chartObj.getSelectedPoints();
+    getSelectedPoint: function () {
+      return selectedPoint;
+    },
+
+    enableTaskButtons: function() {
+      setTaskButtonDisabledState(false);
+    },
+    disableTaskButtons: function() {
+      setTaskButtonDisabledState(true);
     },
 
     draw: drawChart,

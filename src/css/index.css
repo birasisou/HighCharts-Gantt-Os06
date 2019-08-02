@@ -1,5 +1,5 @@
 html, body {
-  font-family: "Droid Sans","Helvetica Neue","Verdana", "Helvetica","Arial",sans-serif;
+  /* font-family: "Droid Sans","Helvetica Neue","Verdana", "Helvetica","Arial",sans-serif; */
 }
 /*
  *  Hourglass Spinner
@@ -72,6 +72,35 @@ div#loading-overlay {
     }
 }
 
+
+/*
+    Bouton pour afficher / masquer #widget-area
+ */
+#widget-area-toggler {
+    position: absolute;
+    top: .3rem;
+    left: 0;
+    border-radius: 0 0 .25em 0;
+    z-index: 2;
+    transition: none !important;
+    box-shadow: 0 -.3rem .0rem rgba(38,143,255,.5);
+}
+#widget-area-toggler:hover {
+    top: .25rem;
+}
+#widget-area-toggler[aria-expanded=true] {
+    box-shadow: none;
+    top: 0;
+}
+code {
+    background-color: rgba(27,31,35,.05) !important;
+    color: black;
+}
+
+#delete-point-label > i {
+    font-size: .6em;
+}
+
 /* Masquer le formulaire servant de template */
 #secret-santa,
 #task-search-widget {
@@ -140,7 +169,11 @@ input[readonly],
 /* Sinon, les Toast sont derrière HighCharts */
 #toast-container {
     bottom: 0;
+    z-index: 2;
 }
 .toast {
     z-index: 1;
+}
+.toast.show {
+    opacity: 0.85;
 }

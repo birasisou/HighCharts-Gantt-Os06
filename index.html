@@ -26,7 +26,7 @@
   <!-- Toast Area Container, à placer avant le reste de la plage car la position est relative au parent -->
   <div class="position-absolute w-100 p-4 d-flex flex-column align-items-end" id="toast-container"></div>
 
-  <div class="container-fluid" id="root">
+  <div class="container-fluid pl-0 pr-0 mx-0" id="root">
     <!-- LOADING -->
     <div id="loading-overlay" class="overlay active">
 
@@ -38,13 +38,13 @@
 
     <div id="graph-container"></div>
 
-    <div id="widget-area" class="row mt-3">
+    <div id="widget-area" class="row mx-0 mt-3">
       <!-- Search widget &fil= -->
       <div class="col">
         <form id="task-search-widget" class="col-12 active" onsubmit="return false;">
           <div class="form-group">
             <div class="input-group">
-              <input id="task-search-input" type="text" class="form-control" placeholder="Recherche" autocomplete="true">
+              <input id="task-search-input" type="text" class="form-control" placeholder="Search" autocomplete="true">
               <div class="input-group-append">
                 <button class="input-group-text text-success"><i class="fa fa-search"></i></button>
               </div>
@@ -63,7 +63,7 @@
     <form id="secret-santa" class="container">
       <div class="form-row">
         <div class="form-group col-5">
-          <label for="task-name-input">Nom</label>
+          <label for="task-name-input">Name</label>
           <input type="text" class="form-control" id="task-name-input" placeholder="Name">
         </div>
 
@@ -80,18 +80,18 @@
 
       <div class="form-row">
         <div class="form-group col-5">
-          <label for="task-start-input">Début</label>
+          <label for="task-start-input">Start</label>
           <div class="input-group">
-            <input type="text" class="form-control cursor-pointer" id="task-start-input" placeholder="Début" value="">
+            <input type="text" class="form-control cursor-pointer" id="task-start-input" placeholder="Start date" value="">
             <div class="input-group-append">
               <span class="input-group-text fa fa-calendar"></span>
             </div>
           </div>
         </div>
         <div class="form-group offset-2 col-5">
-          <label for="task-end-input">Fin</label>
+          <label for="task-end-input">End</label>
           <div class="input-group">
-            <input type="text" class="form-control cursor-pointer" id="task-end-input" placeholder="Fin" value="">
+            <input type="text" class="form-control cursor-pointer" id="task-end-input" placeholder="End date" value="">
             <div class="input-group-append">
               <span class="input-group-text fa fa-calendar"></span>
             </div>
@@ -101,9 +101,9 @@
 
       <div class="form-row">
         <div class="form-group col-5">
-          <label for="task-completed-input">Avancement</label>
+          <label for="task-completed-input">Progress</label>
           <div class="input-group">
-            <input id="task-completed-input" type="number" class="form-control" placeholder="Avancement" min="0"
+            <input id="task-completed-input" type="number" class="form-control" placeholder="Progress" min="0"
                    max="100" step="1">
             <div class="input-group-append">
               <span class="input-group-text">%</span>
@@ -112,23 +112,23 @@
         </div>
 
         <div class="form-group offset-2 col-5 colorpicker-component">
-          <label for="task-color-input">Couleur</label>
-          <input id="task-color-input" type="text" value="" placeholder="Automatique" autocomplete="off" class="form-control cursor-pointer"/>
+          <label for="task-color-input">Colour</label>
+          <input id="task-color-input" type="text" value="" placeholder="Automatic" autocomplete="off" class="form-control cursor-pointer"/>
           <span class="input-group-addon"><i></i></span>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group col-5">
-          <label for="task-category-input">Catégorie</label>
-          <select class="selectpicker form-control" id="task-category-input" data-size="5" title="Aucune">
+          <label for="task-category-input">Category</label>
+          <select class="selectpicker form-control" id="task-category-input" data-size="5" title="None">
             <option value=""></option>
           </select>
         </div>
 
         <div class="form-group offset-2 col-5">
-          <label for="task-dependency-input">Dépendance</label>
-          <select class="selectpicker form-control" id="task-dependency-input" data-size="5" title="Aucune">
+          <label for="task-dependency-input">Dependency</label>
+          <select class="selectpicker form-control" id="task-dependency-input" data-size="5" title="None">
           <!--
             <select class="browser-default custom-select" id="task-dependency-input" onmousedown="if(this.options.length>5){this.size=5;}"  onchange='this.removeAttribute("size");' onblur='this.removeAttribute("size");'>
           -->
@@ -138,6 +138,40 @@
       </div>
     </form>
 
+    <!-- Modal de suppression de Point -->
+    <div class="modal" id="delete-point-modal" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-0">
+
+          <!-- Modal body -->
+          <div class="modal-body text-left row">
+            <span class="offset-1 col-2 my-auto text-right">
+              <i class="fa fa-trash fa-3x" style="color: red; vertical-align: super; " alt="Generic placeholder image"></i>
+            </span>
+
+            <div class="col-8">
+              <h4>Delete <code>&lt;<span id="delete-point-label">Point Label</span>&gt;</code>&nbsp;?</h4>
+              <span class="text-secondary">This action cannot be undone</span>
+            </div>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <div class="mx-auto">
+              <button type="button" class="btn btn-secondary shadow rounded-0 btn-lg mr-2" data-dismiss="modal">
+                <i class="fa fa-times"></i>&nbsp;CANCEL
+              </button>
+
+              <button type="button" id="delete-point-button" class="btn btn-danger shadow rounded-0 btn-lg ml-2" data-dismiss="modal">
+                <i class="fa fa-check"></i>&nbsp;DELETE
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 
 
@@ -161,7 +195,7 @@
 
   <!-- UI -->
   <script src="src/js/UI/loading-overlay-handler.js"></script>
-  <script src="src/js/UI/bootstrap-toast-handler.js"></script>
+  <script src="src/js/UI/bootstrap-toast-factory.js"></script>
   <script src="src/js/UI/alertifyjs-custom-alerts.js"></script>
   <script src="src/js/UI/task-edit-modal.js"></script>
 

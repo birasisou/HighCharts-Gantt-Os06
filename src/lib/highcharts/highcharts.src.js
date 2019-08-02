@@ -24175,7 +24175,7 @@
              * @sample highcharts/plotoptions/series-allowpointselect-line/
              *         Get selected points
              *
-             * @function Highcharts.Chart#getSelectedPoints
+             * @function Highcharts.Chart#getSelectedPoint
              *
              * @return {Array<Highcharts.Point>}
              *         The currently selected points.
@@ -27048,8 +27048,8 @@
                  * (columns, point markers, pie slices, map areas etc).
                  *
                  * The selected points can be handled by point select and unselect
-                 * events, or collectively by the [getSelectedPoints](
-                 * Highcharts.Chart#getSelectedPoints) function.
+                 * events, or collectively by the [getSelectedPoint](
+                 * Highcharts.Chart#getSelectedPoint) function.
                  *
                  * And alternative way of selecting points is through dragging.
                  *

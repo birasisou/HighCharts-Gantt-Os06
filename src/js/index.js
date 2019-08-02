@@ -124,23 +124,6 @@ new Promise(function(resolve, reject) {
         });
 
         /**
-         * Initialiser les boutons permettant d'éditer des Points
-         * TODO FAIT dans oris-gantt-chart-config.model.js
-         *
-        if (PARAMETRES_URL_ORIS_NO_FUNCTIONS.asRaw.edit === "true") {
-          document.getElementById("task-edit-button").addEventListener("click", function () {
-            TASK_EDITOR_MODAL.initAndShow(GANTT_RENDERING_MODULE.getSelectedPoints()[0].options)
-          });
-          document.getElementById("root").classList.add("edition-enabled");
-
-          // Déselectionner le Point avec la touche "Échap"
-          document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape" && GANTT_RENDERING_MODULE.getChart().getSelectedPoints()[0])
-              GANTT_RENDERING_MODULE.getChart().getSelectedPoints()[0].select(false);
-          });
-        } //*/
-
-        /**
          *  General messages (should never happen)
          **/
         window.onmessage = function (e) {
@@ -239,8 +222,10 @@ new Promise(function(resolve, reject) {
           updatedTasks: function (updatedTasksMsg) {
             LoggerModule.info("[INDEX.workerMessageHandler] Updated tasks received", updatedTasksMsg);
 
-            // FIRST CALL, après on veut seulement update les données
-            if (!GANTT_RENDERING_MODULE.getChart()) {
+            // FIRST CALL
+            // ou si on l'a détruit (hard reset sans refresh)
+            // Après on veut seulement update les données
+            if (!GANTT_RENDERING_MODULE.getChart() || !GANTT_RENDERING_MODULE.getChart().renderTo) {
               LoggerModule.log("### INITIAL RENDER ###");
               try {
                 GANTT_RENDERING_MODULE.draw(PARAMETRES_URL_ORIS_NO_FUNCTIONS, updatedTasksMsg)
@@ -258,7 +243,10 @@ new Promise(function(resolve, reject) {
               series: {
                 data: GANTT_RENDERING_MODULE.getChart().series[0].userOptions.data
               }
-            })
+            });
+
+            // Détruire les Toasts qui sont "prêts à disparaitre"
+            TOAST.removeOutdateds();
           },
           done: function (doneMsg) {  // todo remplacer par un success/failure. On ne veut pas masquer mtn car potentiellement encore en train de dessiner
             LoggerModule.info("[INDEX.workerMessageHandler] 'Finally done' received", doneMsg);

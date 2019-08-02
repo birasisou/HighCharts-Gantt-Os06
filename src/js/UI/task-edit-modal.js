@@ -85,12 +85,18 @@ function TASK_EDITOR_MODAL_FACTORY () {
    *
    * @param {Object} taskOptions
    *    HighCharts Task userOptions
+   * @param {Boolean} isAddEditor
+   *    Special behaviour for when this modal is used to create a new Point
+   *      -> empty inputs (all) won't be disabled etc...
    */
-  function initInputs(taskOptions) {
+  function initInputs(taskOptions, isAddEditor) {
     if (!taskOptions)
       throw new EXCEPTIONS.InvalidArgumentExcepetion("initInputs");
 
-    console.warn("[initInputs] taskOptions", taskOptions);
+    // Comportement spécial si on est mode "Création de Point"
+    isAddEditor = isAddEditor || false;
+
+    LoggerModule.info("[initInputs] taskOptions", taskOptions);
 
     for (let input in INPUTS) {
       if (!INPUTS[input])
@@ -119,7 +125,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
         INPUTS[input].disabled = false;
       }
       else {  // Pas de valeur
-        console.warn("Pas de valeur pour INPUTS["+input+"]");
+        LoggerModule.warn("Pas de valeur pour INPUTS["+input+"]");
         INPUTS[input].value = "";
         /**
          * @Github #Issue update de/vers une milestone cause un bug graphique
@@ -164,7 +170,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
     if (!select || typeof select !== "object") // DOM HTMLElement est un objet
       return;
 
-    console.error("optionValues", optionValues);
+    LoggerModule.info("optionValues", optionValues);
 
     // Vider le select
     select.innerText = "";
@@ -225,7 +231,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
     if (!options)
       throw new EXCEPTIONS.MissingArgumentExcepetion("[updateChartOptions]");
 
-    console.error(options);
+    LoggerModule.warn(options);
 
     if (options.yAxis && options.yAxis.categories)
       updateYAxisCategories(options.yAxis.categories);
@@ -235,7 +241,6 @@ function TASK_EDITOR_MODAL_FACTORY () {
       for (let i=0, l=options.series.data.length; i<l; ++i) {
         dependencyNameById[options.series.data[i]["id"]] = SHARED.decodeHTML(options.series.data[i]["label"]);
       }
-      console.error("dependencyById", dependencyNameById);
 
       updateDependencyIds(options.series.data.map(function(e){
         return {
@@ -268,16 +273,10 @@ function TASK_EDITOR_MODAL_FACTORY () {
     initInputs(taskOptions);
 
     //show as confirm
-    INSTANCE = alertify.confirm(div/*, function(){
-      // todo ???? NE SE LANCE PAS
-      alertify.success('Valider'); // todo TryPostData
-    }, function(){
-      // todo ???? NE SE LANCE PAS
-      alertify.error('Aucune modification');
-    }//*/).set({
+    INSTANCE = alertify.confirm(div).set({
       padding: false,
-      title: "Édition de tâche",
-      movable: false,
+      title: "Task editor",
+      // movable: false,
       maximizable: false,
       resizable: true,
       pin: true,  // useless car modal
@@ -289,11 +288,8 @@ function TASK_EDITOR_MODAL_FACTORY () {
         alertify.message('Editor was shown.');
       },
       onok: function () {
-        alertify.notify('TODO: IMPLEMENT + RETURN FALSE', 'error', 3, function(){
-          console.log('TODO: IMPLEMENT + RETURN FALSE');
-        });
         ONOK_HANDLER();
-        return false;  // empêcher le modal de se fermer
+        return false;  // empêcher le modal de se fermer  todo ne plus bloquer #26
       }
     }).resizeTo('40%', 550);
 
@@ -339,14 +335,12 @@ function TASK_EDITOR_MODAL_FACTORY () {
       formattedData["color"] = INPUTS["color"].value.slice(1); // on enlève le "#" initial car on ne peut pas le push dans la BD
 
     if (formattedData)
+      LoggerModule.warn("[ONOK_HANDLER] formattedData", formattedData);
 
-      console.warn("[ONOK_HANDLER] formattedData", formattedData);
-
-    // todo tryPostData
     // Generate & encode URI
     let url = APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData);
 
-    console.warn("Point update URL", url);
+    LoggerModule.warn("Point update URL", url);
 
     // GET
     SHARED.promiseGET(url)
@@ -379,9 +373,9 @@ function TASK_EDITOR_MODAL_FACTORY () {
           actualTask = new OrisGanttTask(root, APP_MODULE.getParametresUrlOrisNoFunction()),
           flippedDataKeys = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.flippedData;
 
-        console.info("formattedData", formattedData);
-        console.info("postedTask", postedTask);
-        console.info("actualTask", actualTask);
+        LoggerModule.log("formattedData", formattedData);
+        LoggerModule.log("postedTask", postedTask);
+        LoggerModule.log("actualTask", actualTask);
 
         // On ne compare que les valeurs modifiées
         // et on les formatte en userOptions
@@ -392,7 +386,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
           let currentPosted = postedTask["userOptions"][flippedDataKeys[attr]],
             currentActual = actualTask["userOptions"][flippedDataKeys[attr]];
 
-          console.log("- (userOptions' value) Is formattedData[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
+          LoggerModule.log("- (userOptions' value) Is formattedData[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
             + ", === to root[" + flippedDataKeys[attr] + "]: " +  (typeof currentPosted === "object" ? JSON.stringify(currentActual) : currentActual) + " ?");
           // if (actualTask["userOptions"][attr] !== postedTask["userOptions"][attr])
           if (typeof currentPosted === "object") {

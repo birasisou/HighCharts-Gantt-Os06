@@ -174,29 +174,149 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   };
 
   /**
-   * Génère l'URL permettant la requête POST modifiant la valeur d'un "Point" dans la base
+   * Génère le début de l'URL permettant une action sur la Base
+   * (avec le paramètre demandant un format JSON, &json=true)
    *
-   * @param {Object} datas
+   * @param {String} act
+   *  Actions possibles:
+   *    - modif, modifier un tuple de la Base
+   *    - newvalid, créer un nouveau tuple dans la Base
+   *    - kill, supprimer un tuple de la Base
+   *
+   * @return {string} le début d'URL pour l'action voulue
+   */
+  this.generateWebserviceActionUrl = function(act) {
+    LoggerModule.log("[generateWebserviceActionUrl] act param", act);
+
+    if (!act || (act !== "modif" && act !== "newvalid" && act !== "kill"))
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceActionUrl] Le paramètre &act=" + act + " n'est pas valide.");
+
+    let url = this.webserviceUrl.slice(0, this.webserviceUrl.indexOf("?"))
+      + "?json=true&act=" + act;
+
+    return url;
+  };
+
+  /**
+   * Génère l'URL permettant de modifier un "Point" dans la base
+   *
+   * @param {Object} userOptions
    *  données (userOptions) du Point à MàJ
    *    /!\ DOIT IMPÉRATIVEMENT CONTENIR L'ATTRIBUT vline
    */
-  this.generateWebserviceUpdateUrl = function(datas) {
-    console.info("[generateWebserviceUpdateUrl] input param", datas);
+  this.generateWebserviceUpdateUrl = function(userOptions) {
+    LoggerModule.log("[generateWebserviceUpdateUrl] input param", userOptions);
 
-    if (typeof datas !== "object")
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + datas);
+    if (typeof userOptions !== "object")
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + userOptions);
 
-    if (!datas.vline && !datas.vline !== 0)
+    if (!userOptions.vline && !userOptions.vline !== 0)
       throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit contenir l'attribut vline");
 
-    let url = this.webserviceUrl.slice(0, this.webserviceUrl.indexOf("?"))
-      + "?act=modif&json=true";
+    let url = this.generateWebserviceActionUrl("modif");
     // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
-    for (let data in datas) {
-      url += "&" + data + "=" + datas[data];
+    for (let option in userOptions) {
+      url += "&" + option + "=" + userOptions[option];
     }
     return encodeURI(url);
   };
+
+  /**
+   * Génère l'URL permettant de supprimer un "Point" de la base
+   *  (&act=kill)
+   *
+   * @param {Object} userOptions
+   *  Options du point à supprimer. Doit impérativement contenir une valeur vline et start
+   */
+  this.generateWebserviceDeleteUrl = function(userOptions) {
+    if (!userOptions)
+      throw new Error("[generateWebserviceDeleteUrl] Le paramètre est absent ou invalide."); // EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceDeleteUrl] Le paramètre est absent ou invalide.");
+
+    if (typeof userOptions !== "object"
+      || !userOptions["vline"]
+      || !userOptions["start"]
+    )
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceDeleteUrl] Le paramètre est invalide (doit contenir vline et start)");
+
+    return this.generateWebserviceActionUrl("kill") + "&vline=" + userOptions.vline; // en dûr, pas bien :(
+  };
+
+  /**
+   * Suppression de Point via requête GET "tout en un" (fonctionnel, pas visuel)
+   *
+   * @param {Object} userOptions
+   *  Options du Point à supprimer
+   *
+   * @return {Promise<T | never>}
+   */
+  this.tryDeletePoint = function (userOptions) {
+    let self = this,  // Pas nécessaire mais bonne pratique ???
+    initToast = TOAST.info({
+      header: "Trying to detelete Point #" + userOptions.vline,
+      delay: 10000  // Il y a peut-être un risque que le Toast ne se masque pas si la réponse du Worker arrive trop vite (très improbable)
+      // autoHide: false
+    });
+    LoggerModule.log("INIT TOAST", initToast);
+
+    return new Promise(function (resolve) {
+      resolve(self.generateWebserviceDeleteUrl(userOptions));
+    })
+      .then(SHARED.promiseGET)
+      .then(function(response) {
+        LoggerModule.log("parsing", response);
+        return JSON.parse(response)
+      })
+      // extract root
+      .then(function (json) {
+        if (!json[self.rootName])
+          throw new Error("Unable to extract root (" + self.rootName + ") from JSON.");
+        return json[self.rootName];
+      })
+      // On reçoit TOUTE LA BASE...
+      // Vérifier si le Point a bien été supprimé (on ne le trouve pas => OK)
+      .then(function (data) {
+        LoggerModule.log("[tryDelete] root's data", data);
+        LoggerModule.log("Does it contain " + userOptions.vline);
+        let searchResult = data.filter(function(elem) {
+          LoggerModule.log("-", elem);
+          LoggerModule.log("self.CONSTANTS.HC_CONFIG_KEYS.data.id.url_param", self.CONSTANTS.HC_CONFIG_KEYS.data["id"]["url_param"]);
+          LoggerModule.log("self.asRaw["+self.CONSTANTS.HC_CONFIG_KEYS.data["id"]["url_param"]+"]", self.asRaw[self.CONSTANTS.HC_CONFIG_KEYS.data["id"]["url_param"]])
+          LoggerModule.log("elem["+ self.asRaw[self.CONSTANTS.HC_CONFIG_KEYS.data["id"]["url_param"]] +"]", elem[self.asRaw[self.CONSTANTS.HC_CONFIG_KEYS.data["id"]["url_param"]]])
+
+          return elem[self.asRaw[self.CONSTANTS.HC_CONFIG_KEYS.data.id.url_param]] === userOptions[self.asRaw[self.CONSTANTS.HC_CONFIG_KEYS.data["id"]["url_param"]]]
+        });
+        LoggerModule.info("searchResult", searchResult);
+        if (searchResult.length)
+          throw new Error("Failed to delete data");
+        return true;
+      })
+      // handle success
+      .then(function (success) {
+        // disable editing buttons as we can't interact with the removed data
+        APP_MODULE.getGanttRenderingModule().disableTaskButtons();
+        //TOAST.success({
+        TOAST.turnSuccess(initToast, {
+          header: "Data #" + userOptions.id + " succesfully deleted."
+        });
+      })
+      .catch(function (err) {
+        let errorHeader = "Error while trying to delete #" + userOptions.id;
+        LoggerModule.error(errorHeader, err);
+        //
+        TOAST.removeTarget(initToast);
+
+        TOAST.error({
+          header: errorHeader
+        });
+      })
+      .then(function (finallyParam) {
+
+        // Prépare le Toast initial pour destruction
+        initToast.setAttribute("outdated", true);
+
+      })
+  };
+
 
   /**
    * @private
