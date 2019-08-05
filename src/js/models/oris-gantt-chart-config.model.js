@@ -81,15 +81,22 @@ function GanttRenderingModule () {
    * TODO faire ça ailleurs...
    */
   /* Afficher le modal de suppression de point */
-  $("#delete-point-modal").on("show.bs.modal", function (event) {
-    document.getElementById("delete-point-label").innerText = SHARED.decodeHTML(selectedPoint.options.label);
-    document.getElementById("delete-point-label").innerHTML += "&nbsp;<i>(ID: " + SHARED.decodeHTML(selectedPoint.options.id) + ")</i>";
+  $("#delete-point-modal").on({
+    "show.bs.modal": function (event) {
+      document.getElementById("delete-point-label").innerText = SHARED.decodeHTML(selectedPoint.options.label);
+      document.getElementById("delete-point-label").innerHTML += "&nbsp;<i>(ID: " + SHARED.decodeHTML(selectedPoint.options.id) + ")</i>";
+    },
+    // focus le bouton de suppression pour pouvoir le valider avec la touche Entrée
+    "shown.bs.modal": function (event) {
+      document.getElementById("delete-point-button").focus();
+    }
   });
   document.getElementById("delete-point-button").addEventListener("click", function(event) {
     LoggerModule.info("Calling for deletion of #" + selectedPoint.id, selectedPoint.options);
     APP_MODULE.getParametresUrlOris().tryDeletePoint(selectedPoint.options);
   });
 
+  /**
   /**
    * Set l'attribut "disabled" des bouttons (implémentés) du task-edit-widget
    * @param {boolean} isDisabled
@@ -218,7 +225,7 @@ function GanttRenderingModule () {
               invisibleYAxisWorkaround(this);
               uncompleteOverlayBackgroundWorkaround(this);
             } catch (e) {
-              LoggerModule.warn("[chart.events.redraw] Error", e);
+              LoggerModule.error("[chart.events.redraw] Error", e);
             }
           }
         }
@@ -369,6 +376,20 @@ function GanttRenderingModule () {
           minWidth: numberValue
         };
     }
+    /**
+     * minHeight ne marhe pas...
+    if (parametreUrlOris.asRaw["minheight"]) {
+      let numberValue = new OrisData(parametreUrlOris.asRaw["minheight"]).asNumber();
+      if (numberValue) {
+        // Ne pas écraser l'objet "scrollablePlotArea" s'il existe déjà
+        if (BASE_CONFIG.chart.scrollablePlotArea)
+          BASE_CONFIG.chart.scrollablePlotArea.minHeight = numberValue;
+        else
+          BASE_CONFIG.chart.scrollablePlotArea = {
+            minHeight: numberValue
+          };
+      }
+    } */
 
     // enable EDIT
     /**
@@ -414,17 +435,22 @@ function GanttRenderingModule () {
      * Ne pas réinstancier les boutons si on re-crée le graphe après l'avoir .destroy()
      */
     if (!DOM_REF.editButtons.edit) {
-
         let editWidget = document.getElementById("task-edit-widget");
         let editButtonStyles = {
           add: {
             class: "success",
             icon: "fa-plus",
+            attributes: {
+              title: "Create new task"
+            },
             label: "Add"
           },
           edit: {
             class: "primary",
             icon: "fa-edit",
+            attributes: {
+              title: "Edit selected task"
+            },
             label: "Edit"
           },
           delete: {
@@ -432,6 +458,7 @@ function GanttRenderingModule () {
             icon: "fa-trash",
             label: "Delete",
             attributes: {
+              title: "Delete selected task",
               "data-toggle": "modal",
               "data-target": "#delete-point-modal"
             }

@@ -53,15 +53,26 @@ function TASK_EDITOR_MODAL_FACTORY () {
   });
   // Les Date pickers
   $(INPUTS["start"]).datetimepicker({
+    useCurrent: false,
     locale: moment.locale() || 'fr',
-    format: 'L' // que la date, pas les heures
+    // format: 'L' // que la date, pas les heures
   });
   $(INPUTS["end"]).datetimepicker({
-    locale: moment.locale() || 'fr'
+    useCurrent: false,
+    locale: moment.locale() || 'fr',
+    // format: 'L LT' Date + Heure:Secondes --> format par défaut
   });
   $(INPUTS["start"]).on("dp.change", function (e) {
     $(INPUTS["end"]).data("DateTimePicker").minDate(e.date);
+    // Cas particulier Add Request
+    if (e.currentTarget.classList.contains("isAdd")) {
+      // Désactiver &end si &start n'a pas de valeur
+      INPUTS["end"].disabled = !e.date;
+      $(INPUTS["end"]).data("DateTimePicker").clear();
+    }
   });
+
+
   $(INPUTS["end"]).on("dp.change", function (e) {
     $(INPUTS["start"]).data("DateTimePicker").maxDate(e.date);
   });
@@ -110,7 +121,13 @@ function TASK_EDITOR_MODAL_FACTORY () {
         if (input === "start" || input === "end") {
           $(INPUTS[input]).data("DateTimePicker").maxDate(false);
           $(INPUTS[input]).data("DateTimePicker").minDate(false);
-          $(INPUTS[input]).data("DateTimePicker").date(moment(Number(taskOptions[input])));
+
+          // Le serveur ne stocke pas les millisecondes
+          let now = moment(Number(taskOptions[input]));
+          // now._d.setSeconds(0);
+          now._d.setMilliseconds(0);
+
+          $(INPUTS[input]).data("DateTimePicker").date( now );
           if (!taskOptions[input])
             INPUTS[input].disabled = true;
         } else if (input === "color")
@@ -133,7 +150,15 @@ function TASK_EDITOR_MODAL_FACTORY () {
          * OU
          * si on n'a pas l'ID de la colonne (!asRaw[input])
          */
-        INPUTS[input].disabled = !isAddEditor && (input === "start" || input === "end" || !APP_MODULE.getParametresUrlOrisNoFunction().asRaw[APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.data[input].url_param]);
+        INPUTS[input].disabled = !isAddEditor && (input === "start"
+          || input === "end"
+          || !APP_MODULE.getParametresUrlOrisNoFunction().asRaw[APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.data[input].url_param]);
+        // Pour le comportement dynamique (désactiver &end si &start n'a pas de valeur) du cas particulier Add Request
+        if (isAddEditor) {
+          INPUTS["start"].classList.add("isAdd");
+          INPUTS["end"].disabled = true;
+        } else
+          INPUTS["start"].classList.remove("isAdd");
 
         /**
          * @Github #9
@@ -270,8 +295,6 @@ function TASK_EDITOR_MODAL_FACTORY () {
       throw new EXCEPTIONS.InvalidArgumentExcepetion("showTaskEditor");
 
     isAddEditor = isAddEditor || false;
-    if (isAddEditor)
-      console.error("Add Editor");
 
     let div = document.createElement('div');
     div.style.maxHeight = "400px";
@@ -297,7 +320,6 @@ function TASK_EDITOR_MODAL_FACTORY () {
       onshow: function () {
         $(INPUTS["category"]).selectpicker('refresh');  // todo allow Category Creation
         $(INPUTS["dependency"]).selectpicker('refresh');
-        alertify.message('Editor was shown.');
       },
       onok: function () {
         ONOK_HANDLER(isAddEditor);
@@ -314,114 +336,49 @@ function TASK_EDITOR_MODAL_FACTORY () {
     // todo set input values + disable en fonction des asRaw + categories
   }
 
-  function ONOK_HANDLER(isAddEditor) {
-    isAddEditor = isAddEditor || false;
+  function ONOK_HANDLER(isAddRequest) {
+    isAddRequest = isAddRequest || false;
     // todo AppModule.tryPostRequest(datas) // se charge de show/hideLoading + doit appeler explicitement Modal.hide()
     //   return false; // <-- Pour ne pas fermer le modal avant la fin de la requête
-
-    // todo show loading
-    APP_MODULE.getLoadingSpinnerHandler().showLoading();
-    //  try POST request
-    //  onsuccess
-    //   hideLoading
-    //   hideModal
-    //   success notification
-    //  onerror
-    //   hideLoading
-    //   ? hideModal ?
-    //   error notification
-
     // format data
-    let formattedData = {},
-      asRawParams = APP_MODULE.getParametresUrlOrisNoFunction().asRaw,
+    let formattedData = {};
+
+
+    let asRawParams = APP_MODULE.getParametresUrlOrisNoFunction().asRaw,
       HC_CONFIG_KEYS = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS;
     for (let input in INPUTS) {
-      if (asRawParams[HC_CONFIG_KEYS.data[input].url_param] // TODO &label n'est pas &name !!! (label --> "owner" mais quand &parent, il faut que &name au lieu de &label...)
+      if (asRawParams[HC_CONFIG_KEYS.data[input].url_param]
         && !INPUTS[input].disabled) { // ne pas MàJ les paramètres disabled (notamment les catégories en mode &uniqueNames, enfin &parent, et ID car ultra important)
-        formattedData[asRawParams[HC_CONFIG_KEYS.data[input].url_param]] = (input === "start" || input === "end") ? $(INPUTS[input]).data("DateTimePicker").date()._d.toISOString() : INPUTS[input].value;
+        if ((input === "start" || input === "end") && INPUTS[input].value) {
+          let dateSansMillisecondes = $(INPUTS[input]).data("DateTimePicker").date()._d;
+          dateSansMillisecondes.setMilliseconds(0);
+          formattedData[asRawParams[HC_CONFIG_KEYS.data[input].url_param]] = dateSansMillisecondes.toISOString();
+        } else
+          formattedData[asRawParams[HC_CONFIG_KEYS.data[input].url_param]] = INPUTS[input].value; // === ""tryAddOrEditPoint
       }
     }
+    // TODO: loop à nouveau et remplacer les valeurs vides par '(v)' pour "push" une valeur vide
+    //  comme précisé dans @github Issue #29
+
     // Forcer l'ajout de l'attribut vline car faire une requête avec &id=vline causait une erreur
-    if (!isAddEditor)
+    if (!isAddRequest)
       formattedData["vline"] = INPUTS["vline"].value;
 
     // Formatter, potentiellement, la couleur (la base n'accepte pas de '#')
     if (formattedData["color"] && formattedData["color"][0] === "#")
       formattedData["color"] = INPUTS["color"].value.slice(1); // on enlève le "#" initial car on ne peut pas le push dans la BD
 
-    if (formattedData)
-      LoggerModule.warn("[ONOK_HANDLER] formattedData", formattedData);
+    console.warn("[ONOK_HANDLER] formattedData", formattedData);
 
     // Pour isAdd on osef des ID car on peut pas le deviner à l'avance
     // En dûr TODO et useless ?
-    if (isAddEditor)
-      delete formattedData["id"]
+    if (isAddRequest)
+      delete formattedData["id"];
 
-    // Generate & encode URI
-    let url = isAddEditor ? APP_MODULE.getParametresUrlOris().generateWebserviceAddUrl(formattedData) : APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData);
-
-    console.warn("Point update URL", url);
-
-    // GET
-    SHARED.promiseGET(url)
-    // JSON Parse
-      .then(function (response) {
-        LoggerModule.warn("Trying to parse:", response);
-        try {
-          return JSON.parse(response);
-        } catch (e) {
-          LoggerModule.warn("But got Error", e);
-          throw Error("Unable to parse response to JSON. " + e.message);
-        }
-      })
-      // extract root
-      // /!\ The rootName doesn't contain the additional "s" (GET => rootName is "<something>s"; POST => rootName is "<something>") /!\
-      .then(function (json) {
-        let root = json[APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1)];  // sans le "s" bonus
-        if (!root)
-          throw new Error("Unable to extract root (" + APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1) + ") from JSON", json);
-        return root;
-      })
-      // The server replies with its stored value for the given vline ID.
-      // We have to check if this data is what we pushed (success) or different (failed)
-      // AND
-      // In this case, the root contains the Object (usually, it's an Array of Objects)
-      .then(function (root) {
-        // TODO check values
-        //    hide modal
-        let postedTask = new OrisGanttTask(formattedData, APP_MODULE.getParametresUrlOrisNoFunction()),
-          actualTask = new OrisGanttTask(root, APP_MODULE.getParametresUrlOrisNoFunction()),
-          flippedDataKeys = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.flippedData;
-
-        LoggerModule.log("formattedData", formattedData);
-        LoggerModule.log("postedTask", postedTask);
-        LoggerModule.log("actualTask", actualTask);
-
-        // On ne compare que les valeurs modifiées
-        // et on les formatte en userOptions
-        for (let attr in formattedData) {
-          if (!flippedDataKeys[attr])
-            continue;
-
-          let currentPosted = postedTask["userOptions"][flippedDataKeys[attr]],
-            currentActual = actualTask["userOptions"][flippedDataKeys[attr]];
-
-          LoggerModule.log("- (userOptions' value) Is formattedData[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
-            + ", === to root[" + flippedDataKeys[attr] + "]: " +  (typeof currentPosted === "object" ? JSON.stringify(currentActual) : currentActual) + " ?");
-          // if (actualTask["userOptions"][attr] !== postedTask["userOptions"][attr])
-          if (typeof currentPosted === "object") {
-            if (JSON.stringify(currentPosted) !== JSON.stringify(currentActual))
-              throw "Mise à jour du Point échouée.<br/>La valeur ('" + flippedDataKeys[attr] + "') du formulaire sont différentes de celles récupérées depuis le serveur.";
-          } else if (SHARED.decodeHTML(currentPosted) !== SHARED.decodeHTML(currentActual))
-            throw "Mise à jour du Point échouée.<br/>La valeur ('" + flippedDataKeys[attr] + "') du formulaire sont différentes de celles récupérées depuis le serveur.";
-        }
-        alertify.success("Mise à jour réussie", 1);
-        INSTANCE.close();
-      })
-      .catch(function (err) {
-        LoggerModule.error("Data update error:", err);
-        alertify.postErrorAlert(err.description || err.message || err);
-        return false; // ne pas fermer le modal
+    APP_MODULE.getParametresUrlOris().tryAddOrEditPoint(formattedData, isAddRequest)
+      .then(function (success) {
+        if (success)
+          INSTANCE.close();
       });
   }
 

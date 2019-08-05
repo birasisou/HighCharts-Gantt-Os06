@@ -107,19 +107,21 @@ function TOAST_FACTORY () {
    */
   function removeOutdateds () {
     for (let toast in currentToasts) {
-      if (currentToasts[toast].getAttribute("outdated") === "true") {
-
-        // Remove DOM element from UI
-        $(currentToasts[toast]).toast("hide");
-        // Remove object reference (free memory)
-        delete currentToasts[toast];
-      }
+      if (currentToasts[toast].getAttribute("outdated") === "true")
+        removeTarget(toast);
     }
   }
 
+  /**
+   * Get toast by reference OR id from storage object
+   * @param {HTMLElement|String} target
+   *  Toast as DOM element or its ID
+   * @return {HTMLElement}
+   *  The targetted Toast, if found
+   */
   function getToast(target) {
     if (!target)
-      LoggerModule.error("[TOAST.removeTarget] Unable to get Toast without reference or ID");
+      LoggerModule.error("[TOAST.getToast] Unable to get Toast without reference or ID");
 
     let toastId = null;
     if (typeof target === "object" && target.id)
@@ -138,8 +140,12 @@ function TOAST_FACTORY () {
   function removeTarget(target) {
     let toast = getToast(target);
     if (toast) {
-      toast.remove();
-      delete currentToasts[toast.id];
+      // toast.classList.remove("show");
+      setTimeout(function(){
+        $(toast).toast("hide");
+        //toast.remove();
+        delete currentToasts[toast.id];
+      }, 500);
     }
   }
 
@@ -168,7 +174,7 @@ function TOAST_FACTORY () {
         }
       }
       let toast = new Toast(options);
-      toast.id = new Date().getTime();
+      toast.id = options.type + "-" + new Date().getTime();
       toast.setAttribute("outdated", false);
       $(toast).on('hidden.bs.toast', function () {
         this.remove();
@@ -210,6 +216,21 @@ function TOAST_FACTORY () {
     // TODO update style and header/body to that of a success Toast
     turnSuccess: function (target, newOptions) {
       newOptions.type = "success";
+      let newToast = this.create(newOptions);
+      newToast.id = target.id;
+      if (target.classList.contains("show"))
+        newToast.classList.add("show");
+      if (target.classList.contains("fade"))
+        newToast.classList.add("fade");
+
+      target.className = newToast.className;
+      target.innerHTML = newToast.innerHTML;
+    },
+
+
+    // TODO update style and header/body to that of a success Toast
+    turnError: function (target, newOptions) {
+      newOptions.type = "error";
       let newToast = this.create(newOptions);
       newToast.id = target.id;
       if (target.classList.contains("show"))

@@ -239,6 +239,137 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   };
 
   /**
+   *
+   * @param {Object} formattedData
+   * @param {boolean} isAddRequest
+   *  @default false
+   */
+  this.tryAddOrEditPoint = function (formattedData, isAddRequest) {
+    let self = this,  // Pas nécessaire mais bonne pratique ???
+      initToast = TOAST.info({
+        header: "Trying to " + ( isAddRequest ?  "create a new task" : ("edit Task #" + formattedData.vline) ),
+        // delay: 10000  // Il y a peut-être un risque que le Toast ne se masque pas si la réponse du Worker arrive trop vite (très improbable)
+        autoHide: false
+      });
+    LoggerModule.log("INIT TOAST", initToast);
+
+    
+
+    return new Promise(function (resolve, reject) {
+      // todo show loading
+      //APP_MODULE.getLoadingSpinnerHandler().showLoading();
+      //  try POST request
+      //  onsuccess
+      //   hideLoading
+      //   hideModal
+      //   success notification
+      //  onerror
+      //   hideLoading
+      //   ? hideModal ?
+      //   error notification
+      
+      
+      // Generate & encode URI
+      let url = isAddRequest ? APP_MODULE.getParametresUrlOris().generateWebserviceAddUrl(formattedData) : APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData);
+
+      console.warn("Point update URL", url);
+      resolve(url);
+    })
+      .then(SHARED.promiseGET)
+      // GET
+      // SHARED.promiseGET(url)
+      // JSON Parse
+      .then(function (response) {
+        LoggerModule.warn("Trying to parse:", response);
+        try {
+          return JSON.parse(response);
+        } catch (e) {
+          LoggerModule.warn("But got Error", e);
+          throw Error("Unable to parse response to JSON. " + e.message);
+        }
+      })
+      // extract root
+      // /!\ The rootName doesn't contain the additional "s" (GET => rootName is "<something>s"; POST => rootName is "<something>") /!\
+      .then(function (json) {
+        let root = json[APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1)];  // sans le "s" bonus
+        if (!root)
+          throw new Error("Unable to extract root (" + APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1) + ") from JSON", json);
+        return root;
+      })
+      // The server replies with its stored value for the given vline ID.
+      // We have to check if this data is what we pushed (success) or different (failed)
+      // AND
+      // In this case, the root contains the Object (usually, it's an Array of Objects)
+      .then(function (root) {
+        // TODO check values
+        //    hide modal
+        let postedTask = new OrisGanttTask(formattedData, APP_MODULE.getParametresUrlOrisNoFunction()),
+          actualTask = new OrisGanttTask(root, APP_MODULE.getParametresUrlOrisNoFunction()),
+          flippedDataKeys = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.flippedData;
+
+        LoggerModule.log("formattedData", formattedData);
+        LoggerModule.log("postedTask", postedTask);
+        LoggerModule.log("actualTask", actualTask);
+
+        // On ne compare que les valeurs modifiées
+        // et on les formatte en userOptions
+        for (let attr in formattedData) {
+          if (!flippedDataKeys[attr])
+            continue;
+
+          let currentPosted = postedTask["userOptions"][flippedDataKeys[attr]],
+            currentActual = actualTask["userOptions"][flippedDataKeys[attr]];
+
+          console.log("- (userOptions' value) Is formattedData[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
+            + ", === to root[" + flippedDataKeys[attr] + "]: " +  (typeof currentPosted === "object" ? JSON.stringify(currentActual) : currentActual) + " ?");
+          // if (actualTask["userOptions"][attr] !== postedTask["userOptions"][attr])
+          if (typeof currentPosted === "object") {
+            if (JSON.stringify(currentPosted) !== JSON.stringify(currentActual))
+              throw "Mise à jour du Point échouée.<br/>La valeur ('" + flippedDataKeys[attr] + "'->"+ JSON.stringify(currentPosted) + "') du formulaire est différente de celle récupérée depuis le serveur (->'" + JSON.stringify(currentActual) +"').";
+          } else if (SHARED.decodeHTML(currentPosted) !== SHARED.decodeHTML(currentActual))
+            throw "Mise à jour du Point échouée.<br/>La valeur ('" + flippedDataKeys[attr] + "'->'"+ SHARED.decodeHTML(currentPosted) + "') du formulaire différentes de celle récupérée depuis le serveur(->'" + SHARED.decodeHTML(currentActual) + "').";
+        }
+
+        // Success Toast
+        TOAST.turnSuccess(initToast, {
+          header: "Task " + (isAddRequest ? " created" : "#" + formattedData.id + " successfuly updated") + "."
+        });
+        return true;
+      })
+      .catch(function (err) {
+        LoggerModule.error("Data update error:", err);
+        alertify.postErrorAlert(err.description || err.message || err);
+        // Turn into Error Toast
+        TOAST.turnError(initToast, {
+          header: "Failed to " + (isAddRequest ? "add new Task" : "update Task #" + formattedData.id) + "."
+        });
+
+        // Masquer le Toast nous-même après 3 secondes
+        // Vu qu'il y a eu une erreur, le Worker ne va pas update et donc pas appeler TOAST.removeOutdateds
+        setTimeout(function() {
+          TOAST.removeTarget(initToast);
+        }, 3000);
+
+        // Ne pas fermer le modal
+        return false; // TODO osef car on veut "non bloquantes" ?
+      })
+      .then(function (success) {
+        // Prépare le Toast initial pour destruction automatique (ne sera détruit qu'une fois que le Worker renvoie
+        initToast.setAttribute("outdated", true);
+
+        // Juste au cas où, mais, en soit, s'il y a succès mais que le Toast ne disparait pas c'est qu'il n'y a pas eu de MàJ
+        // todo d'après le Worker
+        // surement que l'attribut "&id" est différent de vline (et, forcément, n'est pas affecté lors de la création...)
+        setTimeout(function() {
+          TOAST.removeTarget(initToast);
+        }, 15000);
+
+        // TODO osef car on veut "non bloquantes" ?
+        return success;
+      });
+  };
+
+  /**
    * Génère l'URL permettant de supprimer un "Point" de la base
    *  (&act=kill)
    *
@@ -263,19 +394,17 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
    *
    * @param {Object} userOptions
    *  Options du Point à supprimer
-   *
-   * @return {Promise<T | never>}
    */
   this.tryDeletePoint = function (userOptions) {
     let self = this,  // Pas nécessaire mais bonne pratique ???
     initToast = TOAST.info({
-      header: "Trying to detelete Point #" + userOptions.vline,
+      header: "Trying to detelete task #" + userOptions.vline,
       delay: 10000  // Il y a peut-être un risque que le Toast ne se masque pas si la réponse du Worker arrive trop vite (très improbable)
       // autoHide: false
     });
     LoggerModule.log("INIT TOAST", initToast);
 
-    return new Promise(function (resolve) {
+    new Promise(function (resolve) {
       resolve(self.generateWebserviceDeleteUrl(userOptions));
     })
       .then(SHARED.promiseGET)
@@ -311,10 +440,13 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       .then(function (success) {
         // disable editing buttons as we can't interact with the removed data
         APP_MODULE.getGanttRenderingModule().disableTaskButtons();
+
         //TOAST.success({
-        TOAST.turnSuccess(initToast, {
-          header: "Data #" + userOptions.id + " succesfully deleted."
-        });
+        setTimeout(function() {
+          TOAST.turnSuccess(initToast, {
+            header: "Data #" + userOptions.id + " succesfully deleted."
+          })
+        }, 250);
       })
       .catch(function (err) {
         let errorHeader = "Error while trying to delete #" + userOptions.id;
@@ -329,9 +461,8 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       })
       .then(function (finallyParam) {
 
-        // Prépare le Toast initial pour destruction
+        // Prépare le Toast initial pour destruction automatique (ne sera détruit qu'une fois que le Worker renvoie
         initToast.setAttribute("outdated", true);
-
       })
   };
 
