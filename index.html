@@ -38,8 +38,9 @@
 
     <div id="graph-container"></div>
 
+    <!--
     <div id="widget-area" class="row mx-0 mt-3 multi-collapse collapse">
-      <!-- Search widget &fil= -->
+       Search widget &fil= --
       <div class="col">
         <form id="task-search-widget" class="col-12 active " onsubmit="return false;">
           <div class="form-group">
@@ -52,10 +53,9 @@
           </div>
         </form>
       </div>
-
     </div>
 
-    <!-- Edition buttons (Add/Edit/Remove) -->
+     Edition buttons (Add/Edit/Remove)
     <div id="top-left-edit">
       <div id="navbar" class="multi-collapse bg-secondary collapse" style="">
         <div class="p-2 btn-group">
@@ -84,7 +84,50 @@
       </button>
 
     </div>
+    -->
+    <div id="top-left-edit">
+      <div class="multi-collapse collapse" style="">
+        <nav id="navbar" class="navbar navbar-expand bg-dark">
+          <!-- Edit buttons -->
+          <div class="py-2">
+            <button id="task-add-button" class="rounded-0 btn btn-success mr-1" title="Create new task">
+              <i class="fa fa-plus"></i>&nbsp;Add
+            </button>
 
+            <button id="task-edit-button" class="rounded-0 btn btn-primary mr-1" disabled title="Edit selected task">
+              <i class="fa fa-pencil"></i>&nbsp;Edit
+            </button>
+
+            <button id="task-delete-button" class="rounded-0 btn btn-danger" disabled title="Delete selected task" data-toggle="modal" data-target="#delete-point-modal">
+              <i class="fa fa-trash"></i>&nbsp;Delete
+            </button>
+          </div>
+
+          <!-- &fil= -->
+          <form id="task-search-widget" class="form-inline active mx-auto justify-content-center col-4 text-center" onsubmit="return false;">
+            <div class="d-inline w-100">
+              <div class="input-group">
+                <input id="task-search-input" type="text" class="form-control" placeholder="Search" autocomplete="true" onclick="this.setSelectionRange(0, this.value.length)">
+                <div class="input-group-append">
+                  <button class="input-group-text text-success"><i class="fa fa-search"></i></button>
+                </div>
+              </div>
+            </div>
+          </form>
+          <div class="p-2">
+            <button id="chart-destroy-button" class="btn btn-warning rounded-0" title="Reinitialize chart" data-toggle="modal">
+              <i class="fa fa-refresh"></i> Reset
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      <button id="widget-area-toggler" class="btn btn-dark rounded-0 collapsed" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" title="Show/Hide editing buttons">
+        <i class="fa fa-cogs"></i>
+        <i class="fa fa-caret-square-o-up"></i>
+      </button>
+
+    </div>
 
     <!-- Point editor modal -->
     <form id="secret-santa" class="container">
@@ -173,7 +216,7 @@
           <!-- Modal body -->
           <div class="modal-body text-left row">
             <span class="offset-1 col-2 my-auto text-right">
-              <i class="fa fa-trash fa-3x" style="color: red; vertical-align: super; " alt="Generic placeholder image"></i>
+              <i class="fa fa-trash fa-3x" style="color: red; vertical-align: super; " alt="Delete icon"></i>
             </span>
 
             <div class="col-8">
