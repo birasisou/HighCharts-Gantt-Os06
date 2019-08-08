@@ -122,6 +122,7 @@ new Promise(function(resolve, reject) {
           window.location.replace(newUrl);
           return false;
         });
+        document.getElementById("task-search-input").value = PARAMETRES_URL_ORIS.asRaw["fil"] || "";
 
         /**
          *  General messages (should never happen)
@@ -148,6 +149,12 @@ new Promise(function(resolve, reject) {
         startWorker();
       }
 
+      function sendReinitializeMessageToWorker() {
+        WORKER.postMessage({
+          reinitialize: true
+        });
+      }
+      
       /**
        * Crée dynamiquement le Worker en fusionnant différents fichiers locaux
        * @return {Worker}
@@ -223,11 +230,13 @@ new Promise(function(resolve, reject) {
             LoggerModule.info("[INDEX.workerMessageHandler] Updated tasks received", updatedTasksMsg);
 
             // FIRST CALL
-            // ou si on l'a détruit (hard reset sans refresh)
+            // ou si on l'a destroy (hard reset sans refresh)
             // Après on veut seulement update les données
             if (!GANTT_RENDERING_MODULE.getChart() || !GANTT_RENDERING_MODULE.getChart().renderTo) {
               LoggerModule.log("### INITIAL RENDER ###");
               try {
+                console.info("PARAMETRES_URL_ORIS_NO_FUNCTIONS", PARAMETRES_URL_ORIS_NO_FUNCTIONS);
+                console.info("updatedTasksMsg", updatedTasksMsg);
                 GANTT_RENDERING_MODULE.draw(PARAMETRES_URL_ORIS_NO_FUNCTIONS, updatedTasksMsg)
               } catch (err) {
                 LoggerModule.error("Error while drawing chart", err);
@@ -337,7 +346,9 @@ new Promise(function(resolve, reject) {
         },
         getTaskEditor: function () {
           return TASK_EDITOR_MODAL;
-        }
+        },
+
+        reinitializeData: sendReinitializeMessageToWorker
       }
     })();
   /* } catch (e) {

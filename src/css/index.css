@@ -72,46 +72,19 @@ div#loading-overlay {
     }
 }
 
-
-/*
-    Bouton pour afficher / masquer #widget-area
- */
-#widget-area-toggler {
-    position: absolute;
-    top: .3rem;
-    left: 0;
-    border-radius: 0 0 .25em 0;
-    z-index: 2;
-    transition: none !important;
-    box-shadow: 0 -.3rem .0rem rgba(38,143,255,.5);
-}
-#widget-area-toggler:hover {
-    top: .25rem;
-}
-#widget-area-toggler[aria-expanded=true] {
-    box-shadow: none;
-    top: 0;
-}
 code {
     background-color: rgba(27,31,35,.05) !important;
     color: black;
 }
 
-#delete-point-label > i {
-    font-size: .6em;
-}
 
 /* Masquer le formulaire servant de template */
-#secret-santa,
-#task-search-widget {
+#secret-santa {
     display: none;
 }
 /* L'afficher lorsqu'il est dans le popup */
 .ajs-content #secret-santa {
     display: inline-block;
-}
-#task-edit-widget {
-    display: table;
 }
 /*
   Pour changer la taille du popup, il faut le rendre "resizable"
@@ -146,7 +119,7 @@ code {
 }
 #task-edit-button,
 #task-delete-button {
-    margin-left: 0px;
+    margin-left: 0;
 }
 
 input.cursor-pointer {
@@ -166,6 +139,10 @@ input[readonly],
 .dropdown-toggle::after {
     color: #495057;
 }
+
+/*
+    TOAST
+ */
 /* Sinon, les Toast sont derrière HighCharts */
 #toast-container {
     bottom: 0;
@@ -176,4 +153,57 @@ input[readonly],
 }
 .toast.show {
     opacity: 0.85;
+}
+
+/*
+    Bouton pour afficher / masquer #widget-area
+ */
+#widget-area-toggler {
+    display: block;
+    transition: none !important;
+    margin-top: .3em;
+    box-shadow: 0 -0.3rem 0 rgb(108, 117, 125);
+}
+#widget-area-toggler.collapsed:hover {
+    margin-top: .2em;
+}
+#widget-area-toggler:not(.collapsed) {
+    border-radius: 0 0 .25em 0 !important;
+    margin-top: 0;
+}
+#widget-area-toggler[aria-expanded=true] {
+    box-shadow: none;
+}
+#task-edit-widget {
+    padding: .25em;
+}
+#delete-point-label > i {
+    font-size: .6em;
+}
+.btn-mini {
+    padding: .15em .45em;
+}
+.btn-mini.focus,
+.btn-mini:focus {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+
+#widget-area-toggler.collapsed .fa-caret-square-o-up,
+#widget-area-toggler .fa-cogs,
+#task-edit-widget.collaped {
+    display: none;
+}
+#widget-area-toggler.collapsed .fa-cogs,
+#widget-area-toggler .fa-caret-square-o-up {
+    display: inline-block;
+}
+
+#top-left-edit {
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    left: 0;
 }

@@ -87,6 +87,15 @@ self.onmessage = function(event) {
   // TODO utiliser pour autoriser, côté main page, à recevoir des valeurs "invalides" (imaginons un popup signalant '3 valeurs étaient invalident et ont été ignorées'
   if (event.data.ALLOW_INVALID)
     ALLOW_INVALID = new OrisData(event.data.ALLOW_INVALID).asBoolean();
+
+  if (event.data.reinitialize) {
+    LoggerModule.info("[WORKER.ONMESSAGE] event.data.reinisialize received.", "Sending all stored Tasks");
+    postMessage({
+      updatedTasks: clearParentIds(ORIS_TASKS_BY_ID)
+    }, "*");
+
+  }
+
 };
 
 /**
@@ -268,21 +277,15 @@ function updateLocal(rawTaskDatas) {
     }
 
     // Remplacer la valeur et enregistrer ce remplacement pour le signaler
-    // TODO signaler ce remplacement (pour l'instant on est en mode naif
+    // TODO signaler ce remplacement (pour l'instant on est en mode naif)
     LoggerModule.info("updated or new ", currentOrisTask.userOptions);
     updatedTasks[currentOrisTask.getRaw('id')] = ORIS_TASKS_BY_ID[currentOrisTask.getRaw('id')] = currentOrisTask.userOptions;
   }
 
   /**
    * @GitHub-Issue #8
-   * todo Détecter une suppression côté serveur
-   *
-  let validTasksIds = Object.keys(ORIS_TASKS_BY_ID).sort(arr_sort),
-    rawTasksIds = rawTaskDatas.map(function (task) {
-      return task.id;
-    }).sort(arr_sort);
-  // console.info("sorted validTasksIds", validTasksIds);
-  // console.info("sorted rawTasksIds", rawTasksIds); // */
+   * Détecter une suppression côté serveur
+   */
   let deletedTasksIds = SHARED.arrayDifference(Object.keys(ORIS_TASKS_BY_ID), Object.keys(validTasksUserOptions));
   if (deletedTasksIds.length) {
     LoggerModule.info("IDs to delete", deletedTasksIds);
@@ -304,6 +307,7 @@ function updateLocal(rawTaskDatas) {
     LoggerModule.log("tasksToPush ", tasksToPush);
 
     /**
+     * @GanttIssue une valeur (ID) inexistante pour l'attribut &parent d'un Point cause un bug visuel
      * S'assurer de ne pas envoyer de valeurs non-existantes pour l'attribut parent
      */
     if (WORKER_CONFIG.asRaw["parent"])
@@ -398,34 +402,4 @@ function postError(errorMsg) {
   postMessage({
     error: errorMsg.toString()
   }, "*");
-}
-
-// todo à chier ? ou mal utilisé
-function arr_sort(x,y) {
-  let pre = ['string' , 'number' , 'bool'];
-  if(typeof x!== typeof y )return pre.indexOf(typeof y) - pre.indexOf(typeof x);
-
-  if(x === y)return 0;
-  else return (x > y)?1:-1;
-}
-
-
-function postData(data) {
-  var xhr = new XMLHttpRequest();
-
-  var url = window.location.href;
-  console.log("url", url);
-
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-type", "application/json");
-
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-      console.log("xhr.responseText", xhr.responseText);
-      var json = JSON.parse(xhr.responseText);
-      console.log("json", json);
-    }
-  };
-  let stringifiedData = JSON.stringify(data);
-  xhr.send(stringifiedData);
 }

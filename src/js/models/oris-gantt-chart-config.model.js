@@ -21,9 +21,7 @@ function GanttRenderingModule () {
           // DOM_REF.editButtons.delete.disabled = false;
           // MàJ la référence vers le point selectionné
           selectedPoint = this;
-          alertify.success("Task Selected Event", 0.75);
-
-
+          TOAST.info({body: "Task Selected Event", delay: 500 });
         },
         unselect: function(event, options) {
           // Décalage pour cohérence
@@ -32,36 +30,54 @@ function GanttRenderingModule () {
             document.getElementById("task-delete-button").disabled = !chartObj.getSelectedPoints().length;
           }, 10);
 
-          TOAST.success({ body: "Task Unselected Event", delay:750 });
+          TOAST.info({ body: "Task Unselected Event", delay: 500 });
           // alertify.success("Task Unselected Event", 0.75);
           // TODO
           console.warn("TODO: to implement");
 
           // return false;
-        },/*
-        dragStart: function (event, options) {
-          alertify.success("Task DragStart Event", 0.5);
-          // TODO
-          console.warn("TODO: to implement");
-          // return false;
-        }, // */
+        },
         drop: function (event) {
-          console.log("drop.event", event);
-          console.log("drop.this", this);
-          // TODO formatter event.newPoint.start et .end
+          console.info("drop event", event);
+          // Ici, les clefs sont celles d'HighCharts
+          // On veut les remplacer par celles de notre base (param_url)
+          let cloneOptions = {
+            id: this.id
+          };
+          if (event.newPoint.start || event.newPoint.start === 0)
+            cloneOptions.start = event.newPoint.start;
+          if (event.newPoint.end || event.newPoint.end === 0)
+            cloneOptions.end = event.newPoint.end;
+          /**
+           * Risque de poser problème si un Tick yAxis est "collapsed"
+           * @Issue https://github.com/highcharts/highcharts/issues/11486
+           */
+          if (event.newPoint.y || event.newPoint.y === 0)
+            cloneOptions.category = this.series.yAxis.categories[event.newPoint.y];
+          // Ignorer les millisecondes. C'est déjà dans les pickers à l'affichage
+          /*if (typeof cloneOptions.start === "number")
+            cloneOptions.start = new Date(cloneOptions.start).setMilliseconds(0);
+          if (typeof cloneOptions.end === "number")
+            cloneOptions.end = new Date(cloneOptions.end).setMilliseconds(0);//*/
 
-          alertify.error("Task Drop Event", 1);
-          // TODO
-          //    faire la requête pour le point déplacé
-          //    if (OK)
-          //      alertify.success
-          //    else
-          //      alertify.
 
-          let formattedData = SHARED.formatDataOptionsToPost(event.target.options, APP_MODULE.getParametresUrlOrisNoFunction());
-          console.error("formattedData", formattedData);
+          let newOptions = {},
+            paramUrlKeys = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.data;
+          for (let option in cloneOptions) {
+            if (paramUrlKeys[option]) {
+              console.warn("'" + option + "' becomes '" + APP_MODULE.getParametresUrlOrisNoFunction().asRaw[paramUrlKeys[option]["url_param"]] + "'", cloneOptions[option]);
+              newOptions[APP_MODULE.getParametresUrlOrisNoFunction().asRaw[paramUrlKeys[option]["url_param"]]] = (option === "start" || option === "end")
+                ? (cloneOptions[option] ? new Date(cloneOptions[option]).toISOString(): "")
+                : cloneOptions[option];
+            }
+          }
+          // En dûr... &vline needed pour l'argument de la fonction et ID pour la requête
+          newOptions["id"] = newOptions["vline"] = this.vline;
 
-          console.warn("TODO: to implement");
+
+          LoggerModule.info("drop's newOptions", newOptions);
+
+          APP_MODULE.getParametresUrlOris().tryAddOrEditPoint(newOptions, false);
 
           return false;
         },
@@ -70,11 +86,51 @@ function GanttRenderingModule () {
     // Référence aux boutons d'édition de tâches @type {DOM}
     DOM_REF = {
       editButtons: {
-        add: null,
-        edit: null,
-        delete: null
+        add: document.getElementById("task-add-button"),
+        edit: document.getElementById("task-edit-button"),
+        delete: document.getElementById("task-delete-button"),
+        destroy: document.getElementById("chart-destroy-button")
       }
     };
+
+  // Afficher le modal d'édition vide
+  DOM_REF.editButtons["add"].addEventListener("click", function () {
+    APP_MODULE.getTaskEditor().initAndShow({}, true)
+  });
+
+  // Afficher le modal d'édition avec les paramètres du point sélectionné
+  DOM_REF.editButtons["edit"].addEventListener("click", function () {
+    APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options, false)
+  });
+
+  // Reinitialize graph:
+  //  1) Destroy current graph and reset #graph-container's outterHTML (there are remains of previous chart)
+  //  2) GET all data from Worker
+  //  3) Redraw from scratch
+  DOM_REF.editButtons.destroy.addEventListener("click", function () {
+    // todo sudo showLoading (si une requête MàJ entre temps, on ne veut pas que ça cache le chargement,
+    //  on veut carrément l'ignorer vu qu'on doit redresser TOUT le graphique d'abord))
+
+    let renderToDiv = chartObj.renderTo,
+      renderToDivId = renderToDiv.id;
+    // Détruire le graphique
+    chartObj.destroy();
+    // Vider les restes
+    renderToDiv.outerHTML = '<div id="' + renderToDiv.id + '" ></div>';
+    // Envoyer le message au Worker pour récupérer totues les Tâches
+    APP_MODULE.reinitializeData();
+
+  });
+
+  // Déselectionner le Point avec la touche "Échap"
+  // todo prevent Default sur l'écouteur du modal pour ne pas désélectionner ici
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && selectedPoint                                             // touche Échap
+      && !document.getElementById("delete-point-modal").classList.contains("show")  // Aucun modal d'ouvert (à ce moment là, Échap sert à fermer le modal
+      && (!APP_MODULE.getTaskEditor().getInstance()
+        || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().getInstance().isOpen())))
+      selectedPoint.select(false);
+  });
 
   /**
    * @Initialisation
@@ -84,7 +140,7 @@ function GanttRenderingModule () {
   $("#delete-point-modal").on({
     "show.bs.modal": function (event) {
       document.getElementById("delete-point-label").innerText = SHARED.decodeHTML(selectedPoint.options.label);
-      document.getElementById("delete-point-label").innerHTML += "&nbsp;<i>(ID: " + SHARED.decodeHTML(selectedPoint.options.id) + ")</i>";
+      document.getElementById("delete-point-label").innerHTML += /*"&nbsp;*/"<i>(ID: " + SHARED.decodeHTML(selectedPoint.options.id) + ")</i>";
     },
     // focus le bouton de suppression pour pouvoir le valider avec la touche Entrée
     "shown.bs.modal": function (event) {
@@ -96,7 +152,6 @@ function GanttRenderingModule () {
     APP_MODULE.getParametresUrlOris().tryDeletePoint(selectedPoint.options);
   });
 
-  /**
   /**
    * Set l'attribut "disabled" des bouttons (implémentés) du task-edit-widget
    * @param {boolean} isDisabled
@@ -411,6 +466,7 @@ function GanttRenderingModule () {
         }
       };
 
+      // Changer le style d'un Point sélectionné
       BASE_CONFIG.plotOptions.gantt = {
         states: {
           select: {
@@ -435,121 +491,16 @@ function GanttRenderingModule () {
      * Ne pas réinstancier les boutons si on re-crée le graphe après l'avoir .destroy()
      */
     if (!DOM_REF.editButtons.edit) {
-        let editWidget = document.getElementById("task-edit-widget");
-        let editButtonStyles = {
-          add: {
-            class: "success",
-            icon: "fa-plus",
-            attributes: {
-              title: "Create new task"
-            },
-            label: "Add"
-          },
-          edit: {
-            class: "primary",
-            icon: "fa-edit",
-            attributes: {
-              title: "Edit selected task"
-            },
-            label: "Edit"
-          },
-          delete: {
-            class: "danger",
-            icon: "fa-trash",
-            label: "Delete",
-            attributes: {
-              title: "Delete selected task",
-              "data-toggle": "modal",
-              "data-target": "#delete-point-modal"
-            }
-          }
-        };
-
-        for (let key in DOM_REF.editButtons) {
-          let currentButton = editButtonStyles[key];
-          let div = document.createElement("div");
-          div.classList.add("btn-group", "col-4");
-
-          let btn = document.createElement("button");
-          btn.id = "task-" + key + "-button";
-          // Add button toujours activé
-          btn.disabled = key === "add" ? false : true;
-          btn.classList.add("btn", "btn-" + currentButton["class"]);  // , "col-3", "mr-1"
-          // Attributs
-          for (let attrKey in currentButton.attributes) {
-            btn.setAttribute(attrKey, currentButton.attributes[attrKey]);
-          }
-          btn.innerHTML = '<i class="fa ' + currentButton["icon"] + '"></i>&nbsp;' + currentButton["label"];
-
-          div.appendChild(btn);
-          editWidget.appendChild(div);
-          DOM_REF.editButtons[key] = btn;
-        }
-        DOM_REF.editButtons["add"].addEventListener("click", function () {
-          APP_MODULE.getTaskEditor().initAndShow({}, true)
-        });
-
-        DOM_REF.editButtons["edit"].addEventListener("click", function () {
-          APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options, false)
-        });
-
-        /**
-         * Ajouter le bouton permettant d'afficher / masquer "#widget-area"
-         *
-         * <button class="btn btn-dark collapsed" type="button" data-toggle="collapse" data-target="#widget-area" aria-expanded="false" aria-controls="widget-area"><i class="fa fa-cogs"></i></button>
-         */
-        /*
-        TODO ajouter le bouton "forceRefresh"
-          + déplacer les boutons avec seulement des icônes
-        <div id="widget-aze" style="
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;">
-          <button id="widget-area-toggler" class="btn btn-primary border-0" data-toggle="collapse" data-target="#widget-area" aria-controls="widget-area" aria-expanded="true"><i class="fa fa-cogs"></i></button><div class="btn-group" role="group" aria-label="Basic example" style="
-            position: absolute;
-            left: 0;
-            top: 40px;">
-          <button type="button" class="btn btn-warning">
-            <i class="fa fa-wrench"></i>
-          </button>
-          <button type="button" class="btn btn-success">
-            <i class="fa fa-plus"></i>
-          </button>
-          <button type="button" class="btn btn-primary">
-            <i class="fa fa-edit"></i>
-          </button>
-
-          <button type="button" class="btn btn-danger">
-            <i class="fa fa-trash"></i>
-          </button>
-        </div>
-        </div>
-         */
-        let toggleButton = document.createElement("button");
-        toggleButton.id = "widget-area-toggler";
-        toggleButton.classList.add("btn", "btn-primary", "collapsed", "border-0");
-        toggleButton.setAttribute("data-toggle", "collapse");
-        toggleButton.setAttribute("data-target", "#widget-area");
-        toggleButton.setAttribute("aria-controls", "widget-area");
-        toggleButton.setAttribute("aria-expanded", "false");
-        toggleButton.innerHTML = "<i class='fa fa-cogs'></i>";
-
-        document.getElementById("widget-area").classList.add("collapse");
-        document.getElementById("widget-area").parentNode.appendChild(toggleButton);
-
-
-
-        // Déselectionner le Point avec la touche "Échap"
-        // todo prevent Default sur l'écouteur du modal pour ne pas désélectionner ici
-        document.addEventListener("keydown", function (event) {
-          if (event.key === "Escape" && selectedPoint                                             // touche Échap
-            && !document.getElementById("delete-point-modal").classList.contains("show")  // Aucun modal d'ouvert (à ce moment là, Échap sert à fermer le modal
-            && (!APP_MODULE.getTaskEditor().getInstance()
-              || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().getInstance().isOpen())))
-            selectedPoint.select(false);
-        });
-      } // FIN init Buttons
+      // Déselectionner le Point avec la touche "Échap"
+      // todo prevent Default sur l'écouteur du modal pour ne pas désélectionner ici
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && selectedPoint                                             // touche Échap
+          && !document.getElementById("delete-point-modal").classList.contains("show")  // Aucun modal d'ouvert (à ce moment là, Échap sert à fermer le modal
+          && (!APP_MODULE.getTaskEditor().getInstance()
+            || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().getInstance().isOpen())))
+          selectedPoint.select(false);
+      });
+    } // FIN init Buttons
 
     return currentConfig = BASE_CONFIG;
   }

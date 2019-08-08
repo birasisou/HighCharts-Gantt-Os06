@@ -208,15 +208,16 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     LoggerModule.log("[generateWebserviceUpdateUrl] input param", userOptions);
 
     if (typeof userOptions !== "object")
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + userOptions);
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] L'argument de la fonction doit être un Objet contenant les attributs du Point à modifier " + userOptions);
 
     if (!userOptions.vline && !userOptions.vline !== 0)
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit contenir l'attribut vline");
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] L'argument de la fonction doit contenir l'attribut vline");
 
     let url = this.generateWebserviceActionUrl("modif");
     // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
     for (let option in userOptions) {
       url += "&" + option + "=" + userOptions[option];
+      // url += "&" + option + "=" + ((userOptions[option] === "") ? "(v)" : userOptions[option]); // Fait chier plus tard pour la comparaison et confirmation de la MàJ
     }
     return encodeURI(url);
   };
@@ -247,7 +248,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   this.tryAddOrEditPoint = function (formattedData, isAddRequest) {
     let self = this,  // Pas nécessaire mais bonne pratique ???
       initToast = TOAST.info({
-        header: "Trying to " + ( isAddRequest ?  "create a new task" : ("edit Task #" + formattedData.vline) ),
+        header: "Trying to " + ( isAddRequest ?  "create a new Task" : ("edit Task #" + formattedData.vline) ) + ".",
         // delay: 10000  // Il y a peut-être un risque que le Toast ne se masque pas si la réponse du Worker arrive trop vite (très improbable)
         autoHide: false
       });
@@ -280,10 +281,10 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       // SHARED.promiseGET(url)
       // JSON Parse
       .then(function (response) {
-        LoggerModule.warn("Trying to parse:", response);
         try {
           return JSON.parse(response);
         } catch (e) {
+          LoggerModule.error("Tried to parse:", response);
           LoggerModule.warn("But got Error", e);
           throw Error("Unable to parse response to JSON. " + e.message);
         }
@@ -320,14 +321,19 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           let currentPosted = postedTask["userOptions"][flippedDataKeys[attr]],
             currentActual = actualTask["userOptions"][flippedDataKeys[attr]];
 
-          console.log("- (userOptions' value) Is formattedData[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
-            + ", === to root[" + flippedDataKeys[attr] + "]: " +  (typeof currentPosted === "object" ? JSON.stringify(currentActual) : currentActual) + " ?");
+          console.log("- Obj pushed[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
+            + " === received[" + flippedDataKeys[attr] + "]: " +  (typeof currentPosted === "object" ? JSON.stringify(currentActual) : currentActual) + " ?");
           // if (actualTask["userOptions"][attr] !== postedTask["userOptions"][attr])
           if (typeof currentPosted === "object") {
-            if (JSON.stringify(currentPosted) !== JSON.stringify(currentActual))
-              throw "Mise à jour du Point échouée.<br/>La valeur ('" + flippedDataKeys[attr] + "'->"+ JSON.stringify(currentPosted) + "') du formulaire est différente de celle récupérée depuis le serveur (->'" + JSON.stringify(currentActual) +"').";
-          } else if (SHARED.decodeHTML(currentPosted) !== SHARED.decodeHTML(currentActual))
-            throw "Mise à jour du Point échouée.<br/>La valeur ('" + flippedDataKeys[attr] + "'->'"+ SHARED.decodeHTML(currentPosted) + "') du formulaire différentes de celle récupérée depuis le serveur(->'" + SHARED.decodeHTML(currentActual) + "').";
+            if (JSON.stringify(currentPosted) !== JSON.stringify(currentActual)) // todo (v) pour ça aussi...
+              throw "Mise à jour du Point échouée." +
+              "<br/>La valeur ('" + flippedDataKeys[attr] + "'->"+ JSON.stringify(currentPosted) + "') envoyée est différente de celle récupérée depuis le serveur (->'" + JSON.stringify(currentActual) +"').";
+          } // valeur différentes
+          else if (SHARED.decodeHTML(currentPosted) !== SHARED.decodeHTML(currentActual)
+            // mais pas parce qu'une valeur est vide et que la seule façon de push une valeur vide au serveur c'est d'envoyer "(v)"
+            && !(SHARED.decodeHTML(currentPosted) === "" && currentActual === "(v)") )
+            throw "Mise à jour du Point échouée." +
+            "<br/>La valeur ('" + flippedDataKeys[attr] + "'->'"+ SHARED.decodeHTML(currentPosted) + "') envoyée différentes de celle récupérée depuis le serveur(->'" + SHARED.decodeHTML(currentActual) + "').";
         }
 
         // Success Toast

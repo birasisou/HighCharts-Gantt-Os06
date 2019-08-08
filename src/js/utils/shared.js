@@ -354,6 +354,7 @@ function SHARED_FACTORY() {
       });
     },
 
+    /*
     formatDataOptionsToPost: function (dataOptions, parametresUrlOrisNoFunction) {
       let hcConfigKeys = parametresUrlOrisNoFunction.CONSTANTS.HC_CONFIG_KEYS.data,
         asRaw = parametresUrlOrisNoFunction.asRaw,
@@ -372,7 +373,7 @@ function SHARED_FACTORY() {
       }
 
       return formattedData;
-    }
+    } // */
   }
 }
 
