@@ -1,11 +1,13 @@
 /**
  * Module used to draw / update the Gantt Chart
  */
-function GanttRenderingModule () {
-//let GanttRenderingModule = (function () {
+function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
   /**
    * @Variables
    */
+  // PRIVATE
+  let paramUrlOrisNoFunctions = PARAMETRES_URL_ORIS_NO_FUNCTIONS;
+
   // PUBLIC
   let currentConfig = null,
     self = this,
@@ -31,14 +33,8 @@ function GanttRenderingModule () {
           }, 10);
 
           TOAST.info({ body: "Task Unselected Event", delay: 500 });
-          // alertify.success("Task Unselected Event", 0.75);
-          // TODO
-          console.warn("TODO: to implement");
-
-          // return false;
         },
         drop: function (event) {
-          console.info("drop event", event);
           // Ici, les clefs sont celles d'HighCharts
           // On veut les remplacer par celles de notre base (param_url)
           let cloneOptions = {
@@ -55,18 +51,33 @@ function GanttRenderingModule () {
           if (event.newPoint.y || event.newPoint.y === 0)
             cloneOptions.category = this.series.yAxis.categories[event.newPoint.y];
           // Ignorer les millisecondes. C'est déjà dans les pickers à l'affichage
-          /*if (typeof cloneOptions.start === "number")
+          //*
+          if (typeof cloneOptions.start === "number")
             cloneOptions.start = new Date(cloneOptions.start).setMilliseconds(0);
           if (typeof cloneOptions.end === "number")
-            cloneOptions.end = new Date(cloneOptions.end).setMilliseconds(0);//*/
+            cloneOptions.end = new Date(cloneOptions.end).setMilliseconds(0);
+          // */
 
+          // S'il y a des groupes (parent/subtask),
+          //  il faut faire une manipulation particulière pour également MàJ l'attribut &parent
+          //  (HC version 7.1.2)
+          //  https://github.com/highcharts/highcharts/issues/11486
+          if (paramUrlOrisNoFunctions.asRaw["parent"]
+              // MàJ un Point juste en le "resizant" ne change pas son Y donc event.newPoint.y n'existe pas
+              && (event.newPoint["y"] || event.newPoint["y"] === 0)
+              // && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]]
+              && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes
+              && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes[0]) {
+            cloneOptions.parent = this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes[0].parent || "";
+            LoggerModule.info("newOptions.parent", cloneOptions.parent);
+          }
 
           let newOptions = {},
-            paramUrlKeys = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.data;
+            paramUrlKeys = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.data;
           for (let option in cloneOptions) {
             if (paramUrlKeys[option]) {
-              console.warn("'" + option + "' becomes '" + APP_MODULE.getParametresUrlOrisNoFunction().asRaw[paramUrlKeys[option]["url_param"]] + "'", cloneOptions[option]);
-              newOptions[APP_MODULE.getParametresUrlOrisNoFunction().asRaw[paramUrlKeys[option]["url_param"]]] = (option === "start" || option === "end")
+              LoggerModule.info("'" + option + "' becomes '" + paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]] + "'", cloneOptions[option]);
+              newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] = (option === "start" || option === "end")
                 ? (cloneOptions[option] ? new Date(cloneOptions[option]).toISOString(): "")
                 : cloneOptions[option];
             }
@@ -78,7 +89,6 @@ function GanttRenderingModule () {
           LoggerModule.info("drop's newOptions", newOptions);
 
           APP_MODULE.getParametresUrlOris().tryAddOrEditPoint(newOptions, false);
-
           return false;
         },
       }
@@ -111,15 +121,15 @@ function GanttRenderingModule () {
     // todo sudo showLoading (si une requête MàJ entre temps, on ne veut pas que ça cache le chargement,
     //  on veut carrément l'ignorer vu qu'on doit redresser TOUT le graphique d'abord))
 
-    let renderToDiv = chartObj.renderTo,
+    /* let renderToDiv = chartObj.renderTo,
       renderToDivId = renderToDiv.id;
     // Détruire le graphique
     chartObj.destroy();
     // Vider les restes
     renderToDiv.outerHTML = '<div id="' + renderToDiv.id + '" ></div>';
     // Envoyer le message au Worker pour récupérer totues les Tâches
-    APP_MODULE.reinitializeData();
-
+    APP_MODULE.reinitializeData(); // */
+    APP_MODULE.reinializeChart();
   });
 
   // Déselectionner le Point avec la touche "Échap"
@@ -305,7 +315,7 @@ function GanttRenderingModule () {
             formatter: function() {
               let str = this.point.label || "";
               if (this.point.completed && this.point.completed.amount && typeof this.point.completed.amount === "number")
-                str += " (" + (this.point.completed.amount*100).toFixed(0) + "%)";
+                str += " (" + ((Math.round(this.point.completed.amount*100)*10)/10)  + "%)"; // .toFixed(0) + "%)";
               return str;
             } //*/
           }
@@ -361,13 +371,30 @@ function GanttRenderingModule () {
           if (this.point.completed && this.point.completed.amount) {
             let amount = this.point.completed.amount;
             if (amount <= 1)
-              amount = amount * 100;
+              amount = ((Math.round(amount*100)*10)/10);
             str += "<br><small>Avancement:&nbsp;" + amount + "%</small>";
           }
 
           // OWNER
           if (this.point.owner)
             str += "<br><small>Responsable:&nbsp;" + this.point.owner + "</small>";
+
+          /**
+           * @Issue #19
+           * Custom Inputs
+           */
+          for (let customInput in paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel) {
+            // N'afficher la ligne que si l'input existe ET a une valeur
+            if (this.point[customInput]) {
+              str += "<br><small>";
+              // Si l'input custom a un label, afficher "<label>: "
+              let customLabel = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel[customInput];
+              if (customLabel)
+                str += customLabel + ": ";
+              str += this.point[customInput] + "</small>";
+            }
+          }
+
 
           return str;
         }

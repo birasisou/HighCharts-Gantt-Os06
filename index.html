@@ -94,7 +94,8 @@
               <i class="fa fa-plus"></i>&nbsp;Add
             </button>
 
-            <button id="task-edit-button" class="rounded-0 btn btn-primary mr-1" disabled title="Edit selected task">
+            <button id="task-edit-button" class="rounded-0 btn btn-primary mr-1" disabled
+                    title="Edit selected task">
               <i class="fa fa-pencil"></i>&nbsp;Edit
             </button>
 
@@ -115,7 +116,7 @@
             </div>
           </form>
           <div class="p-2">
-            <button id="chart-destroy-button" class="btn btn-warning rounded-0" title="Reinitialize chart" data-toggle="modal">
+            <button id="chart-destroy-button" class="btn btn-warning rounded-0" title="Reinitialize chart">
               <i class="fa fa-refresh"></i> Reset
             </button>
           </div>
@@ -129,7 +130,7 @@
 
     </div>
 
-    <!-- Point editor modal -->
+    <!-- Point editor modal --
     <form id="secret-santa" class="container">
       <div class="form-row">
         <div class="form-group col-5">
@@ -174,7 +175,7 @@
           <label for="task-completed-input">Progress</label>
           <div class="input-group">
             <input id="task-completed-input" type="number" class="form-control" placeholder="Progress" min="0"
-                   max="100" step="1"> <!-- onclick="this.setSelectionRange(0, this.value.length)" NE FONCTIONNE PAS AVEC TYPE="NUMBER" -->
+                   max="100" step="1">
             <div class="input-group-append">
               <span class="input-group-text">%</span>
             </div>
@@ -199,14 +200,124 @@
         <div class="form-group offset-2 col-5">
           <label for="task-dependency-input">Dependency</label>
           <select class="selectpicker form-control" id="task-dependency-input" data-size="5" title="None">
-          <!--
-            <select class="browser-default custom-select" id="task-dependency-input" onmousedown="if(this.options.length>5){this.size=5;}"  onchange='this.removeAttribute("size");' onblur='this.removeAttribute("size");'>
-          -->
             <option value=""></option>
           </select>
         </div>
       </div>
     </form>
+    -->
+
+    <!-- Point editor modal -->
+    <div class="modal fade" id="task-edit-modal" tabindex="-1" role="dialog" aria-labelledby="task-edit-modal-label" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="task-edit-modal-label">Task Editor</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="secret-santa" class="container">
+              <div class="form-row">
+                <div class="form-group col-5" title="Task's name. Visible on top of the task in the graphic">
+                  <label for="task-name-input">Name</label>
+                  <input type="text" class="form-control" id="task-name-input" placeholder="Name" onclick="this.setSelectionRange(0, this.value.length)">
+                </div>
+
+                <div class="form-group offset-2 col-5" title="Task's ID">
+                  <label for="task-id-input">ID</label>
+                  <input type="text" class="form-control" id="task-id-input" readonly placeholder="ID">
+                </div>
+
+                <div hidden class="form-group" title="Server's Task ID">
+                  <label for="task-vline-input">vline</label>
+                  <input type="text" class="form-control" id="task-vline-input" placeholder="vline">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-5" title="Task's starting date">
+                  <label for="task-start-input">Start</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control cursor-pointer" id="task-start-input" placeholder="Start date" value="">
+                    <div class="input-group-append">
+                      <span class="input-group-text fa fa-calendar"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group offset-2 col-5" title="Task's ending date. Not available for milestones">
+                  <label for="task-end-input">End</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control cursor-pointer" id="task-end-input" placeholder="End date" value="">
+                    <div class="input-group-append">
+                      <span class="input-group-text fa fa-calendar"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-5" title="Task category, visible on the left. Tasks with exactly the same category are grouped on the same line">
+                  <label for="task-category-input">Category</label>
+                  <select class="selectpicker form-control" id="task-category-input" data-size="5" title="None">
+                    <option value=""></option>
+                  </select>
+                </div>
+
+                <div class="form-group offset-2 col-5 colorpicker-component" title="Task color">
+                  <label for="task-color-input">Colour</label>
+                  <input id="task-color-input" type="text" value="" placeholder="Automatic" autocomplete="off" class="form-control cursor-pointer"/>
+                  <span class="input-group-addon"><i></i></span>
+                </div>
+              </div>
+
+
+              <!-- Row contenant les Inputs optionnels ET ceux définits par l'utilisateur // À instancier -->
+              <div class="form-row" id="optional-inputs-row">
+                <div hidden class="form-group col-5" id="task-completed-form-group" title="Task advancement (percentage value means a decimal from 0 to 1 or whole number from 0 to 100; but 1 means 100)">
+                  <label for="task-completed-input">Progress</label>
+                  <div class="input-group">
+                    <input id="task-completed-input" type="number" class="form-control" placeholder="Progress" min="0"
+                           max="100" step="1"> <!-- onclick="this.setSelectionRange(0, this.value.length)" NE FONCTIONNE PAS AVEC TYPE="NUMBER" -->
+                    <div class="input-group-append">
+                      <span class="input-group-text">%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Offset initial à masquer À MASQUER
+                  si #task-completed-input est absent (asRaw[CONSTANTS.data["completed"].url_param])
+                  si #task-completed-input ET #task-dependency-input sont absents -->
+                <div hidden class="form-group col-5" id="task-dependency-form-group" title="Arrow from dependency to selected task">
+                  <label for="task-dependency-input">Dependency</label>
+                  <select class="selectpicker form-control" id="task-dependency-input" data-size="5" title="None">
+                    <option value=""></option>
+                  </select>
+                </div>
+
+                <div hidden class="form-group col-5" id="task-parent-form-group"  title="This task will become a sub-task, sub-group, of the given parent">
+                  <label for="task-parent-input">Parent</label>
+                  <select class="selectpicker form-control" id="task-parent-input" data-size="5" title="None">
+                    <option value=""></option>
+                  </select>
+                </div>
+
+                <!-- TODO implement -->
+                <div hidden class="form-group col-5" id="task-icon-form-group"  title="This will add the selected icon next to the task">
+                  <label for="task-icon-input">Parent</label>
+                  <select class="selectpicker form-control" id="task-icon-input" data-size="5" title="None">
+                    <option value=""></option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div> <!-- FIN EDIT MODAL -->
+
+
 
     <!-- Modal de suppression de Point -->
     <div class="modal" id="delete-point-modal" role="dialog" aria-modal="true">

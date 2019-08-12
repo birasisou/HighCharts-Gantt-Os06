@@ -1,4 +1,22 @@
 let APP_MODULE;
+
+/**
+ * Override HighCharts' error handling function
+ * TODO ne marche pas.
+ *    Réussir permettrait de "force refresh" quand il y a une erreur
+ *
+(function() {
+  let proxied = Highcharts.error;
+  Highcharts.error = function() {
+    try {
+      console.log( this, arguments );
+      return proxied.apply( this, arguments );
+    } catch(e) {
+      console.warn("CAUGHT AN HIGHCHARTS ERROR", e);
+    }
+  };
+})(); // */
+
 new Promise(function(resolve, reject) {
 
   // try {
@@ -88,7 +106,7 @@ new Promise(function(resolve, reject) {
         // CONFIG
         PARAMETRES_URL_ORIS = new ParametresUrlOris(window.location.href),
         PARAMETRES_URL_ORIS_NO_FUNCTIONS = PARAMETRES_URL_ORIS.getAllButFunctions(),
-        GANTT_RENDERING_MODULE = new GanttRenderingModule(),
+        GANTT_RENDERING_MODULE = new GanttRenderingModule(PARAMETRES_URL_ORIS_NO_FUNCTIONS),
         // UI
         LOADING_OVERLAY_HANDLER = new LoadingOverlayHandler(HTML_LOADER_ID),
         TASK_EDITOR_MODAL = null,
@@ -108,7 +126,7 @@ new Promise(function(resolve, reject) {
          * Initialisation et UI
          **/
         LOADING_OVERLAY_HANDLER.showLoading();
-        TASK_EDITOR_MODAL = new TASK_EDITOR_MODAL_FACTORY();
+        TASK_EDITOR_MODAL = new TASK_EDITOR_MODAL_FACTORY(PARAMETRES_URL_ORIS_NO_FUNCTIONS);
 
         /**
          * Initialiser Page UI
@@ -149,10 +167,30 @@ new Promise(function(resolve, reject) {
         startWorker();
       }
 
+      /**
+       * Demande au Worker toutes les données utilisables du serveur
+       */
       function sendReinitializeMessageToWorker() {
         WORKER.postMessage({
           reinitialize: true
         });
+      }
+
+      /**
+       * Détruit puis redessine le graphique
+       */
+      function reinitializeChart() {
+        // todo sudo showLoading (si une requête MàJ entre temps, on ne veut pas que ça cache le chargement,
+        //  on veut carrément l'ignorer vu qu'on doit redresser TOUT le graphique d'abord))
+
+        let renderToDiv = GANTT_RENDERING_MODULE.getChart().renderTo,
+          renderToDivId = renderToDiv.id;
+        // Détruire le graphique
+        GANTT_RENDERING_MODULE.getChart().destroy();
+        // Vider les restes
+        renderToDiv.outerHTML = '<div id="' + renderToDiv.id + '" ></div>';
+        // Envoyer le message au Worker pour récupérer totues les Tâches
+        this.reinitializeData();
       }
       
       /**
@@ -348,7 +386,8 @@ new Promise(function(resolve, reject) {
           return TASK_EDITOR_MODAL;
         },
 
-        reinitializeData: sendReinitializeMessageToWorker
+        reinitializeData: sendReinitializeMessageToWorker,
+        reinializeChart: reinitializeChart
       }
     })();
   /* } catch (e) {

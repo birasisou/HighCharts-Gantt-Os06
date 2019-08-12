@@ -25,7 +25,8 @@ function OrisGanttTask(data_row, oris_config) {
   // Les cléfs, définies dans notre url (GET parameters), correspondant aux userOptions d'HC
   let oris_column = oris_config.asRaw,
     // Les clés userOptions HighCharts
-    oris_config_HC_CONFIG_KEYS = oris_config.CONSTANTS.HC_CONFIG_KEYS.data;   //  *    parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS.data
+    oris_config_HC_CONFIG_KEYS_data = oris_config.CONSTANTS.HC_CONFIG_KEYS.data,   // parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS.data
+    oris_config_HC_CONFIG_KEYS_dataLabel = oris_config.CONSTANTS.HC_CONFIG_KEYS.dataLabel;
 
   // RAJOUTER LA CLEF UNIQUE ORIS "vline"
   /*boot
@@ -48,18 +49,18 @@ function OrisGanttTask(data_row, oris_config) {
    * La clé est celle définie dans l'argument CONFIG parametres_url_oris_config (".CONSTANTS.HC_CONFIG_KEYS.data")
    */
   // Liste des paramètres "implémentés" d'une série HighCharts
-  let keys = Object.keys(oris_config_HC_CONFIG_KEYS),
-    length = keys.length;
+  let keys = Object.keys(oris_config_HC_CONFIG_KEYS_data),
+    data_length = keys.length;
 
-  while (length--) {
-    let key = keys[length];
+  while (data_length--) {
+    let key = keys[data_length];
     // L'équivalent Oris (définit en paramètre url)
-    LoggerModule.log("(oris_config_HC_CONFIG_KEYS["+key+"]['url_param']) Our GET parameter equivalent", oris_config_HC_CONFIG_KEYS[key]['url_param']);
+    LoggerModule.log("(oris_config_HC_CONFIG_KEYS["+key+"]['url_param']) Our GET parameter equivalent", oris_config_HC_CONFIG_KEYS_data[key]['url_param']);
 
     // SAVE DATA
 
     // en dur
-    this.rawUserOptions[key] = data_row[oris_column[oris_config_HC_CONFIG_KEYS[key]['url_param']]];
+    this.rawUserOptions[key] = data_row[oris_column[oris_config_HC_CONFIG_KEYS_data[key]['url_param']]];
     // La valeur du data_row
     // TODO faut passer par asRaw....
     LoggerModule.log("(This dataRow's value) data_row[oris_config_HC_CONFIG_KEYS[key]['url_param']] " + key + ":", this.rawUserOptions[key]);
@@ -69,7 +70,7 @@ function OrisGanttTask(data_row, oris_config) {
     LoggerModule.log("(This userOptions's value as OrisValue Object) this.orisValueUserOption[key] " + key + ":", this.orisValueUserOption[key]);
 
     // as formatted
-    this.userOptions[key] = this.orisValueUserOption[key][oris_config_HC_CONFIG_KEYS[key]['format']]();
+    this.userOptions[key] = this.orisValueUserOption[key][oris_config_HC_CONFIG_KEYS_data[key]['format']]();
     LoggerModule.log("(This userOptions's value formatted) userOptions[key] " + key + ":", this.userOptions[key]);
   }
 
@@ -88,6 +89,29 @@ function OrisGanttTask(data_row, oris_config) {
         this.userOptions["completed"] = { amount: Number(Number(this.userOptions["completed"]).toFixed(2)) };
   } else
     this.userOptions["completed"] = null;
+
+  // todo GitIssue #19
+  //    Inputs customisés
+  for (let customInputKey in oris_config_HC_CONFIG_KEYS_dataLabel) {
+    // Si la BD ne renvoie pas de colonne, ça veut dire qu'elle n'existe pas, donc on ne stock rien
+    // À l'inverse, on veut stocker une valeur vide si la base renvoie une valeur vide
+    if (!data_row.hasOwnProperty(customInputKey))
+      continue;
+    // en dur
+    this.rawUserOptions[customInputKey] = data_row[customInputKey];
+    // La valeur du data_row
+    LoggerModule.log("Custom Label " + customInputKey + ":", this.rawUserOptions[customInputKey]);
+
+    // as OrisValue
+    this.orisValueUserOption[customInputKey] = new OrisData(this.rawUserOptions[customInputKey]);
+    LoggerModule.log("this.orisValueUserOption[key] " + customInputKey + ":", this.orisValueUserOption[customInputKey]);
+
+    // as formatted
+    this.userOptions[customInputKey] = this.orisValueUserOption[customInputKey].asString();
+    LoggerModule.log("userOptions[key] " + customInputKey + ":", this.userOptions[customInputKey]);
+  }
+
+
 
   /**
    * Fixe le problème de mise à jour de milestone à tâche et vice-versa

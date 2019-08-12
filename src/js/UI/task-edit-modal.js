@@ -7,12 +7,17 @@
  * Les paramètres HighCharts paramétrables sont renseignés dans ParametresUrlOris.CONSTANTS.HC_CONFIG_KEYS.data
  *  et c'est ici que l'on fait l'équivalence entre "attribut HC" et "ID de la colonne de la base"
  */
-function TASK_EDITOR_MODAL_FACTORY () {
+function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
   /**
    * Form HTML servant de template
    * @type {HTMLElement}
    */
   let FORM_TEMPLATE = document.getElementById("secret-santa"),
+
+    paramUrlOris = parametresUrlOrisNoFunctions,
+    asRawParams = paramUrlOris.asRaw,
+    HC_CONFIG_KEYS = paramUrlOris.CONSTANTS.HC_CONFIG_KEYS,
+
     /**
      * userOptions de la Tâche actuellement modifiée (ou dernièrement modifiée)
      */
@@ -29,18 +34,21 @@ function TASK_EDITOR_MODAL_FACTORY () {
      * <userOption>:<DOM Input>
      */
     INPUTS = {
-      label: document.getElementById(inputId("name")),  // LABEL et pas NAME
+      vline: document.getElementById(inputId("vline")),
+      label: document.getElementById(inputId("name")),  // LABEL et pas NAME /!\
       id: document.getElementById(inputId("id")),
       start: document.getElementById(inputId("start")),
       end: document.getElementById(inputId("end")),
-      completed: document.getElementById(inputId("completed")),
       color: document.getElementById(inputId("color")),
       category: document.getElementById(inputId("category")),
+      // Optionnels
+      completed: document.getElementById(inputId("completed")),
+      parent: document.getElementById(inputId("parent")),
       dependency: document.getElementById(inputId("dependency")),
-      vline: document.getElementById(inputId("vline"))
-
       // TODO Add custom Labels (responsable, icon, etc...)
-    };
+    },
+    // Référence to the custom formGroups created by the user
+    CUSTOM_GROUP_INPUTS = {};
 
   /**
    * Initialiser les éléments de l'UI
@@ -54,11 +62,13 @@ function TASK_EDITOR_MODAL_FACTORY () {
   // Les Date pickers
   $(INPUTS["start"]).datetimepicker({
     useCurrent: false,
+    showTodayButton: true,
     locale: moment.locale() || 'fr',
     // format: 'L' // que la date, pas les heures
   });
   $(INPUTS["end"]).datetimepicker({
     useCurrent: false,
+    showTodayButton: true,
     locale: moment.locale() || 'fr',
     // format: 'L LT' Date + Heure:Secondes --> format par défaut
   });
@@ -72,14 +82,12 @@ function TASK_EDITOR_MODAL_FACTORY () {
     }
   });
 
-
   $(INPUTS["end"]).on("dp.change", function (e) {
     $(INPUTS["start"]).data("DateTimePicker").maxDate(e.date);
   });
 
   // Les sélecteurs sont vides par défaut, on n'a qu'à les update
   $(INPUTS["category"]).selectpicker();
-  $(INPUTS["dependency"]).selectpicker();
 
   /**
    * Génère l'ID de l'input (normalisation)
@@ -88,6 +96,167 @@ function TASK_EDITOR_MODAL_FACTORY () {
    */
   function inputId(id) {
     return "task-" + id + "-input";
+  }
+
+  /**
+   * Initialisation
+   */
+  initCustomInputs(parametresUrlOrisNoFunctions.asArray);
+
+
+  /**
+   * TODO Issue #19
+   * Instancie les inputs personnalisés dans le modal d'édition de Tâche
+   *
+   * On permet à l'utilisateur de créer des <input type="text"> customisés.
+   * Les valeurs apparaîtront dans la bulle de survol (tooltip)
+   *    Les ID des colonnes de la base sont précisés dans l'attribut "&inputs-id=" d'où proviennent les valeurs
+   *    Les Labels des <input>, ainsi que dans le tooltip, sont précisés dans l'attribut "&inputs-label="
+   *
+   */
+  /*
+   * @param {Object} paramAsArray
+   *    Objet contenant les valeurs des paramètres GET de l'URL sous forme d'array.
+   *    Le tableau est généré en splittant l'attribut à chaque "," (virgule) TODO point-virgule ? La convention est d'utiliser des virgules cependant
+   */
+  function initCustomInputs(paramAsArray) {
+    // Initialiser les paramètres optionnels (&completed et &dependency
+    // TODO ainsi que les Input Custom
+    let isLeftSideInput = true;
+    if (asRawParams[HC_CONFIG_KEYS.data.completed.url_param]) {
+      document.getElementById("task-completed-form-group").removeAttribute("hidden");
+      isLeftSideInput = !isLeftSideInput;
+    }
+    if (asRawParams[HC_CONFIG_KEYS.data.dependency.url_param]) {
+      // Afficher un "offset-2" si on est à droite (i.e. #task-completed-input est visible)
+      if (!isLeftSideInput)
+        INPUTS["dependency"].parentNode.classList.add("offset-2");
+      // Afficher l'élément
+      document.getElementById("task-dependency-form-group").removeAttribute("hidden");
+      $(INPUTS["dependency"]).selectpicker();
+      isLeftSideInput = !isLeftSideInput;
+    }
+    /**
+     * @GitIssue #24
+     * Permettre de changer de parent/sous-groupe
+     */
+    if (asRawParams[HC_CONFIG_KEYS.data.parent.url_param]) {
+      // Afficher un "offset-2" si on est à droite (i.e. #task-completed-input est visible)
+      if (!isLeftSideInput)
+        INPUTS["parent"].parentNode.classList.add("offset-2");
+      // Afficher l'élément
+      document.getElementById("task-parent-form-group").removeAttribute("hidden");
+      $(INPUTS["parent"]).selectpicker();
+      isLeftSideInput = !isLeftSideInput;
+    }
+
+    /*
+     * Custom Inputs
+     */
+    let customInputRow = document.getElementById("optional-inputs-row");
+      // paramInputsId = paramAsArray["_inputs-id"],
+      // paramInputsLabel = paramAsArray["_inputs-label"];
+
+    // On ne peut rien instancier si on n'a pas l'un de ces deux paramètres
+    // if (!paramInputsId || !paramInputsLabel)
+
+    // On ne peut rien instancier si on n'a pas de clef/ID de colonne
+    if (!Object.keys(HC_CONFIG_KEYS.dataLabel))
+      return false;
+
+
+    // Les id-labels customs sont formattés lors de l'instanciation lors de l'instanciation de ParametresUrlOris
+    for (let customInputKey in HC_CONFIG_KEYS.dataLabel) {
+      let formGroup = null;
+      try {
+        formGroup = new FormGroupInput({
+          id: customInputKey,
+          label: HC_CONFIG_KEYS.dataLabel[customInputKey] // || ""
+        });
+      } catch(e) {
+        // do nothing
+      }
+      if (formGroup) {
+        console.info(formGroup);
+        if (!isLeftSideInput) {
+          formGroup.classList.add("offset-2");
+        }
+        isLeftSideInput = !isLeftSideInput;
+        customInputRow.appendChild(formGroup);
+        // CUSTOM_GROUP_INPUTS[customInputKey] = formGroup;
+        CUSTOM_GROUP_INPUTS[customInputKey] = formGroup;
+      }
+    }
+
+    /* Version sans paramUrlOris
+    let i=0,
+      l = paramInputsId.length;
+    for (i; i<l; ++i) {
+      // N'instancier un <input> SSI on a un ID; tant pis s'il n'y a pas de label
+      if (paramInputsId[i] && !CUSTOM_GROUP_INPUTS[paramInputsId[i]]) {
+        let formGroup;
+        try {
+          formGroup = new FormGroupInput({
+            id: paramInputsId[i],
+            label: paramInputsLabel[i] || ""
+          });
+        } catch(e) {
+          // do nothing
+        }
+        if (formGroup) {
+          console.info(formGroup);
+          if (!isLeftSideInput) {
+            formGroup.classList.add("offset-2");
+          }
+          isLeftSideInput = !isLeftSideInput;
+          customInputRow.appendChild(formGroup);
+          CUSTOM_GROUP_INPUTS[paramInputsId[i]] = formGroup;
+        }
+      }
+    } // */
+  }
+
+  /**
+   * Instancie un <input type="text">
+   *
+   * @param {Object} config
+   *    Doit contenir l'attribut
+   *    - id (ID de la colonne de la base. Utilisé pour récupérer la valeur et userOptions dans HighCharts)
+   *    - label (Label de l'<input> et précédant la valeur de l'attribut dans la bulle)
+   *
+   * @return {HTMLElement}
+   *    <input type="text">
+   * @constructor
+   */
+  function FormGroupInput(config) {
+    // Ne devrait pas arriver vu qu'on check avant d'appeler cette fonction
+    if (!config || !config.id) // || !config.label)
+      throw new EXCEPTIONS.MissingArgumentExcepetion("FormGroupInput constructor");
+
+    let formGroup = document.createElement("div"),
+      formGroupId = "task-" + config.id + "-custom-form-group",
+      label = document.createElement("label"),
+      input = document.createElement("input"),
+      _inputId = inputId(config.id + "-custom"); // "task-" + config.id + "-custom-input";
+
+    formGroup.classList.add("form-group", "col-5");
+    formGroup.id = formGroupId;
+
+    label.setAttribute("for", _inputId);
+    label.innerHTML = config.label || "&nbsp;"; // Il faut un truc sinon le label n'a pas de hauteur
+
+    input.id = _inputId;
+    input.classList.add("form-control");
+    input.setAttribute("type", "text");
+    input.setAttribute("placeholder", config.label);
+    input.setAttribute("data-id", config.id);
+    input.setAttribute("onclick", "this.setSelectionRange(0, this.value.length); ");
+
+    // Assembler
+    formGroup.appendChild(label);
+    formGroup.appendChild(input);
+
+    return formGroup;
   }
 
   // todo
@@ -109,6 +278,7 @@ function TASK_EDITOR_MODAL_FACTORY () {
 
     console.info("[initInputs] taskOptions", taskOptions);
 
+    // Les inputs obligatoires
     for (let input in INPUTS) {
       if (!INPUTS[input])
         continue;
@@ -135,10 +305,17 @@ function TASK_EDITOR_MODAL_FACTORY () {
         else
           INPUTS[input].value = taskOptions[input];
 
-        INPUTS[input].disabled = (input === "category" && APP_MODULE.getParametresUrlOrisNoFunction().asRaw.parent);
+        // Maintenant qu'on a un bouton hard reset (#25)
+        // on autorise la MàJ de &category lorsque &parent est activé si un groupe Y est masque (collapsed)
+        // (risque élevé de casser le visuel)
+        INPUTS[input].disabled = false; // = (input === "category" && APP_MODULE.getParametresUrlOrisNoFunction().asRaw.parent);
       }
       else if (typeof taskOptions[input] === "object" && input === "completed" && taskOptions["completed"]) {
-        INPUTS["completed"].value = (Number(taskOptions["completed"]["amount"]) <= 1) ? Number(taskOptions["completed"]["amount"])*100 : Number(taskOptions["completed"]["amount"]);
+        if (taskOptions["completed"]["amount"] === "")
+          INPUTS[input].value = "";
+        else
+          INPUTS["completed"].value = (Number(taskOptions["completed"]["amount"]) <= 1) ? (Math.round(Number(taskOptions["completed"]["amount"])*100)*10/10)
+            : (Math.round(Number(taskOptions["completed"]["amount"])*10)/10);
         INPUTS[input].disabled = false;
       }
       else {  // Pas de valeur
@@ -166,6 +343,37 @@ function TASK_EDITOR_MODAL_FACTORY () {
          */
         if (isAddEditor && (input === "start" || input === "end"))
           $(INPUTS[input]).data("DateTimePicker").showClear(true);
+      }
+    }
+    
+    // Les inputs customisés
+    let needsNewOffset = false;
+    for (let customInputKey in CUSTOM_GROUP_INPUTS) {
+      // La clé n'existe pas
+      if (!taskOptions[customInputKey]
+        && taskOptions[customInputKey] !== "") {
+        // Ça va spam cette erreur mais ça me semble important car l'utilisateur essaie d'afficher une colonne de la BD qui n'existe pas
+        let errStr = "The column '" + customInputKey + "' doesn't exist in the DataBase and was deleted from the Editor.";
+        LoggerModule.error(errStr);
+        TOAST.error({ header: errStr, body: "Correct the page URL to fix the interface (if needed).", delay: 5000 });
+        /*
+        // On désactive l'input (façon sale, on sait qu'on n'init que des inputs texte mais on ref le form-group)
+        CUSTOM_GROUP_INPUTS[customInputKey].children[1].disabled = true;
+        // Vider la valeur sinon on verrait la valeur du précédent Point sélectionné
+        CUSTOM_GROUP_INPUTS[customInputKey].children[1].value = "";
+        // Je doit me démerder pour masquer les .form-group sans ruiner les "offset-2" *
+        // SACHANT QU'il est possible d'avoir plusieurs inputs customs à la suite qui sont masqués
+        // (mais là c'est l'utilsateur qui est c*n...)
+        // OU
+        // je retire l'input faux du DOM
+        CUSTOM_GROUP_INPUTS[customInputKey].classList.add("hidden"); // */
+        // Suppression
+        CUSTOM_GROUP_INPUTS[customInputKey].remove();
+        delete CUSTOM_GROUP_INPUTS[customInputKey];
+      } else {
+        CUSTOM_GROUP_INPUTS[customInputKey].children[1].disabled = false;
+        CUSTOM_GROUP_INPUTS[customInputKey].children[1].value = taskOptions[customInputKey];
+        CUSTOM_GROUP_INPUTS[customInputKey].classList.remove("hidden");
       }
     }
   }
@@ -248,6 +456,17 @@ function TASK_EDITOR_MODAL_FACTORY () {
     setSelectorOptions(INPUTS["dependency"], newDataIds); //todo ajouter subtext --> NAME equivalent
   }
 
+  function updateParentIds(newDataIds) {
+    if (!newDataIds || !Array.isArray(newDataIds))
+      return false;
+
+    // todo update only if different
+    currentDataIds = newDataIds;
+    setSelectorOptions(INPUTS["parent"], newDataIds); //todo ajouter subtext --> NAME equivalent
+  }
+
+
+
   /**
    * Mettre à jour tout ou une partie des éléments "généraux" du modal
    * Pour le moment, il s'agit du selecteur d'ID et de catégories
@@ -263,10 +482,11 @@ function TASK_EDITOR_MODAL_FACTORY () {
     if (!options)
       throw new EXCEPTIONS.MissingArgumentExcepetion("[updateChartOptions]");
 
-    LoggerModule.warn(options);
+    LoggerModule.info("[updateChartOptions] options", options);
 
-    if (options.yAxis && options.yAxis.categories)
+    if (options.yAxis && options.yAxis.categories) {
       updateYAxisCategories(options.yAxis.categories);
+    }
 
     if (options.series && options.series.data) {
       let dependencyNameById = {};
@@ -274,7 +494,16 @@ function TASK_EDITOR_MODAL_FACTORY () {
         dependencyNameById[options.series.data[i]["id"]] = SHARED.decodeHTML(options.series.data[i]["label"]);
       }
 
+      // MàJ les ID pour dépendances
       updateDependencyIds(options.series.data.map(function(e){
+        return {
+          id: e.id,
+          name: dependencyNameById[e.id]
+        }
+      }));
+
+      // MàJ les parents
+      updateParentIds(options.series.data.map(function(e){
         return {
           id: e.id,
           name: dependencyNameById[e.id]
@@ -295,6 +524,8 @@ function TASK_EDITOR_MODAL_FACTORY () {
       throw new EXCEPTIONS.InvalidArgumentExcepetion("showTaskEditor");
 
     isAddEditor = isAddEditor || false;
+    currentTaskOptions = taskOptions;
+
 
     let div = document.createElement('div');
     div.style.maxHeight = "400px";
@@ -340,33 +571,56 @@ function TASK_EDITOR_MODAL_FACTORY () {
     isAddRequest = isAddRequest || false;
     // todo AppModule.tryPostRequest(datas) // se charge de show/hideLoading + doit appeler explicitement Modal.hide()
     //   return false; // <-- Pour ne pas fermer le modal avant la fin de la requête
-    // format data
     let formattedData = {};
 
-
-    let asRawParams = APP_MODULE.getParametresUrlOrisNoFunction().asRaw,
-      HC_CONFIG_KEYS = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS;
     for (let input in INPUTS) {
-      if (asRawParams[HC_CONFIG_KEYS.data[input].url_param]
+      let current = asRawParams[HC_CONFIG_KEYS.data[input].url_param];
+      if (current
         && !INPUTS[input].disabled) { // ne pas MàJ les paramètres disabled (notamment les catégories en mode &uniqueNames, enfin &parent, et ID car ultra important)
         if ((input === "start" || input === "end") && INPUTS[input].value) {
           let dateSansMillisecondes = $(INPUTS[input]).data("DateTimePicker").date()._d;
           dateSansMillisecondes.setMilliseconds(0);
-          formattedData[asRawParams[HC_CONFIG_KEYS.data[input].url_param]] = dateSansMillisecondes.toISOString();
+          formattedData[current] = dateSansMillisecondes.toISOString();
         } else
-          formattedData[asRawParams[HC_CONFIG_KEYS.data[input].url_param]] = INPUTS[input].value; // === ""tryAddOrEditPoint
+          formattedData[current] = INPUTS[input].value;
+
+        // Formatter, potentiellement, la couleur (la base n'accepte pas de '#')
+        if (input === "color" && INPUTS[input].value && INPUTS[input].value[0] && INPUTS[input].value[0] === "#")
+          formattedData[current] = INPUTS[input].value.slice(1);
+
+        /**
+         * @Issue #29
+         *  Push des valeurs vides via la valeur réservée "(v)"
+         */
+        // MAIS SEULEMENT SI ELLES N'ÉTAIENT PAS DÉJÀ VIDES
+        if (formattedData[current] === "" && currentTaskOptions[HC_CONFIG_KEYS.flippedData[input]])
+          formattedData[current] = "(v)";
       }
     }
-    // TODO: loop à nouveau et remplacer les valeurs vides par '(v)' pour "push" une valeur vide
-    //  comme précisé dans @github Issue #29
+    /**
+     * @Issue #19
+     * Ajouter les paramètres customisés à la requête
+     */
+    for (let customInput in CUSTOM_GROUP_INPUTS) {
+      let current = CUSTOM_GROUP_INPUTS[customInput].children[1].value;
+      console.info("current", current);
+
+      formattedData[customInput] = current || "";
+
+      /**
+       * @Issue #29
+       *  Push des valeurs vides via la valeur réservée "(v)"
+       */
+      // MAIS SEULEMENT SI ELLES N'ÉTAIENT PAS DÉJÀ VIDES
+      if (formattedData[customInput] === "" && currentTaskOptions[customInput])
+        formattedData[current] = "(v)";
+    }
+
 
     // Forcer l'ajout de l'attribut vline car faire une requête avec &id=vline causait une erreur
     if (!isAddRequest)
       formattedData["vline"] = INPUTS["vline"].value;
 
-    // Formatter, potentiellement, la couleur (la base n'accepte pas de '#')
-    if (formattedData["color"] && formattedData["color"][0] === "#")
-      formattedData["color"] = INPUTS["color"].value.slice(1); // on enlève le "#" initial car on ne peut pas le push dans la BD
 
     console.warn("[ONOK_HANDLER] formattedData", formattedData);
 
@@ -394,8 +648,5 @@ function TASK_EDITOR_MODAL_FACTORY () {
     initAndShow: function (taskOptions, isAdd) { showTaskEditor(taskOptions, isAdd); },
     hide: function () { INSTANCE.close(); },
     show: function () { INSTANCE.showModal(); } // n'aura pas le bon style
-
-
-
   }
 }

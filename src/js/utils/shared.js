@@ -143,7 +143,7 @@ function SHARED_FACTORY() {
         if (!parametresUrl.asRaw[arr[0]])
           LoggerModule.warn("Le paramètre '" + arr[0] + "' n'a pas de valeur");
 
-        parametresUrl.asArray["_" + arr[0]] = (parametresUrl.asRaw[arr[0]]).split(",");
+        parametresUrl.asArray["_" + arr[0]] = (parametresUrl.asRaw[arr[0]]).split(";");
       }
       return parametresUrl;
     },

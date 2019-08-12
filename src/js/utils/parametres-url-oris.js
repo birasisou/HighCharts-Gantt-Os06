@@ -28,6 +28,9 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           format: 'asString'
         }
       },
+      /**
+       * @Issue #19 Inputs customisés
+       */
       dataLabel: {
         // prefix
         // suffix
@@ -54,7 +57,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           url_param: 'end',
           format: 'asTimestamp'
         },
-        name: { // {string} texte apparant sur la tâche
+        name: { // {string} texte apparant sur la tâche, mais en mode &parent (uniqueNames), c'est le "name" qui sert de yCategory, donc name === category
           url_param: 'category',
           // url_param: 'name',
           format: 'asString'
@@ -130,7 +133,13 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
       this.USER_INFOS.ID_ORIS = generateID_Oris.call(this);
       this.USER_INFOS.HOST = generateHost.call(this);
+
       oldInit.call(this);
+
+      // TODO #19 Custom Inputs
+      this.CONSTANTS.HC_CONFIG_KEYS.dataLabel = formatCustomInputs(this);
+
+
     }
   })(this.init);
 
@@ -203,38 +212,26 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
    * @param {Object} userOptions
    *  données (userOptions) du Point à MàJ
    *    /!\ DOIT IMPÉRATIVEMENT CONTENIR L'ATTRIBUT vline
+   * @param {boolean} isAddRequest
+   *    TRUE => générer l'URL pour CRÉER un nouveau Point dans la base
    */
-  this.generateWebserviceUpdateUrl = function(userOptions) {
-    LoggerModule.log("[generateWebserviceUpdateUrl] input param", userOptions);
-
-    if (typeof userOptions !== "object")
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] L'argument de la fonction doit être un Objet contenant les attributs du Point à modifier " + userOptions);
-
-    if (!userOptions.vline && !userOptions.vline !== 0)
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] L'argument de la fonction doit contenir l'attribut vline");
-
-    let url = this.generateWebserviceActionUrl("modif");
-    // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
-    for (let option in userOptions) {
-      url += "&" + option + "=" + userOptions[option];
-      // url += "&" + option + "=" + ((userOptions[option] === "") ? "(v)" : userOptions[option]); // Fait chier plus tard pour la comparaison et confirmation de la MàJ
-    }
-    return encodeURI(url);
-  };
-
-  this.generateWebserviceAddUrl = function(userOptions) {
-    console.log("[generateWebserviceAddUrl] input param", userOptions);
+  this.generateWebserviceAddOrEditUrl = function(userOptions, isAddRequest) {
+    LoggerModule.log("[generateWebserviceAddUrl] input param", userOptions);
 
     if (typeof userOptions !== "object")
       throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + userOptions);
 
-    let url = this.generateWebserviceActionUrl("newvalid");
+    let url = this.generateWebserviceActionUrl(isAddRequest ? "newvalid" : "modif");
     // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
     for (let option in userOptions) {
-      url += "&" + option + "=" + userOptions[option];
+      LoggerModule.log("userOptions["+option+"]", userOptions[option]);
+      // url += "&" + option + "=" + ((userOptions[option] || typeof userOptions !== "string") ? userOptions[option] : "(v)"); // Fait avant // todo @Issue #29: envoyer une valeur vide au serveur
+      url += "&" + option + "=" + userOptions[option]; // todo @Issue #29: envoyer une valeur vide au serveur
     }
 
-    // remove &id=&vline=
+    console.log(encodeURI(url));
+    throw "JE TESTE: " + encodeURI(url) ;
+
 
     return encodeURI(url);
   };
@@ -254,8 +251,6 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       });
     LoggerModule.log("INIT TOAST", initToast);
 
-    
-
     return new Promise(function (resolve, reject) {
       // todo show loading
       //APP_MODULE.getLoadingSpinnerHandler().showLoading();
@@ -271,7 +266,10 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       
       
       // Generate & encode URI
-      let url = isAddRequest ? APP_MODULE.getParametresUrlOris().generateWebserviceAddUrl(formattedData) : APP_MODULE.getParametresUrlOris().generateWebserviceUpdateUrl(formattedData);
+      let url = self.generateWebserviceAddOrEditUrl(formattedData, isAddRequest);
+
+      // Ajouter les paramètres
+
 
       console.warn("Point update URL", url);
       resolve(url);
@@ -292,9 +290,9 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       // extract root
       // /!\ The rootName doesn't contain the additional "s" (GET => rootName is "<something>s"; POST => rootName is "<something>") /!\
       .then(function (json) {
-        let root = json[APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1)];  // sans le "s" bonus
+        let root = json[self.rootName.slice(0, -1)];  // sans le "s" bonus
         if (!root)
-          throw new Error("Unable to extract root (" + APP_MODULE.getParametresUrlOrisNoFunction().rootName.slice(0, -1) + ") from JSON", json);
+          throw new Error("Unable to extract root (" + self.rootName.slice(0, -1) + ") from JSON", json);
         return root;
       })
       // The server replies with its stored value for the given vline ID.
@@ -304,9 +302,9 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       .then(function (root) {
         // TODO check values
         //    hide modal
-        let postedTask = new OrisGanttTask(formattedData, APP_MODULE.getParametresUrlOrisNoFunction()),
-          actualTask = new OrisGanttTask(root, APP_MODULE.getParametresUrlOrisNoFunction()),
-          flippedDataKeys = APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.flippedData;
+        let postedTask = new OrisGanttTask(formattedData, self),
+          actualTask = new OrisGanttTask(root, self),
+          flippedDataKeys = self.CONSTANTS.HC_CONFIG_KEYS.flippedData;
 
         LoggerModule.log("formattedData", formattedData);
         LoggerModule.log("postedTask", postedTask);
@@ -517,6 +515,45 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     if (!this.USER_INFOS.HOST)
       throw new EXCEPTIONS.NoIdOrisOrHostDetected();
     return this.USER_INFOS.HOST;
+  }
+
+  /**
+   * @private
+   * @Issue #19 Custom Inputs
+   * L'utilisateur peut créer ses propres labels qui seront visible dans le tooltip (bulle de survole)
+   *
+   * Les ID des colonnes de ces inputs sont précisés dans "&inputs-id"
+   * Les labels de ces inputs (et de leur ligne dans la bulle) sont précisés dans "&inputs-label"
+   *
+   * Ces attributs sont des "array" où les éléments sont séparés par des ";".
+   * Ils sont stockés dans ParametresUrlOris.asArray grâce à la fonction "getParamsFromPageUri()" de SHARED.js
+   *
+   * todo Ici, on veut réassocier 1 à 1 ces paramètres dans un {Objet} et un {Array} dans self.CONSTANTS.HC_CONFIG_KEYS.dataLabel
+   *  - En ignorant les éléments sans ID
+   *  - En autorisant l'absence de label (tant qu'il y a l'ID).
+   *  Ces associations seront visibles dans la bulle sous forme "<label>: <DB's value by ID>"
+   */
+  function formatCustomInputs(self) {
+    let customLabelsAsObject = {};
+
+    if (!self.asRaw || !self.asRaw["inputs-id"] || !self.asRaw["inputs-label"])
+      return customLabelsAsObject;
+
+    let inputsId = self.asArray["_inputs-id"],
+      inputsLabel = self.asArray["_inputs-label"],
+      i = 0,
+      idLength = inputsId.length;
+
+    for (i; i<idLength; ++i) {
+      // Ignorer les ID vides, tout en autorisant "0", "false", etc...
+      if (inputsId[i]) {
+        customLabelsAsObject[inputsId[i]] = inputsLabel[i] || ""; // Autoriser les labels vides
+      }
+    }
+
+    LoggerModule.warn("customLabels detected (<col id>:<label>)", customLabelsAsObject);
+
+    return customLabelsAsObject;
   }
 
   //Automatiquement initialiser l'Objet lorsqu'il est instancié

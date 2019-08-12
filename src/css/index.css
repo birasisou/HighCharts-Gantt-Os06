@@ -208,3 +208,21 @@ input[readonly],
     left: 0;
     right: 0;
 }
+
+/*
+    TASK EDITOR MODAL
+ */
+#task-edit-modal .modal-dialog{
+    overflow-y: initial !important;
+}
+#task-edit-modal .modal-body{
+    height: 70vh;
+    overflow-y: auto;
+}
+div.ajs-content {
+    overflow-y: auto !important;
+}
+
+.form-group.offset-2:not([hidden]) + .form-group.offset-2 {
+    margin-left: 0;
+}

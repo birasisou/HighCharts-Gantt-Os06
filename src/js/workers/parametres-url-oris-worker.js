@@ -91,7 +91,8 @@ self.onmessage = function(event) {
   if (event.data.reinitialize) {
     LoggerModule.info("[WORKER.ONMESSAGE] event.data.reinisialize received.", "Sending all stored Tasks");
     postMessage({
-      updatedTasks: clearParentIds(ORIS_TASKS_BY_ID)
+      // deep clone pour ne pas provoquer une deuxième requête juste après (clearID modifie le paramètre)
+      updatedTasks: clearParentIds(JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID)))
     }, "*");
 
   }
@@ -160,39 +161,6 @@ function WORKER_GET(url) {
   LoggerModule.log("[WORKER.WORKER_GET] url", url);
   // Return a new promise.
   return SHARED.promiseGET(url);
-  /* return new Promise(function(resolve, reject) {
-    // Do the usual XHR stuff
-    let req = new XMLHttpRequest();
-    req.open('GET', url, true);
-
-    req.onload = function() {
-      LoggerModule.log("[GET.onload] req.status", req.status);
-      // This is called even on 404 etc
-      // so check the status
-      if (req.status === 200) {
-        LoggerModule.log("[GET.onload] req.response", req.response);
-        resolve(req.response);
-      }
-      else {
-        // Otherwise reject with the status text
-        // which will hopefully be a meaningful error
-        let msg = "[GET.onload] req.status !== 200. \nActual req.status: " + req.status;
-        LoggerModule.error(msg);
-        reject(Error(msg));
-      }
-    };
-
-    // Handle network errors
-    req.onerror = function(e) {
-      LoggerModule.error("[GET.onerror] Network Error. e:", e);
-      LoggerModule.error("[GET.onerror] Network Error. xhr.statusText: ", "'" + req.statusText + "'");
-      LoggerModule.error("[GET.onerror] Network Error. xhr.status:", req.status);
-      reject(Error("[GET.onerror] Network Error "+ req.statusText +"(" + req.status + ")"));
-    };
-
-    // Make the request
-    req.send();
-  }); // */
 }
 
 /**

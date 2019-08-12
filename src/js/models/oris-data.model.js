@@ -73,12 +73,9 @@ OrisData.prototype.asRaw = function () {
  * @return {string}
  */
 OrisData.prototype.asString = function () {
-  return (this.value || this.value === false || this.value === 0) ? ("" + this.value) : undefined;
+  return (this.value || this.value === false || this.value === 0 || this.value === "") ? ("" + this.value) : undefined;
 };
 /**
- * Récupérer la valeur sous forme de String
- *    (bien souvent ça sera déjà le cas dans asRaw, mais au cas où
- *     mais ID, Category, etc... doivent impérativement être des String)
  * @return {string|false}
  */
 OrisData.prototype.asStringOrFalse = function () {
@@ -157,7 +154,7 @@ OrisData.prototype.asNumber = function () {
  * @returns {undefined|Number}
  */
 OrisData.prototype.tryParseNumber = function () {
-  if (isNaN(this.value) || this.value === null || this.value === undefined)
+  if (isNaN(this.value) || this.value === null || this.value === undefined || this.value === "") // isNaN("") === false... car "" est falsy -> 0
     return undefined;
 
   // Attention, Number(null) = 0. Alors que Number(undefined) = NaN
