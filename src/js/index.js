@@ -1,6 +1,11 @@
 let APP_MODULE;
 
+function errorAlert (msg) {
+  document.getElementById("error-modal-description").innerText = msg;
+  $(document.getElementById("error-modal")).modal();
+}
 /**
+ *
  * Override HighCharts' error handling function
  * TODO ne marche pas.
  *    Réussir permettrait de "force refresh" quand il y a une erreur
@@ -97,6 +102,20 @@ new Promise(function(resolve, reject) {
         });
 
       /**
+       * @Issue #32
+       * Automatiquement reconstruire le graphique si une Exception HighCharts est "Uncaught"
+       *
+       * Provoque l'affichage du chargement
+       */
+      if (window.location.search.indexOf("autofix=true") > -1)
+        window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
+          if (url.indexOf("highcharts-gantt.src.js") > -1 || url.indexOf("draggable-points.src.js") > -1) {
+            TOAST.error({ header: "Redrawing graph" });
+            APP_MODULE.reinializeChart();
+          }
+        };
+
+      /**
        * @private and/or GLOBAL
        */
         // référence to Global Scope (window)
@@ -182,7 +201,7 @@ new Promise(function(resolve, reject) {
       function reinitializeChart() {
         // todo sudo showLoading (si une requête MàJ entre temps, on ne veut pas que ça cache le chargement,
         //  on veut carrément l'ignorer vu qu'on doit redresser TOUT le graphique d'abord))
-
+        LOADING_OVERLAY_HANDLER.showLoading("Redrawing because an error occurred");
         let renderToDiv = GANTT_RENDERING_MODULE.getChart().renderTo,
           renderToDivId = renderToDiv.id;
         // Détruire le graphique
@@ -190,7 +209,7 @@ new Promise(function(resolve, reject) {
         // Vider les restes
         renderToDiv.outerHTML = '<div id="' + renderToDiv.id + '" ></div>';
         // Envoyer le message au Worker pour récupérer totues les Tâches
-        this.reinitializeData();
+        sendReinitializeMessageToWorker();
       }
       
       /**
@@ -255,7 +274,7 @@ new Promise(function(resolve, reject) {
             if (FAILURE_COUNTER >= MAX_FAIL_COUNTERS - 2) {   // -2 car le temps que le postMessage fasse effet, une deuxième requête sera faite (donc 2 popups)
               worker.postMessage({STOP_AUTO: true});
               if (FAILURE_COUNTER >= MAX_FAIL_COUNTERS - 1)
-                alertify.postErrorAlert(errMsg);
+                errorAlert(errMsg);
             }
             // todo popup msg
             alertify.error(errMsg, 1.5)
@@ -273,8 +292,6 @@ new Promise(function(resolve, reject) {
             if (!GANTT_RENDERING_MODULE.getChart() || !GANTT_RENDERING_MODULE.getChart().renderTo) {
               LoggerModule.log("### INITIAL RENDER ###");
               try {
-                console.info("PARAMETRES_URL_ORIS_NO_FUNCTIONS", PARAMETRES_URL_ORIS_NO_FUNCTIONS);
-                console.info("updatedTasksMsg", updatedTasksMsg);
                 GANTT_RENDERING_MODULE.draw(PARAMETRES_URL_ORIS_NO_FUNCTIONS, updatedTasksMsg)
               } catch (err) {
                 LoggerModule.error("Error while drawing chart", err);
@@ -297,13 +314,11 @@ new Promise(function(resolve, reject) {
           },
           done: function (doneMsg) {  // todo remplacer par un success/failure. On ne veut pas masquer mtn car potentiellement encore en train de dessiner
             LoggerModule.info("[INDEX.workerMessageHandler] 'Finally done' received", doneMsg);
-            if (APP_MODULE.getLoadingSpinnerHandler().spinner.classList.contains("active"))
-              APP_MODULE.getLoadingSpinnerHandler().hideLoading();
+            LOADING_OVERLAY_HANDLER.hideLoading();
           },
           failure: function (failureMsg) {  // todo useless
             LoggerModule.error("[INDEX.workerMessageHandler] Failure received", failureMsg);
-            if (APP_MODULE.getLoadingSpinnerHandler().spinner.classList.contains("active"))
-              APP_MODULE.getLoadingSpinnerHandler().hideLoading();
+            LOADING_OVERLAY_HANDLER.hideLoading();
           }
         };
 
@@ -392,13 +407,13 @@ new Promise(function(resolve, reject) {
     })();
   /* } catch (e) {
     LoggerModule.error("Page initialisation error:", e);
-    alertify.postErrorAlert(e.description || e.message);
+    errorAlert(e.description || e.message);
     APP_MODULE.getLoadingSpinnerHandler().hideLoading();
   } //*/
 })
 .catch(function(e) {
   LoggerModule.error("Page initialisation error:", e);
-  alertify.postErrorAlert("Page initialisation error: " + (e.description || e.message || e));
+  errorAlert("Page initialisation error: " + (e.description || e.message || e));
 })
 // finally
 .then(function (e) {

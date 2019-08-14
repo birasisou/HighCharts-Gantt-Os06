@@ -29,7 +29,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           // Décalage pour cohérence
           setTimeout(function() {
             document.getElementById("task-edit-button").disabled = !chartObj.getSelectedPoints().length;
-            document.getElementById("task-delete-button").disabled = !chartObj.getSelectedPoints().length;
+            document.getElementById("task-delete-navbar-button").disabled = !chartObj.getSelectedPoints().length;
           }, 10);
 
           TOAST.info({ body: "Task Unselected Event", delay: 500 });
@@ -98,7 +98,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
       editButtons: {
         add: document.getElementById("task-add-button"),
         edit: document.getElementById("task-edit-button"),
-        delete: document.getElementById("task-delete-button"),
+        delete: document.getElementById("task-delete-navbar-button"),
         destroy: document.getElementById("chart-destroy-button")
       }
     };
@@ -138,7 +138,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     if (event.key === "Escape" && selectedPoint                                             // touche Échap
       && !document.getElementById("delete-point-modal").classList.contains("show")  // Aucun modal d'ouvert (à ce moment là, Échap sert à fermer le modal
       && (!APP_MODULE.getTaskEditor().getInstance()
-        || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().getInstance().isOpen())))
+        || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().isOpen())) )
       selectedPoint.select(false);
   });
 
@@ -155,6 +155,10 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     // focus le bouton de suppression pour pouvoir le valider avec la touche Entrée
     "shown.bs.modal": function (event) {
       document.getElementById("delete-point-button").focus();
+    },
+    "hide.bs.modal": function (event) {
+      if (APP_MODULE.getTaskEditor().isOpen())
+        APP_MODULE.getTaskEditor().hide();
     }
   });
   document.getElementById("delete-point-button").addEventListener("click", function(event) {
@@ -524,7 +528,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         if (event.key === "Escape" && selectedPoint                                             // touche Échap
           && !document.getElementById("delete-point-modal").classList.contains("show")  // Aucun modal d'ouvert (à ce moment là, Échap sert à fermer le modal
           && (!APP_MODULE.getTaskEditor().getInstance()
-            || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().getInstance().isOpen())))
+            || (APP_MODULE.getTaskEditor().getInstance() && !APP_MODULE.getTaskEditor().isOpen())))
           selectedPoint.select(false);
       });
     } // FIN init Buttons
@@ -563,7 +567,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
 
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
-    LoggerModule.error("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
+    LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
 
     chartObj.update({
       yAxis: {

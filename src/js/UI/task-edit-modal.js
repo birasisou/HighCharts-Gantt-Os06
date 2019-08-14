@@ -9,26 +9,33 @@
  */
 function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
   /**
-   * Form HTML servant de template
-   * @type {HTMLElement}
+   * Références DOM
    */
-  let FORM_TEMPLATE = document.getElementById("secret-santa"),
+  let DOM_REFERENCES = {
+      modal: document.getElementById("task-edit-modal"),
+      title: document.getElementById("task-edit-modal-label"),
+      buttons: {
+        delete: document.getElementById("edit-delete-point-button"),
+        cancel: document.getElementById("edit-cancel-point-button"),
+        ok: document.getElementById("edit-add-point-button")
+      },
+      prompt: document.getElementById("prompt-modal")
+    },
 
     paramUrlOris = parametresUrlOrisNoFunctions,
     asRawParams = paramUrlOris.asRaw,
     HC_CONFIG_KEYS = paramUrlOris.CONSTANTS.HC_CONFIG_KEYS,
 
-    /**
-     * userOptions de la Tâche actuellement modifiée (ou dernièrement modifiée)
-     */
+    // userOptions de la Tâche actuellement modifiée (ou dernièrement modifiée)
     currentTaskOptions = null,
+    isAddEditor = false,
     currentYAxisCategories = [],
     currentDataIds = [],
 
     /**
      * Référence à l'objet AlertifyJS
      */
-    INSTANCE = null,
+    INSTANCE = $(DOM_REFERENCES.modal),
     /**
      * Objet contenant les références HTML de chaque <input> du modal
      * <userOption>:<DOM Input>
@@ -75,7 +82,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
   $(INPUTS["start"]).on("dp.change", function (e) {
     $(INPUTS["end"]).data("DateTimePicker").minDate(e.date);
     // Cas particulier Add Request
-    if (e.currentTarget.classList.contains("isAdd")) {
+    if (isAddEditor) {
       // Désactiver &end si &start n'a pas de valeur
       INPUTS["end"].disabled = !e.date;
       $(INPUTS["end"]).data("DateTimePicker").clear();
@@ -87,7 +94,45 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
   });
 
   // Les sélecteurs sont vides par défaut, on n'a qu'à les update
-  $(INPUTS["category"]).selectpicker();
+  initSelectPicker(INPUTS["category"]);
+  $(INPUTS["category"]).on("rendered.bs.select", function(event) {
+
+  });
+
+  // Les inputs customisés
+  initCustomInputs(parametresUrlOrisNoFunctions.asArray);
+  // Obliger de refresh ici sinon les largeurs sont mal calculées
+  $(DOM_REFERENCES.modal).on("shown.bs.modal", function (event) {
+    $(INPUTS["category"]).selectpicker('refresh');
+
+    /* try {
+      let newCategoryLi = $("#bs-select-1-0").parent()[0];
+      newCategoryLi.addEventListener("click", function(event) {
+        showPromptModal();
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+      })
+    } catch (e) {
+      console.error("e", e);
+      throw e;
+    } //*/
+
+    $(INPUTS["dependency"]).selectpicker('refresh');
+    $(INPUTS["parent"]).selectpicker('refresh');
+  });
+  DOM_REFERENCES.modal.querySelector("form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    onOkHandler(isAddEditor)
+  });
+  DOM_REFERENCES.prompt.querySelector("form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    appendNewOption(document.getElementById("new-category-prompt-modal-input").value);
+  });
+  DOM_REFERENCES.buttons.ok.addEventListener("click", function (event) {
+    onOkHandler(isAddEditor)
+  });
+
 
   /**
    * Génère l'ID de l'input (normalisation)
@@ -98,14 +143,16 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     return "task-" + id + "-input";
   }
 
-  /**
-   * Initialisation
-   */
-  initCustomInputs(parametresUrlOrisNoFunctions.asArray);
+  function initSelectPicker(domInput) {
+    $(domInput).selectpicker({
+      showSubtext: true,
+      iconBase: "fa",
+      tickIcon: "fa fa-check"
+    });
+  }
 
-
   /**
-   * TODO Issue #19
+   * @Issue #19
    * Instancie les inputs personnalisés dans le modal d'édition de Tâche
    *
    * On permet à l'utilisateur de créer des <input type="text"> customisés.
@@ -133,7 +180,12 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         INPUTS["dependency"].parentNode.classList.add("offset-2");
       // Afficher l'élément
       document.getElementById("task-dependency-form-group").removeAttribute("hidden");
-      $(INPUTS["dependency"]).selectpicker();
+      /* $(INPUTS["dependency"]).selectpicker({
+        showSubtext: true,
+        iconBase: "fa",
+        tickIcon: "fa fa-check"
+      }); // */
+      initSelectPicker(INPUTS["dependency"]);
       isLeftSideInput = !isLeftSideInput;
     }
     /**
@@ -146,7 +198,12 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         INPUTS["parent"].parentNode.classList.add("offset-2");
       // Afficher l'élément
       document.getElementById("task-parent-form-group").removeAttribute("hidden");
-      $(INPUTS["parent"]).selectpicker();
+      /* $(INPUTS["parent"]).selectpicker({
+        showSubtext: true,
+        iconBase: "fa",
+        tickIcon: "fa fa-check"
+      }); // */
+      initSelectPicker(INPUTS["parent"]);
       isLeftSideInput = !isLeftSideInput;
     }
 
@@ -177,7 +234,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         // do nothing
       }
       if (formGroup) {
-        console.info(formGroup);
+        LoggerModule.info("new custom input", formGroup);
         if (!isLeftSideInput) {
           formGroup.classList.add("offset-2");
         }
@@ -187,33 +244,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         CUSTOM_GROUP_INPUTS[customInputKey] = formGroup;
       }
     }
-
-    /* Version sans paramUrlOris
-    let i=0,
-      l = paramInputsId.length;
-    for (i; i<l; ++i) {
-      // N'instancier un <input> SSI on a un ID; tant pis s'il n'y a pas de label
-      if (paramInputsId[i] && !CUSTOM_GROUP_INPUTS[paramInputsId[i]]) {
-        let formGroup;
-        try {
-          formGroup = new FormGroupInput({
-            id: paramInputsId[i],
-            label: paramInputsLabel[i] || ""
-          });
-        } catch(e) {
-          // do nothing
-        }
-        if (formGroup) {
-          console.info(formGroup);
-          if (!isLeftSideInput) {
-            formGroup.classList.add("offset-2");
-          }
-          isLeftSideInput = !isLeftSideInput;
-          customInputRow.appendChild(formGroup);
-          CUSTOM_GROUP_INPUTS[paramInputsId[i]] = formGroup;
-        }
-      }
-    } // */
   }
 
   /**
@@ -259,24 +289,23 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     return formGroup;
   }
 
-  // todo
   /**
    * Initilialise les valeurs des inputs du formulaire en fonction du Point.userOptions passé en argument
    *
    * @param {Object} taskOptions
    *    HighCharts Task userOptions
-   * @param {Boolean} isAddEditor
+   * @param {Boolean} isAdd
    *    Special behaviour for when this modal is used to create a new Point
    *      -> empty inputs (all) won't be disabled etc...
    */
-  function initInputs(taskOptions, isAddEditor) {
+  function initInputs(taskOptions, isAdd) {
     if (!taskOptions)
       throw new EXCEPTIONS.InvalidArgumentExcepetion("initInputs");
 
     // Comportement spécial si on est mode "Création de Point"
-    isAddEditor = isAddEditor || false;
+    isAddEditor = isAdd || false;
 
-    console.info("[initInputs] taskOptions", taskOptions);
+    LoggerModule.info("[initInputs] taskOptions", taskOptions);
 
     // Les inputs obligatoires
     for (let input in INPUTS) {
@@ -336,26 +365,28 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
           INPUTS["end"].disabled = true;
         } else
           INPUTS["start"].classList.remove("isAdd");
-
-        /**
-         * @Github #9
-         * On n'autorise la suppression d'une date que lorsque l'on est en mode création car ça ne posera jamais de problème
-         */
-        if (isAddEditor && (input === "start" || input === "end"))
-          $(INPUTS[input]).data("DateTimePicker").showClear(true);
+      }
+      /**
+       * @Github #9
+       * On n'autorise la suppression d'une date que lorsque l'on est en mode création car ça ne posera jamais de problème
+       */
+      if (input === "start" || input === "end") {
+        $(INPUTS[input]).data("DateTimePicker").showClear(isAddEditor);
       }
     }
     
     // Les inputs customisés
-    let needsNewOffset = false;
     for (let customInputKey in CUSTOM_GROUP_INPUTS) {
       // La clé n'existe pas
       if (!taskOptions[customInputKey]
-        && taskOptions[customInputKey] !== "") {
-        // Ça va spam cette erreur mais ça me semble important car l'utilisateur essaie d'afficher une colonne de la BD qui n'existe pas
+        && taskOptions[customInputKey] !== ""
+        // OU on est en mode édition. À ce moment, on check le param pour le premier Point du graphique
+        && !(isAddEditor && APP_MODULE.getChart().series[0].data[0].options[customInputKey]
+          || APP_MODULE.getChart().series[0].data[0].options[customInputKey] === "")) {
+        // Erreur car l'utilisateur essaie d'afficher une colonne de la BD qui n'existe pas
         let errStr = "The column '" + customInputKey + "' doesn't exist in the DataBase and was deleted from the Editor.";
         LoggerModule.error(errStr);
-        TOAST.error({ header: errStr, body: "Correct the page URL to fix the interface (if needed).", delay: 5000 });
+        TOAST.warn({ header: errStr, body: "Correct the page URL to fix the interface (if needed).", delay: 5000 });
         /*
         // On désactive l'input (façon sale, on sait qu'on n'init que des inputs texte mais on ref le form-group)
         CUSTOM_GROUP_INPUTS[customInputKey].children[1].disabled = true;
@@ -372,7 +403,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         delete CUSTOM_GROUP_INPUTS[customInputKey];
       } else {
         CUSTOM_GROUP_INPUTS[customInputKey].children[1].disabled = false;
-        CUSTOM_GROUP_INPUTS[customInputKey].children[1].value = taskOptions[customInputKey];
+        CUSTOM_GROUP_INPUTS[customInputKey].children[1].value = isAddEditor ? "" : taskOptions[customInputKey];
         CUSTOM_GROUP_INPUTS[customInputKey].classList.remove("hidden");
       }
     }
@@ -380,6 +411,12 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
   /**
    * Constructeur d'un <option>
+   *
+   * @param {Object} options
+   *    - value, contient la valeur de l'option
+   *    - (optional) subtext, texte dans <small> ne comptant pas dans element.value
+   *    - (optional) icon, font-awesome
+   *
    * @param {String} value
    *    Label and value of the select option
    * @param {String} subtext
@@ -389,12 +426,26 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
    *    an <option> DOM Element with given value and potentially a subtext (used by Bootstrap-select library)
    *
    * @constructor
-   */
+   *
   function SelectOption(value, subtext) {
     let option = document.createElement("option");
     if (subtext)
       option.setAttribute("data-subtext", subtext);
     option.innerText = option.value = value;
+    return option;
+  } // */
+  function SelectOption(options) {
+    let option = document.createElement("option");
+
+    option.innerText = options["value"] || "";
+    for (let attribute in options) {
+      option.setAttribute(attribute, options[attribute] || "");
+    }
+    /* if (options.subtext)
+      option.setAttribute("data-subtext", options.subtext);
+    if (options.icon)
+      option.setAttribute("data-icon", options.icon);
+    option.innerText = option.value = options.value; //*/
     return option;
   }
 
@@ -414,13 +465,30 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
     // Vider le select
     select.innerText = "";
+    // Ajouter l'option "Ajouter un point" SSI l'input est category
+    /* if (select.id.indexOf("category") > -1) {
+      let tmp = new SelectOption({
+        value: " New",
+        "data-icon": "fa-plus",
+         class: "bg-success text-white btn btn-sm"
+      });
+      tmp.removeAttribute("value");
+      //tmp.setAttribute("data-content", '<i class="fa fa-plus"></i>&nbsp;New');
+      select.innerHTML += tmp.outerHTML;
+    } //*/
+    // Ajouter un séparateur
+    select.innerHTML += new SelectOption({ "data-divider": true }); // "  <option data-divider=\"true\"></option>"
     // Ajouter l'option "vide"
-    select.innerHTML += new SelectOption("").outerHTML;
+    select.innerHTML += new SelectOption({ value: "" }).outerHTML;
+
     // Ajouter les options, s'il y en a
     if (optionValues)
       for (let i=0, l=optionValues.length; i<l; ++i) {
         if (optionValues[i])
-          select.innerHTML += new SelectOption(optionValues[i].id || optionValues[i], optionValues[i].name).outerHTML;
+          select.innerHTML += new SelectOption({
+            value: optionValues[i].id || optionValues[i],
+            "data-subtext": optionValues[i].name
+          }).outerHTML;
       }
 
     // Appliquer les changements à la librairie
@@ -453,7 +521,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
     // todo update only if different
     currentDataIds = newDataIds;
-    setSelectorOptions(INPUTS["dependency"], newDataIds); //todo ajouter subtext --> NAME equivalent
+    setSelectorOptions(INPUTS["dependency"], newDataIds);
   }
 
   function updateParentIds(newDataIds) {
@@ -462,7 +530,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
     // todo update only if different
     currentDataIds = newDataIds;
-    setSelectorOptions(INPUTS["parent"], newDataIds); //todo ajouter subtext --> NAME equivalent
+    setSelectorOptions(INPUTS["parent"], newDataIds);
   }
 
 
@@ -489,16 +557,16 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     }
 
     if (options.series && options.series.data) {
-      let dependencyNameById = {};
+      let dataOptionsById = {};
       for (let i=0, l=options.series.data.length; i<l; ++i) {
-        dependencyNameById[options.series.data[i]["id"]] = SHARED.decodeHTML(options.series.data[i]["label"]);
+        dataOptionsById[options.series.data[i]["id"]] = options.series.data[i];
       }
 
       // MàJ les ID pour dépendances
       updateDependencyIds(options.series.data.map(function(e){
         return {
           id: e.id,
-          name: dependencyNameById[e.id]
+          name: SHARED.decodeHTML(dataOptionsById[e.id]["label"])
         }
       }));
 
@@ -506,68 +574,47 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       updateParentIds(options.series.data.map(function(e){
         return {
           id: e.id,
-          name: dependencyNameById[e.id]
+          // name est la catégorie, mais vu que le lien parent-enfant se fait entre 2 Points,
+          // il vaut mieux afficher le nom du Point parent dans le <select>, comme pour les dépendances
+          name: SHARED.decodeHTML(dataOptionsById[e.id]["label"])
         }
       }));
     }
   }
 
   /**
+   * Initialiser et afficher le modal de création/édition
+   * @param {Object} taskOptions
    *
-   * @param taskOptions
-   *
-   * @param isAddEditor
+   * @param {boolean} isAdd
    * @exposed
    */
-  function showTaskEditor(taskOptions, isAddEditor) {
+  function showTaskEditor(taskOptions, isAdd) {
     if (!taskOptions)
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("showTaskEditor");
+      throw new EXCEPTIONS.InvalidArgumentExcepetion("[showTaskEditor] Function requires the selected data's options");
 
-    isAddEditor = isAddEditor || false;
+    isAddEditor = isAdd || false;
     currentTaskOptions = taskOptions;
 
-
-    let div = document.createElement('div');
-    div.style.maxHeight = "400px";
-    div.style.margin = "0";
-    div.style.padding = "24px";
-    div.style.textAlign = "justify";
-    div.appendChild(document.getElementById('secret-santa'));
-
-    // todo datepicker / colorpicker / categories / dependencies
-
+    DOM_REFERENCES.title.innerText = isAddEditor ? "Task Creator" : "Task Editor";
     initInputs(taskOptions, isAddEditor);
 
-    //show as confirm
-    INSTANCE = alertify.confirm(div).set({
-      padding: false,
-      title: isAddEditor ? "Create task" : "Task editor",
-      // movable: false,
-      maximizable: false,
-      resizable: true,
-      pin: true,  // useless car modal
-      reverseButtons: true,
-      transition: "zoom",
-      onshow: function () {
-        $(INPUTS["category"]).selectpicker('refresh');  // todo allow Category Creation
-        $(INPUTS["dependency"]).selectpicker('refresh');
-      },
-      onok: function () {
-        ONOK_HANDLER(isAddEditor);
-        return false;  // empêcher le modal de se fermer  todo ne plus bloquer #26
-      }
-    }).resizeTo('40%', 550);
-
+    $(DOM_REFERENCES.modal).modal();
 
     $(INPUTS["category"]).selectpicker('refresh');
+
     $(INPUTS["dependency"]).selectpicker('refresh');
+    $(INPUTS["parent"]).selectpicker('refresh');
   }
 
-  function ONSHOW_HANDLER() {
-    // todo set input values + disable en fonction des asRaw + categories
-  }
-
-  function ONOK_HANDLER(isAddRequest) {
+  /**
+   * @ToutEnUn
+   * Essaye d'effecter la requête appropriée, et
+   * (creation de point ou modification)
+   *
+   * @param {boolean} isAddRequest
+   */
+  function onOkHandler(isAddRequest) {
     isAddRequest = isAddRequest || false;
     // todo AppModule.tryPostRequest(datas) // se charge de show/hideLoading + doit appeler explicitement Modal.hide()
     //   return false; // <-- Pour ne pas fermer le modal avant la fin de la requête
@@ -603,7 +650,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
      */
     for (let customInput in CUSTOM_GROUP_INPUTS) {
       let current = CUSTOM_GROUP_INPUTS[customInput].children[1].value;
-      console.info("current", current);
 
       formattedData[customInput] = current || "";
 
@@ -632,21 +678,35 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     APP_MODULE.getParametresUrlOris().tryAddOrEditPoint(formattedData, isAddRequest)
       .then(function (success) {
         if (success)
-          INSTANCE.close();
+          // INSTANCE.modal();
+          hideModal();
       });
   }
 
-  function ONCANCEL_HANDLER() {
-    // todo rien de particulier ?
+  /**
+   * Masquer le modal bootstrap
+   */
+  function hideModal() {
+    INSTANCE.modal("hide");
+  }
+
+  function showPromptModal () {
+    $(document.getElementById("prompt-modal")).modal();
+  }
+  function appendNewOption(value) {
+    console.info("value", value);
+    document.getElementById('task-category-input').innerHTML += '<option value="' + value + '">' + value + '</option>';
+    $('#task-category-input').selectpicker('val', value);
+    $('#task-category-input').selectpicker('refresh');
   }
 
   return {
     getInstance: function() { return INSTANCE; },
+    isOpen: function() { return DOM_REFERENCES.modal.classList.contains("show"); },
 
     setChartOptions: updateChartOptions,
 
     initAndShow: function (taskOptions, isAdd) { showTaskEditor(taskOptions, isAdd); },
-    hide: function () { INSTANCE.close(); },
-    show: function () { INSTANCE.showModal(); } // n'aura pas le bon style
+    hide: hideModal
   }
 }

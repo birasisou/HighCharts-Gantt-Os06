@@ -197,6 +197,11 @@ function TOAST_FACTORY () {
       return displayToast(this.create(options));
     },
 
+    warn: function(options) {
+      options.type = "warn";
+      return displayToast(this.create(options));
+    },
+
     /**
      * Instancie et affiche un Toast "Succès" (vert)
      *

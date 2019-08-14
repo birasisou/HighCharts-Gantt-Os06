@@ -92,7 +92,8 @@ self.onmessage = function(event) {
     LoggerModule.info("[WORKER.ONMESSAGE] event.data.reinisialize received.", "Sending all stored Tasks");
     postMessage({
       // deep clone pour ne pas provoquer une deuxième requête juste après (clearID modifie le paramètre)
-      updatedTasks: clearParentIds(JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID)))
+      updatedTasks: clearParentIds(JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID))),
+      done: "Here ya go"
     }, "*");
 
   }

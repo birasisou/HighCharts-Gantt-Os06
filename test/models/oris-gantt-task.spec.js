@@ -266,7 +266,7 @@ describe('Oris Gantt Task Model', function () {
       let emptyObj = {},
         emptyObjTask = new OrisGanttTask(emptyObj, orisConfig);
 
-      expect(emptyObjTask.isValidTask()).toBe(true);
+      expect(emptyObjTask.isValidTask()).toBe(false);
       expect(emptyObjTask.userOptions['id']).toBeUndefined();
       expect(emptyObjTask.userOptions['start']).toBeUndefined();
       expect(emptyObjTask.userOptions['end']).toBeUndefined();

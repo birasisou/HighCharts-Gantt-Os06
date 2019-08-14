@@ -352,28 +352,7 @@ function SHARED_FACTORY() {
         // Make the request
         req.send();
       });
-    },
-
-    /*
-    formatDataOptionsToPost: function (dataOptions, parametresUrlOrisNoFunction) {
-      let hcConfigKeys = parametresUrlOrisNoFunction.CONSTANTS.HC_CONFIG_KEYS.data,
-        asRaw = parametresUrlOrisNoFunction.asRaw,
-        formattedData = {};
-
-      for (let key in hcConfigKeys) {
-        let orisColumn = asRaw[hcConfigKeys[key]["url_param"]];
-        if (!orisColumn)
-          continue;
-
-        console.warn("key", key);
-        console.info("orisColumn", orisColumn);
-        console.info("newValue", dataOptions[key]);
-
-        formattedData[orisColumn] = dataOptions[key];
-      }
-
-      return formattedData;
-    } // */
+    }
   }
 }
 

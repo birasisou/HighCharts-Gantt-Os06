@@ -212,7 +212,7 @@ describe("Modèle de données Oris", function () {
           raw: '',
           boolean: undefined,
           date: undefined,
-          number: 0,
+          number: undefined,// 0,
           timestamp: undefined,
           rgb: undefined
         }

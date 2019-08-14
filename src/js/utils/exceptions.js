@@ -103,7 +103,7 @@ let EXCEPTIONS = {
   NoMandatoryUrlParameterDetected: function (msg) {
     EXCEPTIONS.DefaultException.call(this,
       "NoMandatoryUrlParameterDetected",
-      "A mandatory GET parameter was missing or has no value",
+      "A mandatory URL parameter was missing or has no value",
       msg);
   },
 

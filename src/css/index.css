@@ -78,7 +78,7 @@ code {
 }
 
 
-/* Masquer le formulaire servant de template */
+/* Masquer le formulaire servant de template *
 #secret-santa {
     display: none;
 }
@@ -118,8 +118,11 @@ code {
     white-space: nowrap;
 }
 #task-edit-button,
-#task-delete-button {
+#task-delete-navbar-button {
     margin-left: 0;
+}
+.front {
+    background: rgba(34, 34, 34, 0.133)
 }
 
 input.cursor-pointer {
@@ -147,11 +150,14 @@ input[readonly],
 #toast-container {
     bottom: 0;
     z-index: 2;
+    pointer-events:none;
 }
 .toast {
     z-index: 1;
+    pointer-events:auto;
 }
 .toast.show {
+    pointer-events:auto;
     opacity: 0.85;
 }
 
@@ -216,13 +222,31 @@ input[readonly],
     overflow-y: initial !important;
 }
 #task-edit-modal .modal-body{
-    height: 70vh;
+    /* height: 70vh; */
     overflow-y: auto;
 }
+.ajs-body {
+    height: 80vh;
+    min-height: 380px !important;
+}
+
 div.ajs-content {
     overflow-y: auto !important;
+}
+.ajs-dialog {
+    width: 55vw !important;
+    height: 80vh !important;
 }
 
 .form-group.offset-2:not([hidden]) + .form-group.offset-2 {
     margin-left: 0;
+}
+
+#task-category-input ~ div.dropdown-menu ul.dropdown-menu.inner > li:first-child {
+    text-align: center;
+    /*margin-left: 25%;*/
+}
+#task-category-input ~ div.dropdown-menu ul.dropdown-menu.inner > li:first-child {
+    width: 90%;
+    margin-left: 5%;
 }

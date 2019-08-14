@@ -80,10 +80,10 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
         },
 
         //TODO bonus
-        owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
+        /* owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
           url_param: 'owner',
           format: 'asString'
-        },
+        }, // */
         icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) css INLINE à partir de la base64 ?
           url_param: 'icon',
           format: 'asString'
@@ -229,10 +229,6 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       url += "&" + option + "=" + userOptions[option]; // todo @Issue #29: envoyer une valeur vide au serveur
     }
 
-    console.log(encodeURI(url));
-    throw "JE TESTE: " + encodeURI(url) ;
-
-
     return encodeURI(url);
   };
 
@@ -271,7 +267,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       // Ajouter les paramètres
 
 
-      console.warn("Point update URL", url);
+      LoggerModule.info("Point update URL", url);
       resolve(url);
     })
       .then(SHARED.promiseGET)
@@ -319,7 +315,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           let currentPosted = postedTask["userOptions"][flippedDataKeys[attr]],
             currentActual = actualTask["userOptions"][flippedDataKeys[attr]];
 
-          console.log("- Obj pushed[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
+          LoggerModule.log("- Obj pushed[" + flippedDataKeys[attr] + "]: " + (typeof currentPosted === "object" ? JSON.stringify(currentPosted) : currentPosted)
             + " === received[" + flippedDataKeys[attr] + "]: " +  (typeof currentPosted === "object" ? JSON.stringify(currentActual) : currentActual) + " ?");
           // if (actualTask["userOptions"][attr] !== postedTask["userOptions"][attr])
           if (typeof currentPosted === "object") {
@@ -342,7 +338,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       })
       .catch(function (err) {
         LoggerModule.error("Data update error:", err);
-        alertify.postErrorAlert(err.description || err.message || err);
+        errorAlert(err.description || err.message || err);
         // Turn into Error Toast
         TOAST.turnError(initToast, {
           header: "Failed to " + (isAddRequest ? "add new Task" : "update Task #" + formattedData.id) + "."
@@ -406,7 +402,6 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       delay: 10000  // Il y a peut-être un risque que le Toast ne se masque pas si la réponse du Worker arrive trop vite (très improbable)
       // autoHide: false
     });
-    LoggerModule.log("INIT TOAST", initToast);
 
     new Promise(function (resolve) {
       resolve(self.generateWebserviceDeleteUrl(userOptions));
