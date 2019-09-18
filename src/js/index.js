@@ -45,7 +45,7 @@ new Promise(function(resolve, reject) {
       let timezone = moment.tz.guess(true);
       console.log("Detected TimeZone", timezone);
       console.log("TimeZone Offset", -moment.tz(new Date(), timezone).utcOffset()/60 + "H");
-      /* todo Ajouter ce formatage signifie "
+      /*
         Highcharts.setOptions({
         time: {
           /**

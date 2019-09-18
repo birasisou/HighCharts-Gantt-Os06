@@ -32,7 +32,7 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
 
   // les tuples clé/valeur des paramètres GET récupérés dans l'url
   this.asRaw = {};     //valeur de chaque paramètre sous forme de {string}
-  this.asArray = {};   //valeur de chaque paramètre sous forme d'array (séparation = "," virgule)
+  this.asArray = {};   //valeur de chaque paramètre sous forme d'array (séparation = ";" point virgule)
   // Paramètres GET obligatoire (Exception renvoyée si l'un d'entre eux manque
   this.MANDATORY_GET_PARAMETERS = [];
   // Clé du JSON (reçu du webservice) contenant les données du graph.

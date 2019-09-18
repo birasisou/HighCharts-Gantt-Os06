@@ -24,8 +24,20 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           format: 'asString'
         },
         subtitle: {
-          url_param: 'title',
+          url_param: 'subtitle',
           format: 'asString'
+        },
+        minWidth: {
+          url_param: 'minwidth',
+          format: 'asString'
+        },
+        height: {
+          url_param: 'height',
+          format: 'asNumber'
+        },
+        width: {
+          url_param: 'width',
+          format: 'asNumber'
         }
       },
       /**
@@ -46,7 +58,6 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
         id: { // {unique string} id de la tâche @MANDATORY
           url_param: 'id',    //paramètre URL contenant la colonne correspondante
-          //format: 'asRaw'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
           format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
         },
         start: {  // {date} date de début de la tâche @MANDATORY
@@ -78,12 +89,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           url_param: 'color',
           format: 'asRgb'
         },
-
-        //TODO bonus
-        /* owner: {  // {id} responsable de la tâche TODO (bonus) nécessite de modifier le tooltipFormatter, donc prévoir un loop sur un objet HC_OPTIONAL_CONFIG_KEYS et appeler leur formatters là
-          url_param: 'owner',
-          format: 'asString'
-        }, // */
+        // TODO bonus
         icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) css INLINE à partir de la base64 ?
           url_param: 'icon',
           format: 'asString'

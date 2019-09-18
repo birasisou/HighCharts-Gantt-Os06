@@ -6,7 +6,8 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
    * @Variables
    */
   // PRIVATE
-  let paramUrlOrisNoFunctions = PARAMETRES_URL_ORIS_NO_FUNCTIONS;
+  let paramUrlOrisNoFunctions = PARAMETRES_URL_ORIS_NO_FUNCTIONS,
+    hcConfigKeys = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS;
 
   // PUBLIC
   let currentConfig = null,
@@ -420,13 +421,18 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     BASE_CONFIG.series.push(new Series(tasks)); // TODO gérer plusieurs séries
 
     // set TITLE
-    if (parametreUrlOris.asRaw["title"])
-      BASE_CONFIG.title = { text: parametreUrlOris.asRaw["title"] };
+    // if (parametreUrlOris.asRaw["title"])
+    //  BASE_CONFIG.title = { text: parametreUrlOris.asRaw["title"] };
+    if (parametreUrlOris.asRaw[hcConfigKeys.chart.title.url_param]) // version moins "couplée"
+      BASE_CONFIG.title = { text: parametreUrlOris.asRaw[hcConfigKeys.chart.title.url_param] };
 
     // set SUBTITLE
-    if (parametreUrlOris.asRaw["subtitle"])
-      BASE_CONFIG.subtitle = { text: parametreUrlOris.asRaw["subtitle"] };
+    // if (parametreUrlOris.asRaw["subtitle"])
+    //  BASE_CONFIG.subtitle = { text: parametreUrlOris.asRaw["subtitle"] };
+    if (parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param]) // version moins "couplée"
+      BASE_CONFIG.subtitle = { text: parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param] };
 
+    // TODO pas recommandé
     // set NAVIGATOR
     if (parametreUrlOris.asRaw["navigator"] === "true")
       BASE_CONFIG.navigator = {
@@ -443,6 +449,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         }
       };
 
+    // TODO pas recommandé
     // set SCROLLBAR
     if (parametreUrlOris.asRaw["scrollbar"] === "true")
       BASE_CONFIG.scrollbar = { enabled: true };
@@ -450,18 +457,33 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     // set RANGE SELECTOR
     if (parametreUrlOris.asRaw["selector"] === "true")
       BASE_CONFIG.rangeSelector = {
-        enabled: true,
-          selected: 0
+          enabled: true,
+          // selected: 0,
+          buttons: []
       };
 
+
     // set MIN WIDTH for scrollable Area (> que scrollbar, car pour scollbar il faut définir la taille en valeurs de X et qu'on a des dates...)
-    if (parametreUrlOris.asRaw["minwidth"]) {
-      let numberValue = new OrisData(parametreUrlOris.asRaw["minwidth"]).asNumber();
+    if (parametreUrlOris.asRaw[hcConfigKeys.chart.minWidth.url_param]) {
+      let numberValue = new OrisData(parametreUrlOris.asRaw[hcConfigKeys.chart.minWidth.url_param])[hcConfigKeys.chart.minWidth.format]();
       if (numberValue)
         BASE_CONFIG.chart.scrollablePlotArea = {
           minWidth: numberValue
         };
     }
+    // set WIDTH et HEIGHT pour forcer une dimension au graphique (/!\ désactiver la responsivité /!\)
+    // Attention à ne pas utiliser WIDTH avec minWidth (si width < minWidth, le graphique dépassera sa bordure de droite...)
+    if (parametreUrlOris.asRaw[hcConfigKeys.chart.height.url_param]) {
+      let numberValue = new OrisData(parametreUrlOris.asRaw[hcConfigKeys.chart.height.url_param])[hcConfigKeys.chart.height.format]();
+      if (numberValue)
+        BASE_CONFIG.chart.height = numberValue
+    }
+    if (parametreUrlOris.asRaw[hcConfigKeys.chart.width.url_param]) {
+      let numberValue = new OrisData(parametreUrlOris.asRaw[hcConfigKeys.chart.width.url_param])[hcConfigKeys.chart.width.format]();
+      if (numberValue)
+        BASE_CONFIG.chart.width = numberValue
+    }
+
     /**
      * minHeight ne marhe pas...
     if (parametreUrlOris.asRaw["minheight"]) {
