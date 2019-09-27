@@ -44,6 +44,16 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
        * @Issue #19 Inputs customisés
        */
       dataLabel: {
+        iconLeft: {
+          url_param: 'icon-left',
+          format: 'asString',
+          input_label: "Left Icon"
+        },
+        iconRight: {
+          url_param: 'icon-right',
+          format: 'asString',
+          input_label: "Right Icon"
+        }
         // prefix
         // suffix
         // idefix
@@ -76,7 +86,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
         category: {   // {string} libellé de la "ligne" sur laquelle doit se trouver cette tâche
           url_param: 'category',
           format: 'asString'
-        },
+        }, // inutile maintenant ? car uniqueNames
         dependency: { // {string} @id d'une autre tâche dont celle-ci dépend
           url_param: 'dependency',
           format: 'asStringOrFalse'
@@ -89,11 +99,6 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           url_param: 'color',
           format: 'asRgb'
         },
-        // TODO bonus
-        icon: {   // ne image (base64 ?) sur la task à gauche ou à droite (panneau danger, etc...) TODO (bonus) css INLINE à partir de la base64 ?
-          url_param: 'icon',
-          format: 'asString'
-        },
         label: {
           // url_param: 'label', // 'desc',
           url_param: 'name',
@@ -101,6 +106,15 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
         },
         parent: {
           url_param: 'parent',
+          format: 'asString'
+        },
+        // TODO bonus
+        iconLeft: {   // image sur la task à gauche (panneau danger, etc...)
+          url_param: 'icon-left',
+          format: 'asString'
+        },
+        iconRight: {   // image sur la task à droite (panneau danger, etc...)
+          url_param: 'icon-right',
           format: 'asString'
         }
       },
@@ -231,7 +245,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
     for (let option in userOptions) {
       LoggerModule.log("userOptions["+option+"]", userOptions[option]);
-      // url += "&" + option + "=" + ((userOptions[option] || typeof userOptions !== "string") ? userOptions[option] : "(v)"); // Fait avant // todo @Issue #29: envoyer une valeur vide au serveur
+      // url += "&" + option + "=" + ((userOptions[option] || typeof userOptions !== "string") ? userOptions[option] : SHARED.ORIS_EMPTY_VALUE); // Fait avant // todo @Issue #29: envoyer une valeur vide au serveur
       url += "&" + option + "=" + userOptions[option]; // todo @Issue #29: envoyer une valeur vide au serveur
     }
 
@@ -314,6 +328,9 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
         // On ne compare que les valeurs modifiées
         // et on les formatte en userOptions
+        let errorOccured = false,
+          errorMessage = "Mise à jour du Point échouée ou incomplète:";
+
         for (let attr in formattedData) {
           if (!flippedDataKeys[attr])
             continue;
@@ -325,16 +342,23 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
             + " === received[" + flippedDataKeys[attr] + "]: " +  (typeof currentPosted === "object" ? JSON.stringify(currentActual) : currentActual) + " ?");
           // if (actualTask["userOptions"][attr] !== postedTask["userOptions"][attr])
           if (typeof currentPosted === "object") {
-            if (JSON.stringify(currentPosted) !== JSON.stringify(currentActual)) // todo (v) pour ça aussi...
-              throw "Mise à jour du Point échouée." +
-              "<br/>La valeur ('" + flippedDataKeys[attr] + "'->"+ JSON.stringify(currentPosted) + "') envoyée est différente de celle récupérée depuis le serveur (->'" + JSON.stringify(currentActual) +"').";
+            if (JSON.stringify(currentPosted) !== JSON.stringify(currentActual)) { // todo (v) pour ça aussi...
+              errorOccured = true;
+              errorMessage += "\nLa valeur ('" + flippedDataKeys[attr] + "'->'" + (currentPosted === null ? "" : JSON.stringify(currentPosted)) + "') envoyée est différente de celle récupérée depuis le serveur (->'" + JSON.stringify(currentActual) + "').";
+              // throw "Mise à jour du Point échouée ou incomplète." +
+            }
           } // valeur différentes
           else if (SHARED.decodeHTML(currentPosted) !== SHARED.decodeHTML(currentActual)
-            // mais pas parce qu'une valeur est vide et que la seule façon de push une valeur vide au serveur c'est d'envoyer "(v)"
-            && !(SHARED.decodeHTML(currentPosted) === "" && currentActual === "(v)") )
-            throw "Mise à jour du Point échouée." +
-            "<br/>La valeur ('" + flippedDataKeys[attr] + "'->'"+ SHARED.decodeHTML(currentPosted) + "') envoyée différentes de celle récupérée depuis le serveur(->'" + SHARED.decodeHTML(currentActual) + "').";
+            // mais pas parce qu'une valeur est vide et que la seule façon de push une valeur vide au serveur c'est d'envoyer SHARED.ORIS_EMPTY_VALUE
+          && !(SHARED.decodeHTML(currentPosted) === "" && currentActual === SHARED.ORIS_EMPTY_VALUE) ) {
+            errorOccured = true;
+            errorMessage += "\nLa valeur ('" + flippedDataKeys[attr] + "'->'"+ SHARED.decodeHTML(currentPosted) + "') envoyée différentes de celle récupérée depuis le serveur(->'" + SHARED.decodeHTML(currentActual) + "').";
+            //throw "Mise à jour du Point échouée ou incomplète." +
+          }
         }
+
+        if (errorOccured)
+          throw errorMessage;
 
         // Success Toast
         TOAST.turnSuccess(initToast, {
@@ -536,6 +560,16 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
    */
   function formatCustomInputs(self) {
     let customLabelsAsObject = {};
+
+    // TODO ne pas faire ça comme ça, c'est... crado
+    // Créer les inputs des icônes
+    for (let optionalInput in self.CONSTANTS.HC_CONFIG_KEYS.dataLabel) {
+      let colId = self.CONSTANTS.HC_CONFIG_KEYS.dataLabel[optionalInput]["url_param"];
+      if (self.asRaw[colId]) {
+        customLabelsAsObject[self.asRaw[colId]] = self.CONSTANTS.HC_CONFIG_KEYS.dataLabel[optionalInput]["input_label"];
+      }
+    }
+
 
     if (!self.asRaw || !self.asRaw["inputs-id"] || !self.asRaw["inputs-label"])
       return customLabelsAsObject;

@@ -1,11 +1,4 @@
 /**
- * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
- * TODO Vu qu'on ne peut pas importer de script dans un Web Worker (erreur de MIME), il faut C/C ce code.
- * TODO il faut donc penser à le faire à chaque fois que le code est modifié
- * /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
- */
-
-/**
  * @DataModel pour une donnée Oris
  * le web-service renvoie toujours des données en string,
  * ce modèle nous sert à normaliser leur formatage
@@ -182,7 +175,7 @@ OrisData.prototype.tryParseDate = function () {
   if (typeof this.value === "number"    // on autorise les timestamps
    || SHARED.isIsoDate(this.value))      // format ISO
     return new Date(this.value);
-  else if (SHARED.isFrenchShortDate(this.value)) {  // On transforme DD/MM/YYYY en MM/DD/YYYY
+  else if (SHARED.isShortFrenchDate(this.value)) {  // On transforme DD/MM/YYYY en MM/DD/YYYY
     let tmp = null;
     if (this.value.indexOf("/"))
       tmp = this.value.split("/");

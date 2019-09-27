@@ -7,7 +7,9 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
    */
   // PRIVATE
   let paramUrlOrisNoFunctions = PARAMETRES_URL_ORIS_NO_FUNCTIONS,
-    hcConfigKeys = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS;
+    hcConfigKeys = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS,
+    // utilisé pour créer l'event Double Click
+    pointClickedId = "";
 
   // PUBLIC
   let currentConfig = null,
@@ -18,33 +20,92 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     CONTAINER_ID = "graph-container", // ID de l'élément DOM cible (<div>) pour dessiner le graphique
     EVENT_HANDLER = {
       point: {
-        select: function(event, options) {
+        select: function(event) {
           setTaskButtonDisabledState(false);
           // DOM_REF.editButtons.edit.disabled = false;
           // DOM_REF.editButtons.delete.disabled = false;
           // MàJ la référence vers le point selectionné
           selectedPoint = this;
-          TOAST.info({body: "Task Selected Event", delay: 500 });
+
+          if (pointClickedId && event.target.id === pointClickedId) {
+            EVENT_HANDLER.point.dbclick(event, this);
+          } else {
+            pointClickedId = this.id;
+            setTimeout(function () {
+              pointClickedId = "";
+            }, 500) // 500ms pour "détecter le double click", même valeur que Windows
+          }
+
+          // TOAST.info({body: "Task Selected Event", delay: 500 });
         },
-        unselect: function(event, options) {
+        unselect: function(event) {
+          // Détecter DBClick, même si le point est déjà sélectionné
+          // fixes @GituIssue #36 mais il faut vérifier qu'il s'agit du même ID car "unselect" est lancé après "select"
+          // et ça détectait comme DB click lors de clic d'un Point à un autre
+          if (pointClickedId && event.target.id === pointClickedId) {
+            EVENT_HANDLER.point.dbclick(event, this);
+            return false;
+          } else if (!pointClickedId) { // obligé de préciser car sinon --> #36
+            pointClickedId = this.id;
+            setTimeout(function () {
+              pointClickedId = "";
+            }, 500) // 500ms pour "détecter le double click", même valeur que Windows
+          }
+
           // Décalage pour cohérence
           setTimeout(function() {
             document.getElementById("task-edit-button").disabled = !chartObj.getSelectedPoints().length;
             document.getElementById("task-delete-navbar-button").disabled = !chartObj.getSelectedPoints().length;
           }, 10);
 
-          TOAST.info({ body: "Task Unselected Event", delay: 500 });
+          // TOAST.info({ body: "Task Unselected Event", delay: 500 });
         },
+
+        // Double Clic
+        dbclick: function (event, target) {
+          $(".multi-collapse").collapse('show');
+          APP_MODULE.getTaskEditor().initAndShow(selectedPoint.options, false);
+        },
+
+        dragStart: function () {
+          // update toast infos
+          updateDragInfoToast(this);
+          // show toast
+          TOAST.showDragInfoToast();
+          TOAST.getDragInfoToast().autoHide = true;
+          // Si le dragStart n'était qu'un simple clic, on a besoin de manuellement le remasquer
+          setTimeout(function() {
+            if (TOAST.getDragInfoToast().autoHide)
+              TOAST.hideDragInfoToast();
+          }, 750);
+        },
+
+        drag: function (event) {
+          TOAST.getDragInfoToast().autoHide = false;
+
+          let tmp = event.newPoint;
+          tmp["raw-start"] = this["raw-start"];
+          tmp["raw-end"] = this["raw-end"];
+          updateDragInfoToast(tmp);
+        },
+
         drop: function (event) {
+          console.log("drop event", event);
+
           // Ici, les clefs sont celles d'HighCharts
           // On veut les remplacer par celles de notre base (param_url)
           let cloneOptions = {
             id: this.id
           };
-          if (event.newPoint.start || event.newPoint.start === 0)
+          if (event.newPoint.start || event.newPoint.start === 0) {
             cloneOptions.start = event.newPoint.start;
-          if (event.newPoint.end || event.newPoint.end === 0)
+            cloneOptions["raw-start"] = event.newPoints[event.target.id].point.options["raw-start"];  // oui, c'est relou ET fortement couplé à la librairie HighCharts...
+          }
+          if (event.newPoint.end || event.newPoint.end === 0) {
             cloneOptions.end = event.newPoint.end;
+            cloneOptions["raw-end"] = event.newPoints[event.target.id].point.options["raw-end"];  // oui, c'est relou ET fortement couplé à la librairie HighCharts...
+          }
+
           /**
            * Risque de poser problème si un Tick yAxis est "collapsed"
            * @Issue https://github.com/highcharts/highcharts/issues/11486
@@ -78,18 +139,33 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           for (let option in cloneOptions) {
             if (paramUrlKeys[option]) {
               LoggerModule.info("'" + option + "' becomes '" + paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]] + "'", cloneOptions[option]);
-              newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] = (option === "start" || option === "end")
-                ? (cloneOptions[option] ? new Date(cloneOptions[option]).toISOString(): "")
-                : cloneOptions[option];
+              if (option === "start" || option === "end") {
+                let date = new Date(cloneOptions[option]);
+                // Conserver le format de la DB (Long/Court)
+                let isShortFrenchDate = (cloneOptions["raw-" + option] && cloneOptions["raw-" + option].indexOf("Z") < 0);  // format long --> Zulu Time
+                newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] = isShortFrenchDate ? SHARED.toShortFrenchDate(date) : date.toISOString();
+                // newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] = isShortFrenchDate ? (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear()) : date.toISOString();
+              } else
+                newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] = cloneOptions[option];
+                /*newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] =
+                (option === "start" || option === "end")
+                  ? (cloneOptions[option] ?
+                    // FORMAT COURT / LONG
+                    ( cloneOptions["raw-" + option].indexOf("Z") > 0 ? new Date(cloneOptions[option]).toISOString() : )
+                    : "")
+                  : cloneOptions[option];
+                  */
             }
           }
           // En dûr... &vline needed pour l'argument de la fonction et ID pour la requête
           newOptions["id"] = newOptions["vline"] = this.vline;
 
 
-          LoggerModule.info("drop's newOptions", newOptions);
+          console.info("drop's newOptions", newOptions);
 
           APP_MODULE.getParametresUrlOris().tryAddOrEditPoint(newOptions, false);
+
+          setTimeout(TOAST.hideDragInfoToast, 250);
           return false;
         },
       }
@@ -181,6 +257,31 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
   }
 
   /**
+   * @GitIssue #33 Ajouter des icônes aux tâches
+   * Génère l'élément DOM adapté pour afficher une icône dans une tâche
+   *
+   * @param {string} icon
+   *    Si la valeur contient un "." il s'agit d'une URI, absolue ou relative,
+   *    sinon on interprète cela comme une icône FontAwesome 4.7.0
+   *
+   *    Dans le cas FontAwesome, il est possible de préciser la taille via les classes css FontAwesome (https://fontawesome.com/how-to-use/on-the-web/styling/sizing-icons)
+   *    et la couleur via les classes Bootstrap 4 (https://getbootstrap.com/docs/4.3/utilities/colors/)
+   *
+   * @return {string}
+   *    Élément DOM sous forme de string
+   */
+  function iconFormatter(icon, align) {
+    if (icon.indexOf(".") > 0)  // fichier local, à mettre dans un tag <img>
+      return '<div style="opacity: 0.85; width: 24px; height: 24px; overflow: hidden; '
+        + ((align === "left")
+          ? 'margin-left: -25px; '
+          : 'position:absolute; left: 0; top: -1px; ')
+        + '">\n<img src="' + icon + '" style="width: 24px; ">\n</div>';
+    else
+      return '<i class="fa ' + icon + '" style="opacity: 0.85; vertical-align: middle; "></i>';
+  }
+
+  /**
    * HighChart series Object
    * @param data
    * @throws if missing argument
@@ -193,12 +294,52 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
 
     return {
       name: data.name || "", // undefined ou null sont automatiquement remplacés par "Series N"
-      data: data
+      data: data,
+
+      dataLabels: [
+        // icon-left
+        {
+          enabled: true,
+          allowOverlap: true,
+          align: 'left',
+          useHTML: true,
+          formatter: function() {
+            let icon = this.point.iconLeft;
+            if (icon)
+              return iconFormatter(icon, "left");
+          }
+        },
+        // label
+        {
+          allowOverlap: true,
+          enabled: true,
+          // useHTML: true,
+          formatter: function() {
+            let str = this.point.label || "";
+            if (this.point.completed && this.point.completed.amount && typeof this.point.completed.amount === "number")
+              str += " (" + ((Math.round(this.point.completed.amount*100)*10)/10)  + "%)"; // .toFixed(0) + "%)";
+            return str;
+          }
+        },
+        // icon-right
+        {
+          enabled: true,
+          allowOverlap: true,
+          align: 'right',
+          useHTML: true,
+          formatter: function() {
+            let icon = this.point.iconRight;
+            if (icon) {
+              return iconFormatter(icon, "right");
+            }
+          }
+        }]
+
     }
   }
 
   /**
-   * Fixe le fait que la zone de labels de l'axe Y deviennent invisibles lorsque l'on update
+   * @Issue Fixe le fait que la zone de labels de l'axe Y deviennent invisibles lorsque l'on update
    * https://github.com/highcharts/highcharts/issues/8862
    *
    * @param chart
@@ -278,7 +419,9 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     if (arguments.length < 3)
       throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel constructor]");
 
-    // template de base
+    /**
+     * @TEMPALTE Gantt
+     */
     let BASE_CONFIG = {
       chart: {
         spacingLeft: 1,
@@ -312,18 +455,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
               }
             }
           },
-          animation: false,
-          dataLabels: {
-            enabled: true,
-            // format: '{point.name}' // todo custom formatter, surtout si pre/suffix/img, etc...
-            //*
-            formatter: function() {
-              let str = this.point.label || "";
-              if (this.point.completed && this.point.completed.amount && typeof this.point.completed.amount === "number")
-                str += " (" + ((Math.round(this.point.completed.amount*100)*10)/10)  + "%)"; // .toFixed(0) + "%)";
-              return str;
-            } //*/
-          }
+          animation: false
         }
       },
       yAxis: {
@@ -331,7 +463,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         categories: []
       },
       xAxis: [{
-        //*
         dateTimeLabelFormats: {
           millisecond: '%H:%M:%S.%L',
           second: '%H:%M:%S',
@@ -344,14 +475,26 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           week: '%e %b',
           month: '%b \'%y',
           year: '%Y'
-        }, // */
-        currentDateIndicator: true,
+        },
+        gridLineWidth: parametreUrlOris.asRaw["grid"] === "true" ? 1 : 0,
+        currentDateIndicator: parametreUrlOris.asRaw["current"] === "true" ? { color: 'red' } : false,
         minPadding: 0.01,
         maxPadding: 0.01,
-        minTickInterval: 86400000 // 1 Day: 24 * 3600000 = 86400000
+        // minTickInterval: (parametreUrlOris.asRaw["xinterval"] || 1) * 24 * 3600 * 1000 // 1 Day === 24 * 3600 * 1000 en ms
+        tickInterval: (parametreUrlOris.asRaw["xinterval"] || 1) * 24 * 3600 * 1000 // 1 Day === 24 * 3600 * 1000 en ms
       }, { // Le 2e axe X est la ligne des "semaines"
         labels: {
-          format: (APP_MODULE.getPreferedLanguage() === "fr" ? 'Semaine' : 'Week') + ' {value:%W}'
+          /*formatter: function () {
+            console.info("labels this", this);
+            if (!parametreUrlOris.asRaw["xlabel"])
+              return (APP_MODULE.getPreferedLanguage() === "fr" ? 'Semaine' : 'Week') + ' {value:%W}';
+            else
+              return "{value:%" + parametreUrlOris.asArray["_xlabel"].join('}{value:%') + "}";
+          }, //*/
+          format: parametreUrlOris.asRaw["xlabel"]
+            //? ("{value:%" + parametreUrlOris.asArray["_xlabel"].join('}{value:%') + "}") //  {value:%B}  {value:%Y}'
+            ? ("{value:%" + parametreUrlOris.asRaw["xlabel"] + "}") //  {value:%B}  {value:%Y}'
+            : (APP_MODULE.getPreferedLanguage() === "fr" ? 'Semaine' : 'Week') + ' {value:%W}' //*/
         }
       }],
       tooltip: {
@@ -366,11 +509,18 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
 
           // START
           if (this.x)
-            str += "<br><small>Début:&nbsp;" + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x) + "</small>";  // todo format date
+            str += "<br><small>"+ (APP_MODULE.getPreferedLanguage() === "fr" ? 'Début' : 'Start')
+              + ":&nbsp;" + (this.point.options["raw-start"].indexOf("Z") < 0
+                ? SHARED.toShortFrenchDate(this.x)
+                : Highcharts.dateFormat('%a %d %b %Y, %H:%M', new Date(this.x))) + "</small>";  // todo format date
 
           // END
           if (this.x2)
-            str += "<br><small>Fin:&nbsp;" + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x2) + "</small>";
+            str += "<br><small>"+ (APP_MODULE.getPreferedLanguage() === "fr" ? 'Fin' : 'End')
+              + ":&nbsp;" + (this.point.options["raw-end"].indexOf("Z") < 0
+                ? SHARED.toShortFrenchDate(this.x2)
+                : Highcharts.dateFormat('%a %d %b %Y, %H:%M', new Date(this.x2))) + "</small>";
+          // + Highcharts.dateFormat('%a %d %b %Y, %H:%M', this.x2) + "</small>";
 
           // COMPLETED
           if (this.point.completed && this.point.completed.amount) {
@@ -380,20 +530,17 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
             str += "<br><small>Avancement:&nbsp;" + amount + "%</small>";
           }
 
-          // OWNER
-          if (this.point.owner)
-            str += "<br><small>Responsable:&nbsp;" + this.point.owner + "</small>";
-
           /**
            * @Issue #19
            * Custom Inputs
            */
           for (let customInput in paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel) {
             // N'afficher la ligne que si l'input existe ET a une valeur
-            if (this.point[customInput]) {
+            if (this.point[customInput] || this.point[customInput] === "") {
               str += "<br><small>";
               // Si l'input custom a un label, afficher "<label>: "
               let customLabel = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel[customInput];
+              // N'ajouter le ": " que s'il y a un label
               if (customLabel)
                 str += customLabel + ": ";
               str += this.point[customInput] + "</small>";
@@ -441,7 +588,12 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         series: {
           type: 'gantt',
           pointPlacement: 0.5,
-          pointPadding: 0.25
+          pointPadding: 0.25,
+          dataLabels: [{
+            enabled: false
+          }, {
+            enabled: false
+          }]
         },
         yAxis: {
           reversed: true,
@@ -530,14 +682,15 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         }
       };
 
-      // TODO initialise UI
-      //    Inclure une librairie ?
       // Enable Drag/Drop
       BASE_CONFIG.plotOptions.series.dragDrop = {
         liveRedraw: false,
         draggableX: true,
         draggableY: true, // ne fonctionne pas en mode "uniqeNames"
-        dragPrecisionX: day / 2 // Snap to eight hours
+        dragPrecisionX: parametreUrlOris.asRaw["xprecision"]
+          ? (parametreUrlOris.asRaw["xprecision"] * 36e5) // précision en heures
+          // : (day / 2) // Snap to 12 hours
+          : (day / 48) // Snap to 30 minutes
       };
 
     /**
@@ -642,6 +795,35 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
       resultat.data[l]["y"] = resultat.categories.indexOf(resultat.data[l]["category"]);
     }
     return resultat;
+  }
+
+  // TODO
+  //    Drag Info Toast, ici plutôt que dans TOAST factory ?
+  /**
+   * Met à jour les dates &start/end indicatives du Toast de Drag/Drop
+   * @param {Object} newData
+   *    HighCharts Point.userOptions (x/start et y/end)
+   */
+  function updateDragInfoToast(newData) {
+    LoggerModule.log("newData", newData);
+    // Date de départ
+    newData.x = newData.x || newData.start;
+    if (newData.x) {
+      TOAST.getDragInfoToast().start.innerText = SHARED.isShortFrenchDate(newData["raw-start"])
+        ? SHARED.toShortFrenchDate(newData.x)
+        : Highcharts.dateFormat('%a  %d %b %Y, %H:%M', new Date(newData.x))
+    }
+
+    // Date de fin
+    newData.x2 = newData.x2 || newData.end;
+    if (newData.x2) {
+      TOAST.getDragInfoToast().element.classList.remove("is-milestone");
+      TOAST.getDragInfoToast().end.innerText = SHARED.isShortFrenchDate(newData["raw-end"])
+        ? SHARED.toShortFrenchDate(newData.x2)
+        : Highcharts.dateFormat('%a %d %b %Y, %H:%M', new Date(newData.x2))
+    } else { // Cas milestone
+      TOAST.getDragInfoToast().element.classList.add("is-milestone");
+    }
   }
 
   return {

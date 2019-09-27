@@ -1,6 +1,12 @@
 // Magouille pour pouvoir transférer (ENTRE AUTRES) SHARED au Web Worker
 function SHARED_FACTORY() {
   return {
+    /*
+     * Valeur réservée par Oris pou signifier qu'une valeur est "vide"
+     * (on ne peut pas push une valeur vide via une requête GET)
+     */
+    ORIS_EMPTY_VALUE: "null",
+
     /**
      * Parse un string en un objet Location (on peut alors utiliser les attributs host/protocol/...)
      *
@@ -229,16 +235,41 @@ function SHARED_FACTORY() {
      * @param str
      * @return {boolean}
      */
-    isFrenchShortDate: function (str) {
+    isShortFrenchDate: function (str) {
       if (!(/^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(str))) return false;
       let tmp = (str.indexOf("/")) ? str.split("/") : str.split("-");
-      LoggerModule.log("[isFrenchShortDate] tmp", tmp);
+      LoggerModule.log("[isShortFrenchDate] tmp", tmp);
       // On transforme DD/MM/YYYY en MM/DD/YYYY
       let d = new Date(tmp[1] + "/" + tmp[0] + "/" + tmp[2]);
-      LoggerModule.log("[isFrenchShortDate] date", d);
+      LoggerModule.log("[isShortFrenchDate] date", d);
 
       // return ((d.toISOString() === str || d.toISOString() === (str.slice(0, -1)+".000Z")) &&
       return d.getTime() === d.getTime(); // false si Invalid Date car (NaN === NaN) => false
+    },
+
+    /**
+     * Tenter de transformer le paramètre en une Date écrite au format court DD/MM/YYYY
+     * @param {Date|moment|Number} date
+     *    Date à transcrire.
+     *    La chaîne de caractère est interprétée différemment par le constructeur Date selon les navigateurs donc OSEF
+     *
+     * @return {String|undefined}
+     */
+    toShortFrenchDate: function (date) {
+      if (typeof date === "number")
+        date = new Date(date);
+
+      // Déjà une Date valide ou objet MomentJS ?
+      if (typeof date === "object") {
+        if (date._isAMomentObject)
+          date = date._d;
+        if (typeof date.getTime()) // Date Invalid --> .getTime() == NaN
+          return (date.getDate() < 10 ? "0": "") + date.getDate()
+            + "/" + ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1)
+            + "/" + date.getFullYear();
+      }
+
+      return undefined;
     },
 
     /**

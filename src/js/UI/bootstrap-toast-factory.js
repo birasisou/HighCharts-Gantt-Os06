@@ -23,6 +23,36 @@ function TOAST_FACTORY () {
           icon: "fa-exclamation-triangle",
           backgroundStyles: ["bg-danger", "text-white"]
       }
+    },
+    DRAG_INFO_TOAST = {
+      // set à true on dragStart (ce qui inclue un clic simple)
+      // ==> mais masqué seulement lors d'un event Drop (pas le cas si un clic)
+      autoHide: false,
+
+      containerId: "drag-info-toast-container",
+      get container() {
+        return document.getElementById(this.containerId);
+      },
+
+      elementId: "drag-info-toast",
+      get element() {
+        return document.getElementById(this.elementId);
+      },
+
+      titleId: "drag-info-toast-title",
+      get title() {
+        return document.getElementById(this.containerId);
+      },
+
+      startId: "drag-info-toast-start",
+      get start() {
+        return document.getElementById(this.startId);
+      },
+
+      endId: "drag-info-toast-end",
+      get end() {
+        return document.getElementById(this.endId);
+      },
     };
 
   /**
@@ -152,6 +182,19 @@ function TOAST_FACTORY () {
   return {
     getDefaultToastOptions: function() { return DEFAULT_TOAST_OPTIONS; },
     getCurrentToasts: function() { return currentToasts; },
+
+    getDragInfoToast: function () {
+      return DRAG_INFO_TOAST;
+    },
+
+    showDragInfoToast: function() {
+      $(DRAG_INFO_TOAST.element).toast('show');
+      // Masquer
+      DRAG_INFO_TOAST.element.classList.add("to-auto-hide")
+    },
+    hideDragInfoToast: function() {
+      $(DRAG_INFO_TOAST.element).toast('hide');
+    },
 
     /**
      * Instancier un Toast Bootstrap à partir d'options

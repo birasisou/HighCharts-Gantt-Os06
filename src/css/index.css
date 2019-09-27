@@ -143,14 +143,24 @@ input[readonly],
     color: #495057;
 }
 
+/* On n'affiche pas les boutons lorque "&selector=true"
+   car le zoom fait bugguer le graphique (visuellement) */
+.highcharts-range-selector-buttons {
+    display: none;
+}
+
 /*
     TOAST
  */
 /* Sinon, les Toast sont derrière HighCharts */
-#toast-container {
+#toast-container,
+#drag-info-toast-container {
     bottom: 0;
     z-index: 2;
     pointer-events:none;
+}
+.drag-info-toast {
+    opacity: 0.75;
 }
 .toast {
     z-index: 1;
@@ -159,6 +169,10 @@ input[readonly],
 .toast.show {
     pointer-events:auto;
     opacity: 0.85;
+}
+#drag-info-toast.is-milestone #drag-info-toast-date-separator,
+#drag-info-toast.is-milestone #drag-info-toast-end {
+    display: none;
 }
 
 /*
@@ -242,6 +256,16 @@ div.ajs-content {
     margin-left: 0;
 }
 
+.warning-feedback {
+    display: none;
+    width: 100%;
+    margin-top: .25rem;
+    font-size: 80%;
+}
+.form-control.border-warning~.warning-feedback {
+    display: block!important;
+}
+
 #task-category-input ~ div.dropdown-menu ul.dropdown-menu.inner > li:first-child {
     text-align: center;
     /*margin-left: 25%;*/
@@ -249,4 +273,55 @@ div.ajs-content {
 #task-category-input ~ div.dropdown-menu ul.dropdown-menu.inner > li:first-child {
     width: 90%;
     margin-left: 5%;
+}
+
+/**
+ * Custom Animation
+ * Tourner dans le sens inverse des aiguilles d'une montre
+ **/
+.fa-counter-spin {
+    -webkit-animation: spin-counter 2s infinite linear;
+    -moz-animation: spin-counter 2s infinite linear;
+    -o-animation: spin-counter 2s infinite linear;
+    animation: spin-counter 2s infinite linear;
+}
+@-moz-keyframes spin-counter {
+    0% {
+        -moz-transform: rotate(359deg);
+    }
+    100% {
+        -moz-transform: rotate(0deg);
+    }
+}
+@-webkit-keyframes spin-counter {
+    0% {
+        -webkit-transform: rotate(359deg);
+    }
+    100% {
+        -webkit-transform: rotate(0deg);
+    }
+}
+@-o-keyframes spin-counter {
+    0% {
+        -o-transform: rotate(359deg);
+    }
+    100% {
+        -o-transform: rotate(0deg);
+    }
+}
+@-ms-keyframes spin-counter {
+    0% {
+        -ms-transform: rotate(359deg);
+    }
+    100% {
+        -ms-transform: rotate(0deg);
+    }
+}
+@keyframes spin-counter {
+    0% {
+        transform: rotate(359deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
 }

@@ -7,13 +7,17 @@
 
 /**
  * @DataModel pour une tâche Oris
- * TODO: extends une classe du genre GanttDataModel
+ *
+ * /!\ Les dates sont également stockée dans leur format brut
+ * /!\ car on souhaite conserver ce format lorsque l'on écrit dans la base
+ *
  * @param {Object} data_row
  *    Objet contenant les données des colonnes récupérées
  *    (&id, &start, &end, etc...)
  *
  * @param {ParametresUrlOris} oris_config
  *    toute la getConfig que le Worker a. Il nous faut les constantes et
+ *
  * @constructor
  */
 function OrisGanttTask(data_row, oris_config) {
@@ -27,13 +31,6 @@ function OrisGanttTask(data_row, oris_config) {
     // Les clés userOptions HighCharts
     oris_config_HC_CONFIG_KEYS_data = oris_config.CONSTANTS.HC_CONFIG_KEYS.data,   // parametres_url_oris_config.CONSTANTS.HC_CONFIG_KEYS.data
     oris_config_HC_CONFIG_KEYS_dataLabel = oris_config.CONSTANTS.HC_CONFIG_KEYS.dataLabel;
-
-  // RAJOUTER LA CLEF UNIQUE ORIS "vline"
-  /*boot
-  oris_config_HC_CONFIG_KEYS.vline = {
-    url_param: 'vline',
-    format: 'asString'
-  };  // todo PAS ICI ??? */
 
   // Valeur brute d'un userOption
   this.rawUserOptions = {};
@@ -52,17 +49,19 @@ function OrisGanttTask(data_row, oris_config) {
   let keys = Object.keys(oris_config_HC_CONFIG_KEYS_data),
     data_length = keys.length;
 
+  // console.warn("keys", keys);
+
   while (data_length--) {
     let key = keys[data_length];
+
     // L'équivalent Oris (définit en paramètre url)
-    LoggerModule.log("(oris_config_HC_CONFIG_KEYS["+key+"]['url_param']) Our GET parameter equivalent", oris_config_HC_CONFIG_KEYS_data[key]['url_param']);
+    LoggerModule.log("(oris_config_HC_CONFIG_KEYS["+key+"]['url_param']) Our GET parameter equivalent",
+      oris_config_HC_CONFIG_KEYS_data[key]['url_param']);
 
     // SAVE DATA
-
     // en dur
     this.rawUserOptions[key] = data_row[oris_column[oris_config_HC_CONFIG_KEYS_data[key]['url_param']]];
     // La valeur du data_row
-    // TODO faut passer par asRaw....
     LoggerModule.log("(This dataRow's value) data_row[oris_config_HC_CONFIG_KEYS[key]['url_param']] " + key + ":", this.rawUserOptions[key]);
 
     // as OrisValue
@@ -73,6 +72,41 @@ function OrisGanttTask(data_row, oris_config) {
     this.userOptions[key] = this.orisValueUserOption[key][oris_config_HC_CONFIG_KEYS_data[key]['format']]();
     LoggerModule.log("(This userOptions's value formatted) userOptions[key] " + key + ":", this.userOptions[key]);
   }
+
+  // console.log("data_row", data_row);
+  // console.log("rawUserOptions", this.rawUserOptions)
+  // console.log("orisValueUserOption", this.orisValueUserOption)
+  // console.log("userOptions", this.userOptions)
+
+  /**
+   * DATE FORMAT
+   * On veut conserver le format de dates de la BD mais Highcharts ne comprend que les timestamps, or,
+   * si on est au format LONG (UTC, on affichera les heures)
+   * ou au format COURT ("DD/MM/YYYY", on n'affichera pas les heures)
+   * on souhaite réécrire la même chose dans la base
+   *
+   * /!\ Si &start et &end sont mis au même jour, il faut passer &end = 23h59, ou au jour d'après /!\
+   */
+  this.userOptions["raw-" + oris_config_HC_CONFIG_KEYS_data["start"]["url_param"]] =
+    this.rawUserOptions[oris_config_HC_CONFIG_KEYS_data["start"]["url_param"]];
+  this.userOptions["raw-" + oris_config_HC_CONFIG_KEYS_data["end"]["url_param"]] =
+    this.rawUserOptions[oris_config_HC_CONFIG_KEYS_data["end"]["url_param"]];
+
+  // Passer &end à 23h59 s'il a la même date que &start
+  // console.warn("this.orisValueUserOption['start']", this.orisValueUserOption["start"].asDateObject());
+  let startAsDate = this.orisValueUserOption["start"].asDateObject(),
+    endAsDate = this.orisValueUserOption["end"].asDateObject();
+  if (startAsDate && endAsDate
+    && startAsDate.getDate() === endAsDate.getDate()
+    && startAsDate.getMonth() === endAsDate.getMonth()
+    && startAsDate.getFullYear() === endAsDate.getFullYear()
+    && startAsDate.getHours() === endAsDate.getHours()
+    && startAsDate.getMinutes() === endAsDate.getMinutes()) {
+    LoggerModule.info("'start' et 'end' ont la même valeur donc 'end' prend la valeur '23h59'.");
+    this.userOptions["end"] = endAsDate.setHours(23,59);
+  }
+
+
 
   /**
    * CAS PARTICULIERS
@@ -90,8 +124,10 @@ function OrisGanttTask(data_row, oris_config) {
   } else
     this.userOptions["completed"] = null;
 
-  // todo GitIssue #19
-  //    Inputs customisés
+  /**
+   * @GitIssue #19
+   * INPUTS CUSTOMISÉS
+   */
   for (let customInputKey in oris_config_HC_CONFIG_KEYS_dataLabel) {
     // Si la BD ne renvoie pas de colonne, ça veut dire qu'elle n'existe pas, donc on ne stock rien
     // À l'inverse, on veut stocker une valeur vide si la base renvoie une valeur vide
@@ -110,8 +146,6 @@ function OrisGanttTask(data_row, oris_config) {
     this.userOptions[customInputKey] = this.orisValueUserOption[customInputKey].asString();
     LoggerModule.log("userOptions[key] " + customInputKey + ":", this.userOptions[customInputKey]);
   }
-
-
 
   /**
    * Fixe le problème de mise à jour de milestone à tâche et vice-versa
