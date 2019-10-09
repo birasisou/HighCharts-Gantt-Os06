@@ -159,8 +159,9 @@ input[readonly],
     z-index: 2;
     pointer-events:none;
 }
-.drag-info-toast {
+#drag-info-toast {
     opacity: 0.75;
+    text-align: center;
 }
 .toast {
     z-index: 1;

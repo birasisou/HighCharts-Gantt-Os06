@@ -491,9 +491,12 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
             else
               return "{value:%" + parametreUrlOris.asArray["_xlabel"].join('}{value:%') + "}";
           }, //*/
+          /**
+           * @Issue #38
+           **/
           format: parametreUrlOris.asRaw["xlabel"]
-            //? ("{value:%" + parametreUrlOris.asArray["_xlabel"].join('}{value:%') + "}") //  {value:%B}  {value:%Y}'
-            ? ("{value:%" + parametreUrlOris.asRaw["xlabel"] + "}") //  {value:%B}  {value:%Y}'
+            ? ("{value:" + parametreUrlOris.asArray["_xlabel"].join("}{value:") + "}") //  {value:%B}  {value:%Y}'
+            // ? ("{value:%" + parametreUrlOris.asRaw["xlabel"] + "}") //  {value:%B}  {value:%Y}'
             : (APP_MODULE.getPreferedLanguage() === "fr" ? 'Semaine' : 'Week') + ' {value:%W}' //*/
         }
       }],
@@ -531,12 +534,12 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           }
 
           /**
-           * @Issue #19
+           * @Issue #19 & #33
            * Custom Inputs
            */
           for (let customInput in paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel) {
             // N'afficher la ligne que si l'input existe ET a une valeur
-            if (this.point[customInput] || this.point[customInput] === "") {
+            if ((this.point[customInput] || this.point[customInput] === "" ) && (customInput !== paramUrlOrisNoFunctions.asRaw["icon-left"] && customInput !== paramUrlOrisNoFunctions.asRaw["icon-right"])) {
               str += "<br><small>";
               // Si l'input custom a un label, afficher "<label>: "
               let customLabel = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel[customInput];
@@ -571,13 +574,17 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     // if (parametreUrlOris.asRaw["title"])
     //  BASE_CONFIG.title = { text: parametreUrlOris.asRaw["title"] };
     if (parametreUrlOris.asRaw[hcConfigKeys.chart.title.url_param]) // version moins "couplée"
-      BASE_CONFIG.title = { text: parametreUrlOris.asRaw[hcConfigKeys.chart.title.url_param] };
+      BASE_CONFIG.title = {
+        text: decodeURIComponent(parametreUrlOris.asRaw[hcConfigKeys.chart.title.url_param])
+    };
 
     // set SUBTITLE
     // if (parametreUrlOris.asRaw["subtitle"])
     //  BASE_CONFIG.subtitle = { text: parametreUrlOris.asRaw["subtitle"] };
     if (parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param]) // version moins "couplée"
-      BASE_CONFIG.subtitle = { text: parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param] };
+      BASE_CONFIG.subtitle = {
+      text: decodeURIComponent(parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param])
+    };
 
     // TODO pas recommandé
     // set NAVIGATOR

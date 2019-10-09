@@ -582,7 +582,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     for (i; i<idLength; ++i) {
       // Ignorer les ID vides, tout en autorisant "0", "false", etc...
       if (inputsId[i]) {
-        customLabelsAsObject[inputsId[i]] = inputsLabel[i] || ""; // Autoriser les labels vides
+        customLabelsAsObject[inputsId[i]] = decodeURIComponent(inputsLabel[i]) || ""; // Autoriser les labels vides
       }
     }
 

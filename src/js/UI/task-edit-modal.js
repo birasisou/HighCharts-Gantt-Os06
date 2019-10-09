@@ -288,7 +288,10 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     formGroup.classList.add("form-group", "col-5");
     formGroup.id = formGroupId;
 
+    config.label = decodeURIComponent(config.label);
+
     label.setAttribute("for", _inputId);
+    // Décoder car les paramètres passant par l'URL sont donc encodés
     label.innerHTML = config.label || "&nbsp;"; // Il faut un truc sinon le label n'a pas de hauteur
 
     input.id = _inputId;
