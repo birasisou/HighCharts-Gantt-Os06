@@ -305,7 +305,9 @@ new Promise(function(resolve, reject) {
                 categories: GANTT_RENDERING_MODULE.getChart().series[0].yAxis.categories
               },
               series: {
-                data: GANTT_RENDERING_MODULE.getChart().series[0].userOptions.data
+                data: GANTT_RENDERING_MODULE.getChart().series[0].userOptions.data,
+
+
               }
             });
 

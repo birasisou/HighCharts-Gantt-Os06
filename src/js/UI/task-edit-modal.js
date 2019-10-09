@@ -52,6 +52,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       completed: document.getElementById(inputId("completed")),
       parent: document.getElementById(inputId("parent")),
       dependency: document.getElementById(inputId("dependency")),
+      iconLeft: document.getElementById(inputId("icon-left")),
+      iconRight: document.getElementById(inputId("icon-right")),
       // TODO Add custom Labels (responsable, icon, etc...)
     },
     // Référence to the custom formGroups created by the user
@@ -77,9 +79,21 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     useCurrent: false,
     showTodayButton: true,
     locale: moment.locale() || 'fr',
+    widgetPositioning: {
+      vertical: "auto",
+      horizontal: "right"
+    }
     // format: 'L LT' Date + Heure:Secondes --> format par défaut
   });
   $(INPUTS["start"]).on("dp.change", function (e) {
+    // Enlever le style "valeur calculée" si visible && date modifiée (pour de vrai ==> plus d'une minute d'écart)
+    if (INSTANCE.hasClass("show")
+      && e.oldDate && e.oldDate._d && e.date && e.date._d
+        // on considère que la Date est différente s'il y a plus d'une minute d'écart
+        && (Math.abs(e.oldDate._d - e.date._d) > (60 * 1000))
+    )
+      INPUTS["start"].classList.remove("border-warning");
+
     $(INPUTS["end"]).data("DateTimePicker").minDate(e.date);
     // Cas particulier Add Request
     if (isAddEditor) {
@@ -88,35 +102,30 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       $(INPUTS["end"]).data("DateTimePicker").clear();
     }
   });
+  $(INPUTS["start"]).on("dp.show", function () {
+    // cas milestone
+    $(INPUTS["start"]).data("DateTimePicker").maxDate( INPUTS["end"].value ? $(INPUTS["end"]).data("DateTimePicker").date() : false);
+  });
 
   $(INPUTS["end"]).on("dp.change", function (e) {
+    // Enlever le style "valeur calculée"
+    if (INSTANCE.hasClass("show"))
+      INPUTS["end"].classList.remove("border-warning");
+
     $(INPUTS["start"]).data("DateTimePicker").maxDate(e.date);
+  });
+  $(INPUTS["end"]).on("dp.show", function () {
+    $(INPUTS["end"]).data("DateTimePicker").minDate($(INPUTS["start"]).data("DateTimePicker").date());
   });
 
   // Les sélecteurs sont vides par défaut, on n'a qu'à les update
   initSelectPicker(INPUTS["category"]);
-  $(INPUTS["category"]).on("rendered.bs.select", function(event) {
-
-  });
 
   // Les inputs customisés
   initCustomInputs(parametresUrlOrisNoFunctions.asArray);
   // Obliger de refresh ici sinon les largeurs sont mal calculées
   $(DOM_REFERENCES.modal).on("shown.bs.modal", function (event) {
     $(INPUTS["category"]).selectpicker('refresh');
-
-    /* try {
-      let newCategoryLi = $("#bs-select-1-0").parent()[0];
-      newCategoryLi.addEventListener("click", function(event) {
-        showPromptModal();
-        event.stopPropagation();
-        event.preventDefault();
-        return false;
-      })
-    } catch (e) {
-      console.error("e", e);
-      throw e;
-    } //*/
 
     $(INPUTS["dependency"]).selectpicker('refresh');
     $(INPUTS["parent"]).selectpicker('refresh');
@@ -174,6 +183,15 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       document.getElementById("task-completed-form-group").removeAttribute("hidden");
       isLeftSideInput = !isLeftSideInput;
     }
+    /*console.warn("HC_CONFIG_KEYS.dataLabel", HC_CONFIG_KEYS.dataLabel)
+    if (asRawParams[HC_CONFIG_KEYS.dataLabel.iconLeft.url_param]) {
+      document.getElementById("task-icon-left-form-group").removeAttribute("hidden");
+      isLeftSideInput = !isLeftSideInput;
+    }
+    if (asRawParams[HC_CONFIG_KEYS.dataLabel.iconRight.url_param]) {
+      document.getElementById("task-icon-right-form-group").removeAttribute("hidden");
+      isLeftSideInput = !isLeftSideInput;
+    } //*/
     if (asRawParams[HC_CONFIG_KEYS.data.dependency.url_param]) {
       // Afficher un "offset-2" si on est à droite (i.e. #task-completed-input est visible)
       if (!isLeftSideInput)
@@ -221,7 +239,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     if (!Object.keys(HC_CONFIG_KEYS.dataLabel))
       return false;
 
-
     // Les id-labels customs sont formattés lors de l'instanciation lors de l'instanciation de ParametresUrlOris
     for (let customInputKey in HC_CONFIG_KEYS.dataLabel) {
       let formGroup = null;
@@ -234,7 +251,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         // do nothing
       }
       if (formGroup) {
-        LoggerModule.info("new custom input", formGroup);
         if (!isLeftSideInput) {
           formGroup.classList.add("offset-2");
         }
@@ -306,11 +322,16 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     isAddEditor = isAdd || false;
 
     LoggerModule.info("[initInputs] taskOptions", taskOptions);
+    let validationWarning = "border-warning";
+    INPUTS["start"].classList.remove(validationWarning);
+    INPUTS["end"].classList.remove(validationWarning);
 
     // Les inputs obligatoires
     for (let input in INPUTS) {
       if (!INPUTS[input])
         continue;
+
+      LoggerModule.warn("taskOptions["+input+"]", taskOptions[input]);
 
       if (typeof taskOptions[input] !== "object"              // null
         && typeof taskOptions[input] !== "undefined"          // undefined
@@ -318,6 +339,16 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       {
         taskOptions[input] = SHARED.decodeHTML(taskOptions[input]);
         if (input === "start" || input === "end") {
+          LoggerModule.info(input, taskOptions[input]);
+          LoggerModule.info("raw-" + input, taskOptions["raw-" + input]);
+          // todo si "raw-"+input n'a pas de valeur (alors que input oui) c'est que les dates sont auto calculées
+          //  --> on ne veut pas push de nouvelles dates
+          if (taskOptions[input] && !taskOptions["raw-" + input])
+            INPUTS[input].classList.add(validationWarning);
+          else
+            INPUTS[input].classList.remove(validationWarning);
+
+
           $(INPUTS[input]).data("DateTimePicker").maxDate(false);
           $(INPUTS[input]).data("DateTimePicker").minDate(false);
 
@@ -329,10 +360,35 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
           $(INPUTS[input]).data("DateTimePicker").date( now );
           if (!taskOptions[input])
             INPUTS[input].disabled = true;
+
+          // Conserver le format de la DB (Long/Court)
+          let isShortFrenchDate = (taskOptions["raw-" + input] && taskOptions["raw-" + input].indexOf("Z") < 0 );  // format long --> Zulu Time
+          LoggerModule.log(taskOptions[input] + " " + (isShortFrenchDate ? "is" : "is not") + " short Date format (DD/MM/YYYY).");
+
+          $(INPUTS[input]).data("DateTimePicker").options({
+            format: isShortFrenchDate ? 'L' : 'L LT' // format court === 'L' --> que les jours, sans les heures
+          });
+
         } else if (input === "color")
           $(INPUTS[input]).data('colorpicker').setValue(taskOptions[input]);
-        else
+        else {
+          // Ne pas sélectionner une valeur "inexistante" car ceci fait bugger Select-Picker
+          if (INPUTS[input].nodeName === "SELECT" && !INPUTS[input].querySelector("[value='"+taskOptions[input]+"']")) {
+            let errorTitle = "Unknown ID ('" + taskOptions[input] + "') given to '" + input + "'",
+              errorMsg = "Correct the DB to fix this warning. You can do so from this modal by submitting a correct value (autocorrected to 'None').";
+            LoggerModule.error(errorTitle, errorMsg);
+
+            TOAST.warn({
+              header: errorTitle,
+              body: errorMsg,
+              delay: 15000
+            });
+            // /!\ on sélectionne "Pas de valeur" pour éviter le bug
+            // (Bootstrap Select bug si on donne une valeur inconnue au sélecteur)
+            INPUTS[input].value = "";
+          } else
           INPUTS[input].value = taskOptions[input];
+        }
 
         // Maintenant qu'on a un bouton hard reset (#25)
         // on autorise la MàJ de &category lorsque &parent est activé si un groupe Y est masque (collapsed)
@@ -376,6 +432,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     }
     
     // Les inputs customisés
+    let needsFix = false; // si un input est viré, on doit réparer
+
     for (let customInputKey in CUSTOM_GROUP_INPUTS) {
       // La clé n'existe pas
       if (!taskOptions[customInputKey]
@@ -384,7 +442,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         && !(isAddEditor && APP_MODULE.getChart().series[0].data[0].options[customInputKey]
           || APP_MODULE.getChart().series[0].data[0].options[customInputKey] === "")) {
         // Erreur car l'utilisateur essaie d'afficher une colonne de la BD qui n'existe pas
-        let errStr = "The column '" + customInputKey + "' doesn't exist in the DataBase and was deleted from the Editor.";
+        let errStr = "The field '" + customInputKey + "' doesn't exist in the DataBase and was removed from the Editor.";
         LoggerModule.error(errStr);
         TOAST.warn({ header: errStr, body: "Correct the page URL to fix the interface (if needed).", delay: 5000 });
         /*
@@ -401,7 +459,18 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         // Suppression
         CUSTOM_GROUP_INPUTS[customInputKey].remove();
         delete CUSTOM_GROUP_INPUTS[customInputKey];
+        needsFix = true;
       } else {
+        if (needsFix) {
+          LoggerModule.log("CUSTOM_GROUP_INPUTS[" + customInputKey + "] should be fixed", CUSTOM_GROUP_INPUTS[customInputKey]);
+          if (CUSTOM_GROUP_INPUTS[customInputKey].previousSibling.classList) {
+            if (CUSTOM_GROUP_INPUTS[customInputKey].previousSibling.classList.contains("offset-2"))
+              CUSTOM_GROUP_INPUTS[customInputKey].classList.remove("offset-2");
+            else
+              CUSTOM_GROUP_INPUTS[customInputKey].classList.add("offset-2")
+          }
+          needsFix = false;
+        }
         CUSTOM_GROUP_INPUTS[customInputKey].children[1].disabled = false;
         CUSTOM_GROUP_INPUTS[customInputKey].children[1].value = isAddEditor ? "" : taskOptions[customInputKey];
         CUSTOM_GROUP_INPUTS[customInputKey].classList.remove("hidden");
@@ -441,11 +510,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     for (let attribute in options) {
       option.setAttribute(attribute, options[attribute] || "");
     }
-    /* if (options.subtext)
-      option.setAttribute("data-subtext", options.subtext);
-    if (options.icon)
-      option.setAttribute("data-icon", options.icon);
-    option.innerText = option.value = options.value; //*/
     return option;
   }
 
@@ -461,7 +525,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     if (!select || typeof select !== "object") // DOM HTMLElement est un objet
       return;
 
-    LoggerModule.info("optionValues", optionValues);
+    LoggerModule.log("optionValues", optionValues);
 
     // Vider le select
     select.innerText = "";
@@ -477,7 +541,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       select.innerHTML += tmp.outerHTML;
     } //*/
     // Ajouter un séparateur
-    select.innerHTML += new SelectOption({ "data-divider": true }); // "  <option data-divider=\"true\"></option>"
+    // select.innerHTML += new SelectOption({ "data-divider": true }).outerHTML; // "  <option data-divider=\"true\"></option>"
     // Ajouter l'option "vide"
     select.innerHTML += new SelectOption({ value: "" }).outerHTML;
 
@@ -625,23 +689,31 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       if (current
         && !INPUTS[input].disabled) { // ne pas MàJ les paramètres disabled (notamment les catégories en mode &uniqueNames, enfin &parent, et ID car ultra important)
         if ((input === "start" || input === "end") && INPUTS[input].value) {
-          let dateSansMillisecondes = $(INPUTS[input]).data("DateTimePicker").date()._d;
-          dateSansMillisecondes.setMilliseconds(0);
-          formattedData[current] = dateSansMillisecondes.toISOString();
+          // FORMAT COURT
+          if ($(INPUTS[input]).data("DateTimePicker").options().format === "L") {
+            let date = $(INPUTS[input]).data("DateTimePicker").date()._d;
+            formattedData[current] = SHARED.toShortFrenchDate(date);
+          }
+          // FORMAT LONG
+          else {
+            let dateSansMillisecondes = $(INPUTS[input]).data("DateTimePicker").date()._d;
+            dateSansMillisecondes.setMilliseconds(0);
+            formattedData[current] = dateSansMillisecondes.toISOString();
+          }
         } else
           formattedData[current] = INPUTS[input].value;
 
-        // Formatter, potentiellement, la couleur (la base n'accepte pas de '#')
+        // Formatter la COULEUR (la base n'accepte pas de '#')
         if (input === "color" && INPUTS[input].value && INPUTS[input].value[0] && INPUTS[input].value[0] === "#")
           formattedData[current] = INPUTS[input].value.slice(1);
 
         /**
          * @Issue #29
-         *  Push des valeurs vides via la valeur réservée "(v)"
+         *  Push des valeurs vides via la valeur réservée SHARED.ORIS_EMPTY_VALUE, déclarée dans SHARED.ORIS_EMPTY_VALUE
          */
         // MAIS SEULEMENT SI ELLES N'ÉTAIENT PAS DÉJÀ VIDES
         if (formattedData[current] === "" && currentTaskOptions[HC_CONFIG_KEYS.flippedData[input]])
-          formattedData[current] = "(v)";
+          formattedData[current] = SHARED.ORIS_EMPTY_VALUE;
       }
     }
     /**
@@ -655,11 +727,11 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
       /**
        * @Issue #29
-       *  Push des valeurs vides via la valeur réservée "(v)"
+       *  Push des valeurs vides via la valeur réservée SHARED.ORIS_EMPTY_VALUE
        */
       // MAIS SEULEMENT SI ELLES N'ÉTAIENT PAS DÉJÀ VIDES
       if (formattedData[customInput] === "" && currentTaskOptions[customInput])
-        formattedData[current] = "(v)";
+        formattedData[customInput] = SHARED.ORIS_EMPTY_VALUE;
     }
 
 
@@ -668,7 +740,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       formattedData["vline"] = INPUTS["vline"].value;
 
 
-    console.warn("[ONOK_HANDLER] formattedData", formattedData);
+    LoggerModule.warn("[ONOK_HANDLER] formattedData", formattedData);
 
     // Pour isAdd on osef des ID car on peut pas le deviner à l'avance
     // En dûr TODO et useless ?
