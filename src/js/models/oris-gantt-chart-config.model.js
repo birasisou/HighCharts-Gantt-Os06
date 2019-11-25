@@ -90,8 +90,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         },
 
         drop: function (event) {
-          console.log("drop event", event);
-
           // Ici, les clefs sont celles d'HighCharts
           // On veut les remplacer par celles de notre base (param_url)
           let cloneOptions = {
@@ -161,7 +159,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           newOptions["id"] = newOptions["vline"] = this.vline;
 
 
-          console.info("drop's newOptions", newOptions);
+          LoggerModule.info("drop's newOptions", newOptions);
 
           APP_MODULE.getParametresUrlOris().tryAddOrEditPoint(newOptions, false);
 
