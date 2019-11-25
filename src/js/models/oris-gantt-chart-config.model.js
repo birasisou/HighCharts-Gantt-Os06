@@ -290,7 +290,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
    */
   function Series(data) {
     if (arguments.length < 1)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("[Serie constructor] data argument is missing");
+      throw new EXCEPTIONS.MissingArgumentException("[Serie constructor] data argument is missing");
 
     return {
       name: data.name || "", // undefined ou null sont automatiquement remplacés par "Series N"
@@ -417,7 +417,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     let day = 1000 * 60 * 60 * 24; // nombre de ms dans une journée
 
     if (arguments.length < 3)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel constructor]");
+      throw new EXCEPTIONS.MissingArgumentException("[initOrisGanttChartConfigModel constructor]");
 
     /**
      * @TEMPALTE Gantt
@@ -723,7 +723,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
   function drawChart (parametreUrlOris, rawTaskDatas) {
     // TODO check param integrity/type/etc...
     if (arguments.length !== 2)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("[GanttRenderingModule.categoryToIndex] 'parametreUrlOris' and/or 'rawTaskDatas' argument missing");
+      throw new EXCEPTIONS.MissingArgumentException("[GanttRenderingModule.categoryToIndex] 'parametreUrlOris' and/or 'rawTaskDatas' argument missing");
 
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
@@ -745,7 +745,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
   function updateChart (parametreUrlOris, rawTaskDatas) {
     // TODO check param integrity/type/etc...
     if (arguments.length !== 2)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("[GanttRenderingModule.updateChart] 'parametreUrlOris' and/or 'rawTaskDatas' argument missing");
+      throw new EXCEPTIONS.MissingArgumentException("[GanttRenderingModule.updateChart] 'parametreUrlOris' and/or 'rawTaskDatas' argument missing");
 
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
@@ -771,7 +771,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
    */
   function formatYAxisAndTasks (tasksAsObject) {
     if (arguments.length !== 1)
-      throw new Error(new EXCEPTIONS.MissingArgumentExcepetion("[GanttRenderingModule.categoryToIndex] taskArray argument missing"));
+      throw new Error(new EXCEPTIONS.MissingArgumentException("[GanttRenderingModule.categoryToIndex] taskArray argument missing"));
 
     // Transformer l'Objet d'OrisGanttTasks en array d'OrisGantt
     let tasksAsArray = Object.values(tasksAsObject);

@@ -8,9 +8,9 @@ describe("ParametresUrl permet d'initialiser différents paramètres nécessaire
 
   describe("Lors de l'initialisation...", function() {
     it("L'argument à fournir est l'URI de la page {string}", function() {
-      expect( function(){ parametres_url = new ParametresUrl(true); } ).toThrow(new EXCEPTIONS.InvalidArgumentExcepetion("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)"));
-      expect( function(){ parametres_url = new ParametresUrl({}); } ).toThrow(new EXCEPTIONS.InvalidArgumentExcepetion("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)"));
-      expect( function(){ parametres_url = new ParametresUrl(""); } ).not.toThrow(new EXCEPTIONS.InvalidArgumentExcepetion());
+      expect( function(){ parametres_url = new ParametresUrl(true); } ).toThrow(new EXCEPTIONS.InvalidArgumentException("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)"));
+      expect( function(){ parametres_url = new ParametresUrl({}); } ).toThrow(new EXCEPTIONS.InvalidArgumentException("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)"));
+      expect( function(){ parametres_url = new ParametresUrl(""); } ).not.toThrow(new EXCEPTIONS.InvalidArgumentException());
     });
 
     it("Renvoie une exception NoParametersDetectedInURI par défaut s'il n'y a pas de paramètres", function() {

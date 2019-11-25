@@ -277,7 +277,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
   function FormGroupInput(config) {
     // Ne devrait pas arriver vu qu'on check avant d'appeler cette fonction
     if (!config || !config.id) // || !config.label)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("FormGroupInput constructor");
+      throw new EXCEPTIONS.MissingArgumentException("FormGroupInput constructor");
 
     let formGroup = document.createElement("div"),
       formGroupId = "task-" + config.id + "-custom-form-group",
@@ -319,7 +319,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
    */
   function initInputs(taskOptions, isAdd) {
     if (!taskOptions)
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("initInputs");
+      throw new EXCEPTIONS.InvalidArgumentException("initInputs");
 
     // Comportement spécial si on est mode "Création de Point"
     isAddEditor = isAdd || false;
@@ -615,7 +615,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
    */
   function updateChartOptions(options) {
     if (!options)
-      throw new EXCEPTIONS.MissingArgumentExcepetion("[updateChartOptions]");
+      throw new EXCEPTIONS.MissingArgumentException("[updateChartOptions]");
 
     LoggerModule.info("[updateChartOptions] options", options);
 
@@ -658,7 +658,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
    */
   function showTaskEditor(taskOptions, isAdd) {
     if (!taskOptions)
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[showTaskEditor] Function requires the selected data's options");
+      throw new EXCEPTIONS.InvalidArgumentException("[showTaskEditor] Function requires the selected data's options");
 
     isAddEditor = isAdd || false;
     currentTaskOptions = taskOptions;

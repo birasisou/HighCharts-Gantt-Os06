@@ -13,7 +13,7 @@ describe("ParametresUrlOris permet d'initialiser différents paramètres nécess
 
       //Tester chaque paramètre obligatoire individuellement
       expect( function() { parametres_url = new ParametresUrlOris(url) } )
-        .toThrow(new EXCEPTIONS.NoMandatoryUrlParameterDetected(reversedMandatoryParameters + ' is/are missing'));
+        .toThrow(new EXCEPTIONS.NoMandatoryUrlParameterDetectedException(reversedMandatoryParameters + ' is/are missing'));
 
 
     });

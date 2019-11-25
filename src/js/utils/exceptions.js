@@ -47,7 +47,7 @@ let EXCEPTIONS = {
    *
    * @constructor
    */
-  InvalidArgumentExcepetion: function (msg) {
+  InvalidArgumentException: function (msg) {
     EXCEPTIONS.DefaultException.call(this,
       "InvalidArgumentExcepetion",
       "An invalid argument was passed to a function",
@@ -63,7 +63,7 @@ let EXCEPTIONS = {
    *
    * @constructor
    */
-  MissingArgumentExcepetion: function (msg) {
+  MissingArgumentException: function (msg) {
     EXCEPTIONS.DefaultException.call(this,
       "MissingArgumentExcepetion",
       "One or more arguments are missing",
@@ -100,7 +100,7 @@ let EXCEPTIONS = {
    *
    * @constructor
    */
-  NoMandatoryUrlParameterDetected: function (msg) {
+  NoMandatoryUrlParameterDetectedException: function (msg) {
     EXCEPTIONS.DefaultException.call(this,
       "NoMandatoryUrlParameterDetected",
       "A mandatory URL parameter was missing or has no value",
@@ -112,7 +112,7 @@ let EXCEPTIONS = {
    * @param msg
    * @constructor
    */
-  NoIdOrisOrHostDetected: function (msg) {
+  NoIdOrisOrHostDetectedException: function (msg) {
     EXCEPTIONS.DefaultException.call(this,
       "NoIdOrisOrHostDetected",
       "Erreur lors de la récupération de l'ID-Oris ou de l'host",

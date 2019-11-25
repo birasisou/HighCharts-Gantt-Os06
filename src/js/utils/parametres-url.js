@@ -21,7 +21,7 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
   //EXCEPTIONS: on n'accepte que du {string} pour locationSearch
   //!ATTENTION! Ne pas modifier le message
   if (typeof windowLocation !== "string")
-    throw new EXCEPTIONS.InvalidArgumentExcepetion("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)");
+    throw new EXCEPTIONS.InvalidArgumentException("ParametresUrlOris n'accepte qu'une chaîne de caractères en paramères (page_location)");
   this.isAlreadyDecoded = isAlreadyDecoded || false;
   this.isEmptyAllowed = isEmptyAllowed || false;
 
@@ -101,7 +101,7 @@ function ParametresUrl (windowLocation, isEmptyAllowed, isAlreadyDecoded) {
         missingParameters.push(this.MANDATORY_GET_PARAMETERS[length]);
     }
     if (missingParameters.length)
-      throw new EXCEPTIONS.NoMandatoryUrlParameterDetected(missingParameters.toString() + ' is/are missing');
+      throw new EXCEPTIONS.NoMandatoryUrlParameterDetectedException(missingParameters.toString() + ' is/are missing');
   }
 
 }

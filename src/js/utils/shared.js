@@ -292,7 +292,7 @@ function SHARED_FACTORY() {
      */
     loadJsScript: function(url) {
       if (arguments.length < 1)
-        throw new EXCEPTIONS.MissingArgumentExcepetion("[initOrisGanttChartConfigModel url]");
+        throw new EXCEPTIONS.MissingArgumentException("[initOrisGanttChartConfigModel url]");
 
       let script = document.createElement("script");  // create a script DOM node
       script.src = url;  // set its src to the provided URL
@@ -318,7 +318,7 @@ function SHARED_FACTORY() {
      */
     addOrReplaceUrlParam: function (url, param, newValue) {
       if (!url || !param)
-        throw new EXCEPTIONS.InvalidArgumentExcepetion("[SHARED.addOrReplaceUrlParam] URL or Param argument ");
+        throw new EXCEPTIONS.InvalidArgumentException("[SHARED.addOrReplaceUrlParam] URL or Param argument ");
       newValue = newValue || "";
 
       /*
@@ -389,11 +389,3 @@ function SHARED_FACTORY() {
 
 // Objet global comme avant
 let SHARED = new SHARED_FACTORY();
-
-/** Gulp concat
-  gulp.task('script', function() {
-    return gulp.src(['./js/workers/*.js', './js/models/*.js', './js/utils/*.js'])
-      .pipe(concat('all-in-one-worker.js'))
-      .pipe(gulp.dest('./js/dist/'));
-  });
- //*/

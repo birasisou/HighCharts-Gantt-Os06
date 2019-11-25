@@ -4,7 +4,7 @@ if (!Array.prototype.includes) {
     value: function(searchElement, fromIndex) {
 
       if (this == null) {
-        throw new TypeError('"this" est nul ou non défini');
+        throw new TypeError('"this" est null ou non défini');
       }
 
       // 1. Soit o égal à ? Object(cette valeur).

@@ -218,7 +218,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     LoggerModule.log("[generateWebserviceActionUrl] act param", act);
 
     if (!act || (act !== "modif" && act !== "newvalid" && act !== "kill"))
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceActionUrl] Le paramètre &act=" + act + " n'est pas valide.");
+      throw new EXCEPTIONS.InvalidArgumentException("[generateWebserviceActionUrl] Le paramètre &act=" + act + " n'est pas valide.");
 
     let url = this.webserviceUrl.slice(0, this.webserviceUrl.indexOf("?"))
       + "?json=true&act=" + act;
@@ -239,7 +239,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     LoggerModule.log("[generateWebserviceAddUrl] input param", userOptions);
 
     if (typeof userOptions !== "object")
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + userOptions);
+      throw new EXCEPTIONS.InvalidArgumentException("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + userOptions);
 
     let url = this.generateWebserviceActionUrl(isAddRequest ? "newvalid" : "modif");
     // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
@@ -414,7 +414,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       || !userOptions["vline"]
       || !userOptions["start"]
     )
-      throw new EXCEPTIONS.InvalidArgumentExcepetion("[generateWebserviceDeleteUrl] Le paramètre est invalide (doit contenir vline et start)");
+      throw new EXCEPTIONS.InvalidArgumentException("[generateWebserviceDeleteUrl] Le paramètre est invalide (doit contenir vline et start)");
 
     return this.generateWebserviceActionUrl("kill") + "&vline=" + userOptions.vline; // en dûr, pas bien :(
   };
@@ -525,7 +525,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       this.USER_INFOS.ID_ORIS = path.split("/")[1];  //[0] est une chaine vide car le pathname commence par un "/"
       return this.USER_INFOS.ID_ORIS;
     } else
-      throw new EXCEPTIONS.NoIdOrisOrHostDetected();
+      throw new EXCEPTIONS.NoIdOrisOrHostDetectedException();
   }
 
   /**
@@ -538,7 +538,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   function generateHost() {
     this.USER_INFOS.HOST = this.USER_INFOS.HOST || this.page_location.host;
     if (!this.USER_INFOS.HOST)
-      throw new EXCEPTIONS.NoIdOrisOrHostDetected();
+      throw new EXCEPTIONS.NoIdOrisOrHostDetectedException();
     return this.USER_INFOS.HOST;
   }
 
