@@ -10,7 +10,7 @@ let ORIS_TASKS_BY_ID = {};      // Row by ID, dictionnaire/hashmap des tâches (
 // TODO implémenter côté main page
 let ALLOW_INVALID = false,
   IS_MONITORING = true,
-  MONITORING_DELAY = 3000; // delay entre deux mise à jours (en ms)
+  MONITORING_DELAY = 10000; // delay entre deux mise à jours (en ms)
 
 //Début du worker
 // TODO NE SURTOUT PAS IMPORTER SINON LA PAGE PRINCIPALE VA EXECUTER (enfin non, car elle ne recevra jamais de .CONFIG, mais ...)
@@ -20,7 +20,9 @@ self.onmessage = function(event) {
     LoggerModule.log("[WORKER.ONMESSAGE] event.data.CONFIG received");
     WORKER_CONFIG = event.data.CONFIG;
 
-    MONITORING_DELAY = WORKER_CONFIG.asRaw["refresh"] ? (Number(WORKER_CONFIG.asRaw["refresh"]) * 1000) : 3000; // delay entre deux mise à jours (en ms)
+    MONITORING_DELAY = WORKER_CONFIG.asRaw["refresh"]
+      ? (Number(WORKER_CONFIG.asRaw["refresh"]) * 1000)
+      : MONITORING_DELAY; // delay entre deux mise à jours (en ms)
     LoggerModule.info("MONITORING_DELAY", MONITORING_DELAY);
   }
   if (event.data.START_AUTO) {
