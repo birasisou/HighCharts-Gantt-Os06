@@ -196,14 +196,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     // todo sudo showLoading (si une requête MàJ entre temps, on ne veut pas que ça cache le chargement,
     //  on veut carrément l'ignorer vu qu'on doit redresser TOUT le graphique d'abord))
 
-    /* let renderToDiv = chartObj.renderTo,
-      renderToDivId = renderToDiv.id;
-    // Détruire le graphique
-    chartObj.destroy();
-    // Vider les restes
-    renderToDiv.outerHTML = '<div id="' + renderToDiv.id + '" ></div>';
-    // Envoyer le message au Worker pour récupérer totues les Tâches
-    APP_MODULE.reinitializeData(); // */
     APP_MODULE.reinializeChart();
   });
 
@@ -660,10 +652,15 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     /**
      * @Réunion du 30 juillet 2019
      *  L'édition est toujours activée
-     *  Les boutons d'édition et le champ de recherche sont masqués par défauts et
+     *  Les boutons d'édition et le champ de recherche sont masqués par défauts et...
+     *
+     * @Réunion du 26 novembre 2019
+     * @Issue #44 Bah finalement... on introduit un mode `readonly` (pour les tablettes, etc...)
+     *  mais le comportement par défaut reste le mode où l'édition est autorisée
+     *
+     * todo ne pas instancier le modal d'édition car ne sera jamais affiché en `readonly`
      */
-    //if (parametreUrlOris.asRaw["edit"] === "true") {
-      // TODO events
+    if (parametreUrlOris.asRaw["readonly"] !== "true") {
       BASE_CONFIG.plotOptions.series.allowPointSelect = true;
       BASE_CONFIG.plotOptions.series.point = {
         events: {
@@ -697,6 +694,12 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           // : (day / 2) // Snap to 12 hours
           : (day / 48) // Snap to 30 minutes
       };
+
+    } else {
+      // MODE &readonly --> désactiver le bouton "Add"
+      DOM_REF.editButtons.add.disabled = true;
+
+    }
 
     /**
      * Ne pas réinstancier les boutons si on re-crée le graphe après l'avoir .destroy()
