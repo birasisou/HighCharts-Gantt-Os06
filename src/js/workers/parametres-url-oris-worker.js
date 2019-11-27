@@ -168,16 +168,17 @@ function updateLocal(rawTaskDatas) {
 
   let validTasksUserOptions = {},  // Tâches valides
     updatedTasks = {},  // Nouvelles tâches à afficher / MàJ dans le graphique
-    invalidTasks = {},  // Tâches invalides, seront renvoyés à la page principale et signalées via popup
+    invalidTasks = {};  // Tâches invalides, seront renvoyés à la page principale et signalées via popup
 
-    length = rawTaskDatas.length;
+
 
   // stocker les nouvelles valeurs et informer la page principale des changements
-  while (length--) {
-    LoggerModule.log("\n\nTRYING TO TRANSFORM", rawTaskDatas[length]);
+  // while (length--) {
+  for (let i=0, length = rawTaskDatas.length; i<length; ++i) {
+    LoggerModule.log("\n\nTRYING TO TRANSFORM", rawTaskDatas[i]);
     // instancier la nouvelle tâche
     // TODO try / catch car throw si pas le
-    let currentOrisTask = new OrisGanttTask(rawTaskDatas[length], WORKER_CONFIG),
+    let currentOrisTask = new OrisGanttTask(rawTaskDatas[i], WORKER_CONFIG),
       //ancienne valeur pour cette tâche
       oldTask = ORIS_TASKS_BY_ID[currentOrisTask.getRaw('id')];
 
