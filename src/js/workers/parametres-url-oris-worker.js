@@ -173,7 +173,6 @@ function updateLocal(rawTaskDatas) {
 
 
   // stocker les nouvelles valeurs et informer la page principale des changements
-  // while (length--) {
   for (let i=0, length = rawTaskDatas.length; i<length; ++i) {
     LoggerModule.log("\n\nTRYING TO TRANSFORM", rawTaskDatas[i]);
     // instancier la nouvelle tâche

@@ -416,6 +416,12 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
       chart: {
         spacingLeft: 1,
         animation: false,
+        /**
+         * @Issue #41 Rendre le zoom activable
+         */
+        zoomType: parametreUrlOris.asRaw["zoom"] === "true" ? 'x' : undefined,
+        panning: true,
+        panKey: 'shift',
         events: {
           // Signaler à la page principale que le graphique est dessiné --> pour démarrer le monitoring
           load: function() {
