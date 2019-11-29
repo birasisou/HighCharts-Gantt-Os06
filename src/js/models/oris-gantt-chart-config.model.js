@@ -658,7 +658,36 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
      *
      * todo ne pas instancier le modal d'édition car ne sera jamais affiché en `readonly`
      */
-    if (parametreUrlOris.asRaw["readonly"] !== "true") {
+    // mode READ-ONLY: aucune interaction
+    if (parametreUrlOris.asRaw["readonly"] === "true" || parametreUrlOris.asRaw["readonly"] === "partial") {
+      // Désactiver le bouton "Add"
+      DOM_REF.editButtons.add.disabled = true;
+
+      // mode PARTIAL: Le drag & drop est autorisé,
+      // mais ni les boutons ni les boutons,
+      // ni l'éditeur de tâches sont accessibles (double clic)
+      if (parametreUrlOris.asRaw["readonly"] === "partial") {
+        BASE_CONFIG.plotOptions.series.point = {
+          events: {
+            dragStart: EVENT_HANDLER.point.dragStart,
+            drag: EVENT_HANDLER.point.drag,
+            drop: EVENT_HANDLER.point.drop
+          }
+        };
+        // Enable Drag/Drop
+        BASE_CONFIG.plotOptions.series.dragDrop = {
+          liveRedraw: false,
+          draggableX: true,
+          draggableY: true, // ne fonctionne pas en mode "uniqeNames"
+          dragPrecisionX: parametreUrlOris.asRaw["xprecision"]
+            ? (parametreUrlOris.asRaw["xprecision"] * 36e5) // précision en heures
+            // : (day / 2) // Snap to 12 hours
+            : (day / 48) // Snap to 30 minutes
+        };
+      }
+    }
+    // mode DEFAULT: toutes les interactions
+    else {
       BASE_CONFIG.plotOptions.series.allowPointSelect = true;
       BASE_CONFIG.plotOptions.series.point = {
         events: {
@@ -692,11 +721,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           // : (day / 2) // Snap to 12 hours
           : (day / 48) // Snap to 30 minutes
       };
-
-    } else {
-      // MODE &readonly --> désactiver le bouton "Add"
-      DOM_REF.editButtons.add.disabled = true;
-
     }
 
     /**
