@@ -264,9 +264,10 @@ function SHARED_FACTORY() {
         if (date._isAMomentObject)
           date = date._d;
         if (typeof date.getTime()) // Date Invalid --> .getTime() == NaN
-          return (date.getDate() < 10 ? "0": "") + date.getDate()
-            + "/" + ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1)
-            + "/" + date.getFullYear();
+          // IMPÉRATIF d'utiliser les valeurs UTC car c'est celles-ci qui sont "uniformes" et que l'on fixe avec des `.setTime(23*3600*1000-offset...)`
+          return (date.getUTCDate() < 10 ? "0": "") + date.getUTCDate()
+            + "/" + ((date.getUTCMonth() + 1) < 10 ? "0" : "") + (date.getUTCMonth() + 1)
+            + "/" + date.getUTCFullYear();
       }
 
       return undefined;

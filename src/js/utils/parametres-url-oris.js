@@ -298,9 +298,16 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
         try {
           return JSON.parse(response);
         } catch (e) {
+          // Généralement, les messages d'erreur sont des pages HTML,
+          // on souhaite donc en extraire le message (<body>)
           LoggerModule.error("Tried to parse:", response);
+          let response_content = /<body[^>]*>((.|[\n\r])*)<\/body>/.exec(response);
           LoggerModule.warn("But got Error", e);
-          throw Error("Unable to parse response to JSON. " + e.message);
+          throw Error("Unable to parse response to JSON.\n\n"
+            + (response_content && response_content[1] // s'il y a un match, [0] est TOUT le body (`outerHTML`), [1] est le contenu du body (`innerText`)
+              ? response_content[1]
+              : response_content)
+            + "\n\n" + e.message);
         }
       })
       // extract root

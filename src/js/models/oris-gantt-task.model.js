@@ -96,14 +96,30 @@ function OrisGanttTask(data_row, oris_config) {
   // console.warn("this.orisValueUserOption['start']", this.orisValueUserOption["start"].asDateObject());
   let startAsDate = this.orisValueUserOption["start"].asDateObject(),
     endAsDate = this.orisValueUserOption["end"].asDateObject();
-  if (startAsDate && endAsDate
-    && startAsDate.getDate() === endAsDate.getDate()
-    && startAsDate.getMonth() === endAsDate.getMonth()
-    && startAsDate.getFullYear() === endAsDate.getFullYear()
-    && startAsDate.getHours() === endAsDate.getHours()
-    && startAsDate.getMinutes() === endAsDate.getMinutes()) {
-    LoggerModule.info("'start' et 'end' ont la même valeur donc 'end' prend la valeur '23h59'.");
-    this.userOptions["end"] = endAsDate.setHours(23,59);
+
+  /**
+   * @Issue 40 On veut **TOUJOURS** affecter 23h59 à une "end date" au **format court** (`DD/MM/YYYY`)
+   * Sauf qu'il faut prendre en compte le timeOffset
+   * Simplement faire `setHours(23, 59, 59, 99)` ne suffirait pas
+   * car HighCharts affiche la valeur UTC (par exemple, avec un GMT+0100, la tâche serait visible 1h devant le tick de sa date (courte)
+   */
+  if (this.orisValueUserOption["end"].asRaw().indexOf("/") > 0) {
+    //*
+    this.userOptions["end"] = endAsDate.setTime(
+      endAsDate.setHours(23, 59, 59, 99) - endAsDate.getTimezoneOffset() * 60 * 1000
+    ); // */
+    //this.userOptions["end"] = endAsDate.setTime(endAsDate.getTime() + 23 * 3600 * 1000 - endAsDate.getTimezoneOffset() * 60 * 1000);
+  }
+  if (this.orisValueUserOption["start"].asRaw().indexOf("/") > 0) {
+    // this.userOptions["start"] = startAsDate.setHours(0, 0, 0);
+    // Le graphe affiche la valeur UTC des dates !!
+    // Sans ça, si on est en GMT+0100, la tâche commencera 1 heure avant le tick de minuit
+    // this.userOptions["start"] = startAsDate.setUTCHours(0, 0, 0);
+
+    // Fixer le décalage GMT
+    this.userOptions["start"] = startAsDate.setTime(
+      startAsDate.setHours(0, 0, 0, 0) - startAsDate.getTimezoneOffset() * 60 * 1000
+    );
   }
 
 

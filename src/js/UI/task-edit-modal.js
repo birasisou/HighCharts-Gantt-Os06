@@ -341,6 +341,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         && (taskOptions[input] || taskOptions[input] === 0))  // Number (0 compte comme false donc on doit l'autoriser manuellement)
       {
         taskOptions[input] = SHARED.decodeHTML(taskOptions[input]);
+        // CAS INPUTS dates
         if (input === "start" || input === "end") {
           LoggerModule.info(input, taskOptions[input]);
           LoggerModule.info("raw-" + input, taskOptions["raw-" + input]);
@@ -357,7 +358,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
           // Le serveur ne stocke pas les millisecondes
           let now = moment(Number(taskOptions[input]));
-          // now._d.setSeconds(0);
           now._d.setMilliseconds(0);
 
           $(INPUTS[input]).data("DateTimePicker").date( now );
@@ -369,14 +369,23 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
           LoggerModule.log(taskOptions[input] + " " + (isShortFrenchDate ? "is" : "is not") + " short Date format (DD/MM/YYYY).");
 
           $(INPUTS[input]).data("DateTimePicker").options({
+            // On souhaite afficher la valeur UTC, car sinon, surtout au formats courts,
+            // "00h00" et "23h59" a de forte chance d'afficher la mauvaise journée
+            timeZone: 'UTC',
             format: isShortFrenchDate ? 'L' : 'L LT' // format court === 'L' --> que les jours, sans les heures
           });
 
-        } else if (input === "color")
+        }
+        // CAS INPUTS color
+        else if (input === "color")
           $(INPUTS[input]).data('colorpicker').setValue(taskOptions[input]);
+        // CAS INPUTS any
         else {
           // Ne pas sélectionner une valeur "inexistante" car ceci fait bugger Select-Picker
-          if (INPUTS[input].nodeName === "SELECT" && !INPUTS[input].querySelector("[value='"+taskOptions[input]+"']")) {
+          if (INPUTS[input].nodeName === "SELECT"
+            // chercher les valeurs encodées (sinon les guillemets simples font bugger)
+            && !INPUTS[input].querySelector("[data-encoded-value='"+encodeURIComponent((taskOptions[input])).replace(/'/g, "%27")+"']"))
+          {
             let errorTitle = "Unknown ID ('" + taskOptions[input] + "') given to '" + input + "'",
               errorMsg = "Correct the DB to fix this warning. You can do so from this modal by submitting a correct value (autocorrected to 'None').";
             LoggerModule.error(errorTitle, errorMsg);
@@ -554,6 +563,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         if (optionValues[i])
           select.innerHTML += new SelectOption({
             value: optionValues[i].id || optionValues[i],
+            // la recherche du champ va foirer si on n'encode pas la valeur de l'<option> et qu'elle contient des ' (guillemets simples)
+            "data-encoded-value": encodeURIComponent(optionValues[i].id || optionValues[i]).replace(/'/g, "%27"),
             "data-subtext": optionValues[i].name
           }).outerHTML;
       }

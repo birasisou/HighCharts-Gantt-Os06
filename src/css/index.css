@@ -181,6 +181,10 @@ input[readonly],
  */
 #widget-area-toggler {
     display: block;
+    /* position absolute pour ne pas avoir une "hitbox invisible"
+     * en dessous de la barre lorsqu'elle est déployée
+     */
+    position: absolute;
     transition: none !important;
     margin-top: .3em;
     box-shadow: 0 -0.3rem 0 rgb(108, 117, 125);

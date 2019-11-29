@@ -145,14 +145,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
                 // newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] = isShortFrenchDate ? (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear()) : date.toISOString();
               } else
                 newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] = cloneOptions[option];
-                /*newOptions[paramUrlOrisNoFunctions.asRaw[paramUrlKeys[option]["url_param"]]] =
-                (option === "start" || option === "end")
-                  ? (cloneOptions[option] ?
-                    // FORMAT COURT / LONG
-                    ( cloneOptions["raw-" + option].indexOf("Z") > 0 ? new Date(cloneOptions[option]).toISOString() : )
-                    : "")
-                  : cloneOptions[option];
-                  */
             }
           }
           // En dûr... &vline needed pour l'argument de la fonction et ID pour la requête
