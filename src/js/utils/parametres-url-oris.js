@@ -249,6 +249,21 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       url += "&" + option + "=" + userOptions[option]; // todo @Issue #29: envoyer une valeur vide au serveur
     }
 
+    /**
+     * @Issue 47 Ajouter bêtement les paramètres complémentaires
+     * c'est-à-dire ceux qu'il faut passer aux requêtes, sans les modifier ni rien.
+     *
+     * C'est famosos "paramètres complémentaires" sont ceux de l'URL de la page qui commencent par un "_" (underscore)
+     */
+    for (let param in this.asRaw) {
+      // Les clefs commençant par un "_" (underscore)
+      if (param[0] === "_") {
+        let parametreComplementaire = "&" + param + "=" + this.asRaw[param];
+        LoggerModule.info("J'ajoute bêtement le paramètre complémentaire", parametreComplementaire);
+        url += parametreComplementaire;
+      }
+    }
+
     return encodeURI(url);
   };
 
