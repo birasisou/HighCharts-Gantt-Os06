@@ -301,10 +301,31 @@ function SHARED_FACTORY() {
       document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
     },
 
+    /**
+     * Décode les entités HTML d'un string
+     *  utilise l'objet `document` et, de ce fait, ne peut pas être utilisé par un Worker
+     *  (j'intègre donc une version alternative qui ne remplace, "en dur", que les 4 entités ASCII
+     *  - & == &amp;
+     *  - < == &lt;
+     *  - >	== &gt;
+     *  - " == &quot;
+     *
+     * @param {string} html
+     * @returns {string|undefined}
+     */
     decodeHTML: function (html) {
-      var txt = document.createElement('textarea');
-      txt.innerHTML = html;
-      return txt.value;
+      // version Document (classique)
+      if (typeof document !== "undefined") {
+        var txt = document.createElement('textarea');
+        txt.innerHTML = html;
+        return txt.value;
+      }
+      else
+        // version Workers
+        return html ? html.replace(/&amp;/gmi, '&')
+          .replace(/&lt;/gmi, '<')
+          .replace(/&gt;/gmi, '>')
+          .replace(/&quot;/gmi, '"') : html;
     },
 
     /**

@@ -34,6 +34,8 @@ function OrisGanttTask(data_row, oris_config) {
 
   // Valeur brute d'un userOption
   this.rawUserOptions = {};
+  // Valeur brute après SHARED.decodeHTML (pour supprimer les "&quot;" par exemple)
+  this.decodedRawUserOptions = {};
   // Objet OrisValue d'un userOption
   this.orisValueUserOption = {};
   // Valeur formattée d'un userOption
@@ -64,8 +66,15 @@ function OrisGanttTask(data_row, oris_config) {
     // La valeur du data_row
     LoggerModule.log("(This dataRow's value) data_row[oris_config_HC_CONFIG_KEYS[key]['url_param']] " + key + ":", this.rawUserOptions[key]);
 
+    // On travaille avec les version décodées
+    // version Worker --> ne checkera que 4 entités (&, <, > et ")
+    this.decodedRawUserOptions[key] = SHARED.decodeHTML(this.rawUserOptions[key]);
+    // La valeur du data_row
+    LoggerModule.log("(This dataRow's decodeHTML value) this.decodedRawUserOptions[key] " + key + ":", this.decodedRawUserOptions[key]);
+
     // as OrisValue
-    this.orisValueUserOption[key] = new OrisData(this.rawUserOptions[key]);
+    // this.orisValueUserOption[key] = new OrisData(this.rawUserOptions[key]);
+    this.orisValueUserOption[key] = new OrisData(this.decodedRawUserOptions[key]);
     LoggerModule.log("(This userOptions's value as OrisValue Object) this.orisValueUserOption[key] " + key + ":", this.orisValueUserOption[key]);
 
     // as formatted

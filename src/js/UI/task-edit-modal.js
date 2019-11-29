@@ -334,13 +334,10 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       if (!INPUTS[input])
         continue;
 
-      LoggerModule.warn("taskOptions["+input+"]", taskOptions[input]);
-
       if (typeof taskOptions[input] !== "object"              // null
         && typeof taskOptions[input] !== "undefined"          // undefined
         && (taskOptions[input] || taskOptions[input] === 0))  // Number (0 compte comme false donc on doit l'autoriser manuellement)
       {
-        taskOptions[input] = SHARED.decodeHTML(taskOptions[input]);
         // CAS INPUTS dates
         if (input === "start" || input === "end") {
           LoggerModule.info(input, taskOptions[input]);
@@ -379,12 +376,16 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         // CAS INPUTS color
         else if (input === "color")
           $(INPUTS[input]).data('colorpicker').setValue(taskOptions[input]);
-        // CAS INPUTS any
+        // CAS default
         else {
           // Ne pas sélectionner une valeur "inexistante" car ceci fait bugger Select-Picker
           if (INPUTS[input].nodeName === "SELECT"
             // chercher les valeurs encodées (sinon les guillemets simples font bugger)
-            && !INPUTS[input].querySelector("[data-encoded-value='"+encodeURIComponent((taskOptions[input])).replace(/'/g, "%27")+"']"))
+            && !INPUTS[input].querySelector("[data-encoded-value='"
+              // encoder et remplacer les guillemets simples manuellement
+              + encodeURIComponent(taskOptions[input])
+                .replace(/'/g, "%27")
+              + "']"))
           {
             let errorTitle = "Unknown ID ('" + taskOptions[input] + "') given to '" + input + "'",
               errorMsg = "Correct the DB to fix this warning. You can do so from this modal by submitting a correct value (autocorrected to 'None').";
@@ -398,8 +399,10 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
             // /!\ on sélectionne "Pas de valeur" pour éviter le bug
             // (Bootstrap Select bug si on donne une valeur inconnue au sélecteur)
             INPUTS[input].value = "";
-          } else
-          INPUTS[input].value = taskOptions[input];
+          } else {
+            // Affecter la valeur non-encodée
+            INPUTS[input].value = taskOptions[input];
+          }
         }
 
         // Maintenant qu'on a un bouton hard reset (#25)
@@ -541,17 +544,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
     // Vider le select
     select.innerText = "";
-    // Ajouter l'option "Ajouter un point" SSI l'input est category
-    /* if (select.id.indexOf("category") > -1) {
-      let tmp = new SelectOption({
-        value: " New",
-        "data-icon": "fa-plus",
-         class: "bg-success text-white btn btn-sm"
-      });
-      tmp.removeAttribute("value");
-      //tmp.setAttribute("data-content", '<i class="fa fa-plus"></i>&nbsp;New');
-      select.innerHTML += tmp.outerHTML;
-    } //*/
     // Ajouter un séparateur
     // select.innerHTML += new SelectOption({ "data-divider": true }).outerHTML; // "  <option data-divider=\"true\"></option>"
     // Ajouter l'option "vide"
@@ -562,9 +554,11 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       for (let i=0, l=optionValues.length; i<l; ++i) {
         if (optionValues[i])
           select.innerHTML += new SelectOption({
+
             value: optionValues[i].id || optionValues[i],
             // la recherche du champ va foirer si on n'encode pas la valeur de l'<option> et qu'elle contient des ' (guillemets simples)
-            "data-encoded-value": encodeURIComponent(optionValues[i].id || optionValues[i]).replace(/'/g, "%27"),
+            "data-encoded-value": encodeURIComponent( optionValues[i].id || optionValues[i] )
+              .replace(/'/g, "%27"),
             "data-subtext": optionValues[i].name
           }).outerHTML;
       }
@@ -780,7 +774,6 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     $(document.getElementById("prompt-modal")).modal();
   }
   function appendNewOption(value) {
-    console.info("value", value);
     document.getElementById('task-category-input').innerHTML += '<option value="' + value + '">' + value + '</option>';
     $('#task-category-input').selectpicker('val', value);
     $('#task-category-input').selectpicker('refresh');

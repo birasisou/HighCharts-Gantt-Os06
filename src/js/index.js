@@ -292,8 +292,6 @@ new Promise(function (resolve, reject) {
             },
             series: {
               data: GANTT_RENDERING_MODULE.getChart().series[0].userOptions.data,
-
-
             }
           });
 

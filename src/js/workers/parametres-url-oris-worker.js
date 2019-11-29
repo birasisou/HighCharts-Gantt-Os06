@@ -81,11 +81,11 @@ function autoUpdateData(url) {
     //.finally(function (arg) {
     .then(function (arg) {
       fakeFinally(arg);
-      }, function (arg) {
+    }, function (arg) {
       fakeFinally(arg);
     });
   // TODO rendre infini
-                // mais je pense plutôt attendre que le main "confirme" le monde infini
+  // mais je pense plutôt attendre que le main "confirme" le monde infini
 }
 
 /**
@@ -192,8 +192,8 @@ function updateLocal(rawTaskDatas) {
 
     // Ne rien faire si TOUTES les valeurs sont les mêmes
     if (oldTask !== undefined
-        && SHARED.quickObjectEquals(oldTask, currentOrisTask.userOptions)) {
-        // && SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions)) {
+      && SHARED.quickObjectEquals(oldTask, currentOrisTask.userOptions)) {
+      // && SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions)) {
       LoggerModule.info("\nVALUES DIDN'T CHANGE\n");
       continue;
     }
@@ -222,7 +222,7 @@ function updateLocal(rawTaskDatas) {
   if (Object.keys(updatedTasks).length > 0          // nouvelles datas
     || Object.keys(ORIS_TASKS_BY_ID).length === 0   // pour "showNoData()"
     || deletedTasksIds.length                       // signaler une suppresion
-    // || Object.keys(updatedTasks).length !== Object.keys(ORIS_TASKS_BY_ID).length  //
+  // || Object.keys(updatedTasks).length !== Object.keys(ORIS_TASKS_BY_ID).length  //
   ) {
     // Clone pour faire des opérations avant de POST sans que ça ne soit pris en compte lors de la "détection de modifications"
     let tasksToPush = JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID));
@@ -276,32 +276,11 @@ function clearParentIds(tasks) {
         let fakeParentId = tasks[key]["parent"];
         // Ne créer un faux groupe que s'il y a une valeur valide à
         if (typeof fakeParentId !== "undefined" && typeof fakeParentId !== "object") {
-          /*
-          WORKER_GET(SHARED.addOrReplaceUrlParam(WORKER_CONFIG.webserviceUrl, "fil", fakeParentId))
-            .then(customJsonParse)
-            .then(extractData)
-            .then(function (datas) {
-              // Normalement, vu que l'on fait un &fil=<ID>, l'ID doit être unique et on ne doit avoir qu'une seule valeur dans le JSON
-              let data = datas[0];
-              if (fakeParentId !== data.id)
-              tasks[fakeParentId] = {
-                id: fakeParentId,
-                name: data[WORKER_CONFIG.asRaw["name"]]    // TODO faire une requête GET avec &fil=fakeParentId pour récupérer le nom de
-              };
-              distinctIds.push(tasks[key]["parent"]);
-            })
-            // En cas d'Erreur, on supprime simplement la référence
-            .catch(function (err) {
-              LoggerModule.error(err);
-              postError(err);
-              tasks[key]["parent"] = null;
-            });
-          //*/
-            tasks[fakeParentId] = {
-              id: fakeParentId,
-              name: fakeParentId    // TODO faire une requête GET avec &fil=fakeParentId pour récupérer le nom de
-            };
-            distinctIds.push(tasks[key]["parent"]);
+          tasks[fakeParentId] = {
+            id: fakeParentId,
+            name: fakeParentId    // TODO faire une requête GET avec &fil=fakeParentId pour récupérer le nom de
+          };
+          distinctIds.push(tasks[key]["parent"]);
         }
       } else {
         /**
