@@ -258,7 +258,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     for (let param in this.asRaw) {
       // Les clefs commençant par un "_" (underscore)
       if (param[0] === "_") {
-        let parametreComplementaire = "&" + param + "=" + this.asRaw[param];
+        let parametreComplementaire = "&" + param.slice(1) + "=" + this.asRaw[param];
         LoggerModule.info("J'ajoute bêtement le paramètre complémentaire", parametreComplementaire);
         url += parametreComplementaire;
       }
@@ -530,7 +530,10 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       if (this.asRaw.hasOwnProperty(i)
         && typeof this.asRaw[i] === "string"
         && i !== "data")
-        toutData += "&" + i + "=" + this.asRaw[i];
+        toutData += "&"
+          // paramètres complémentaires @Issue #47
+          + (i[0] === "_" ? ""+i.slice(1) : i)
+          + "=" + this.asRaw[i];
     }
     return toutData;
   }
