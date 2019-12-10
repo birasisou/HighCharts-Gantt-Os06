@@ -82,11 +82,6 @@ function OrisGanttTask(data_row, oris_config) {
     LoggerModule.log("(This userOptions's value formatted) userOptions[key] " + key + ":", this.userOptions[key]);
   }
 
-  // console.log("data_row", data_row);
-  // console.log("rawUserOptions", this.rawUserOptions)
-  // console.log("orisValueUserOption", this.orisValueUserOption)
-  // console.log("userOptions", this.userOptions)
-
   /**
    * DATE FORMAT
    * On veut conserver le format de dates de la BD mais Highcharts ne comprend que les timestamps, or,

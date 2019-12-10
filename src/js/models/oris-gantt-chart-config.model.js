@@ -786,18 +786,15 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
   /**
    * Transforme un Objet contenant des Tasks en la liste des catégories Y
    * et met à jour les Tasks avec l'index de l'ID de leur catégorie
-   * @param  {Object} tasksAsObject
+   * @param  {Object} tasksAsArray
    *    L'objet "updatedTasks" renvoyé par le Worker --> Object contenant les Tasks sous la forme {<ID Task>:<OrisGanttTaskModel>}
    * @return {Object}
    *     .categories  => les valeurs uniques de l'taskArray passé en paramètre
    *     .data        => l'array initial où les valeurs sont remplacées par l'index correspondant de .categories
    */
-  function formatYAxisAndTasks (tasksAsObject) {
+  function formatYAxisAndTasks (tasksAsArray) {
     if (arguments.length !== 1)
       throw new Error(new EXCEPTIONS.MissingArgumentException("[GanttRenderingModule.categoryToIndex] taskArray argument missing"));
-
-    // Transformer l'Objet d'OrisGanttTasks en array d'OrisGantt
-    let tasksAsArray = Object.values(tasksAsObject);
 
     /**
      * Empty return template

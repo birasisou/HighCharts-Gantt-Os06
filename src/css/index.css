@@ -330,3 +330,12 @@ div.ajs-content {
         transform: rotate(0deg);
     }
 }
+
+/**
+ * Ne pas cliquer sur les labels
+ * (ce qui peut parfois empêcher de cliquer sur la tâche derrière)
+ */
+.highcharts-label .highcharts-data-label {
+    cursor: default;
+    pointer-events: none;
+}

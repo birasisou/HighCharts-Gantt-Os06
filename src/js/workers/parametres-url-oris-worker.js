@@ -13,7 +13,6 @@ let ALLOW_INVALID = false,
   MONITORING_DELAY = 10000; // delay entre deux mise à jours (en ms)
 
 //Début du worker
-// TODO NE SURTOUT PAS IMPORTER SINON LA PAGE PRINCIPALE VA EXECUTER (enfin non, car elle ne recevra jamais de .CONFIG, mais ...)
 self.onmessage = function(event) {
   // récupérer la getConfig depuis l'Objet ParametresUrl appelant (ici, Oris) et lancer la récupération des données
   if (event.data.CONFIG) {
@@ -41,9 +40,9 @@ self.onmessage = function(event) {
 
   if (event.data.reinitialize) {
     LoggerModule.info("[WORKER.ONMESSAGE] event.data.reinisialize received.", "Sending all stored Tasks");
+
     postMessage({
-      // deep clone pour ne pas provoquer une deuxième requête juste après (clearID modifie le paramètre)
-      updatedTasks: clearParentIds(JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID))),
+      updatedTasks: preparetORIS_TASKS_BY_IDToPostMessage(), // todo Appliquer @ISSUE #50
       done: "Here ya go"
     }, "*");
 
@@ -174,12 +173,25 @@ function updateLocal(rawTaskDatas) {
 
   // stocker les nouvelles valeurs et informer la page principale des changements
   for (let i=0, length = rawTaskDatas.length; i<length; ++i) {
-    LoggerModule.log("\n\nTRYING TO TRANSFORM", rawTaskDatas[i]);
+
+
+    LoggerModule.info("\n\nTRYING TO TRANSFORM", rawTaskDatas[i]);
     // instancier la nouvelle tâche
     // TODO try / catch car throw si pas le
     let currentOrisTask = new OrisGanttTask(rawTaskDatas[i], WORKER_CONFIG),
       //ancienne valeur pour cette tâche
       oldTask = ORIS_TASKS_BY_ID[currentOrisTask.getRaw('id')];
+
+    /**
+     * @Issue #50 Conserver l'ordre de réception des données
+     *  Vu qu'on stock les Points dans un Objet, on le perd
+     *  On ajoute donc un paramètre secret `__orderIndex = i;`
+     *  afin d'également détecter les changements d'ordres dans la BD
+     *  (plus chiant si j'avais fait un array directement)
+     *  et on postMessage maintenant un ARRAY au lieu d'un Objet
+     *  (de toute façon, on reconvertissait déjà l'Objet en array côté main... donc bon)
+     */
+    currentOrisTask.rawUserOptions.__orderIndex = currentOrisTask.userOptions.__orderIndex = i;
 
     // Ignorer les tâches "invalides" TODO (puis SIGNALER à la page principale)
     if (!currentOrisTask.isValidTask()) {
@@ -194,7 +206,7 @@ function updateLocal(rawTaskDatas) {
     if (oldTask !== undefined
       && SHARED.quickObjectEquals(oldTask, currentOrisTask.userOptions)) {
       // && SHARED.objectEquals(oldTask.rawUserOptions, currentOrisTask.rawUserOptions)) {
-      LoggerModule.info("\nVALUES DIDN'T CHANGE\n");
+      LoggerModule.log("\nVALUES DIDN'T CHANGE\n");
       continue;
     }
 
@@ -205,7 +217,7 @@ function updateLocal(rawTaskDatas) {
   }
 
   /**
-   * @GitHub-Issue #8
+   * @Issue #8
    * Détecter une suppression côté serveur
    */
   let deletedTasksIds = SHARED.arrayDifference(Object.keys(ORIS_TASKS_BY_ID), Object.keys(validTasksUserOptions));
@@ -224,20 +236,19 @@ function updateLocal(rawTaskDatas) {
     || deletedTasksIds.length                       // signaler une suppresion
   // || Object.keys(updatedTasks).length !== Object.keys(ORIS_TASKS_BY_ID).length  //
   ) {
-    // Clone pour faire des opérations avant de POST sans que ça ne soit pris en compte lors de la "détection de modifications"
-    let tasksToPush = JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID));
-    LoggerModule.log("tasksToPush ", tasksToPush);
 
-    /**
-     * @GanttIssue une valeur (ID) inexistante pour l'attribut &parent d'un Point cause un bug visuel
-     * S'assurer de ne pas envoyer de valeurs non-existantes pour l'attribut parent
-     */
-    if (WORKER_CONFIG.asRaw["parent"])
-      tasksToPush = clearParentIds(tasksToPush);
+    let tasksToPushAsArray = preparetORIS_TASKS_BY_IDToPostMessage();
 
+    postMessage({
+      updatedTasks: tasksToPushAsArray // todo Ne plus utiliser la version naïve d'updatedTasks (TOUT renvoyer)
+    }, "*");
+    /*
     postMessage({
       updatedTasks: tasksToPush // todo Ne plus utiliser la version naïve d'updatedTasks (TOUT renvoyer)
     }, "*");
+    //*/
+
+
   }
   // Informer de l'existence de valeurs invalides dans la BD
   if (Object.keys(invalidTasks).length > 0) {
@@ -303,4 +314,28 @@ function postError(errorMsg) {
   postMessage({
     error: errorMsg.toString()
   }, "*");
+}
+
+/**
+ * Transforme ORIS_TASKS_BY_ID en `array`
+ *  en ordonnant en fonction de `__orderIndex` (afin de respecter l'ordre d'arrivé des Données, aka @Issue #50)
+ *  en supprimant les `parent`s invalides (qui causerait un bug HighCharts)
+ * @returns {OrisGanttTask[]}
+ */
+function preparetORIS_TASKS_BY_IDToPostMessage() {
+  // Clone pour faire des opérations avant de POST sans que ça ne soit pris en compte lors de la "détection de modifications"
+  let tasksToPush = JSON.parse(JSON.stringify(ORIS_TASKS_BY_ID));
+  LoggerModule.log("tasksToPush ", tasksToPush);
+
+  /**
+   * @Issue une valeur (ID) inexistante pour l'attribut &parent d'un Point cause un bug visuel
+   * S'assurer de ne pas envoyer de valeurs non-existantes pour l'attribut parent
+   */
+  if (WORKER_CONFIG.asRaw["parent"])
+    tasksToPush = clearParentIds(tasksToPush);
+
+  return Object.values(tasksToPush)
+    .sort(function (a, b) {
+      return (a.__orderIndex > b.__orderIndex) ? 1 : -1;
+    });
 }
