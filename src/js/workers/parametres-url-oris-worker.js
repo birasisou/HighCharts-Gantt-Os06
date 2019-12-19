@@ -239,9 +239,6 @@ function updateLocal(rawTaskDatas) {
 
     let tasksToPushAsArray = preparetORIS_TASKS_BY_IDToPostMessage();
 
-    console.warn("NEW/UPDATED DATA");
-    console.log(tasksToPushAsArray.map(e => e.id));
-
     postMessage({
       updatedTasks: tasksToPushAsArray // todo Ne plus utiliser la version naïve d'updatedTasks (TOUT renvoyer)
     }, "*");

@@ -477,13 +477,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         tickInterval: (parametreUrlOris.asRaw["xinterval"] || 1) * 24 * 3600 * 1000 // 1 Day === 24 * 3600 * 1000 en ms
       }, { // Le 2e axe X est la ligne des "semaines"
         labels: {
-          /*formatter: function () {
-            console.info("labels this", this);
-            if (!parametreUrlOris.asRaw["xlabel"])
-              return (APP_MODULE.getPreferedLanguage() === "fr" ? 'Semaine' : 'Week') + ' {value:%W}';
-            else
-              return "{value:%" + parametreUrlOris.asArray["_xlabel"].join('}{value:%') + "}";
-          }, //*/
           /**
            * @Issue #38
            **/
@@ -759,10 +752,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
 
     // Init config
     let highChartConfig = new initOrisGanttChartConfigModel(parametreUrlOris, formattedYAxisAndData.categories, formattedYAxisAndData.data);
-    // todo ne pas formatter les données et utiliser { yAxis: { uniqueNames: true } }
-
-  console.warn("highChartConfig", JSON.stringify(highChartConfig));
-
 
     chartObj = Highcharts.ganttChart(CONTAINER_ID, highChartConfig);
   }
@@ -780,11 +769,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     // formatter les données
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
     LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
-
-    console.log("yCategories", formattedYAxisAndData.categories);
-    console.log("series", [new Series(formattedYAxisAndData.data)]);
-    console.error("https://jsfiddle.net/BlackLabel/h32zxu5a",
-      "https://jsfiddle.net/a2v8fj41/11/");
 
     chartObj.update({
       /*
@@ -842,7 +826,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     while (l--) {
       resultat.data[l]["y"] = resultat.categories.indexOf(resultat.data[l]["category"]);
     }
-    console.log("resultat.categories", resultat.categories);
     return resultat;
   }
 
