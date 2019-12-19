@@ -447,8 +447,13 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         }
       },
       yAxis: {
-        type: 'category',
-        categories: []
+        uniqueNames: true,
+
+        //*
+        labels: {
+          useHTML: true,
+          formatter: yAxisCatergoryMinMaxValueFormatter
+        }, //*/
       },
       xAxis: [{
         dateTimeLabelFormats: {
@@ -546,13 +551,13 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     };
 
     // set CATEGORIES
-    BASE_CONFIG.yAxis.categories = yCategories;
+    //BASE_CONFIG.yAxis.categories = yCategories;
     // if (parametreUrlOris.asRaw["uniquenames"] === "true")
       // BASE_CONFIG.yAxis =  { uniqueNames: true };
     /**
      * Détecter ("calculer") yAxis.uniqueNames
      */
-    BASE_CONFIG.yAxis =  { uniqueNames: true };
+    // BASE_CONFIG.yAxis =  ;
 
     // set SERIES
     //LoggerModule.warn(new Series(tasks));
@@ -756,6 +761,8 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     let highChartConfig = new initOrisGanttChartConfigModel(parametreUrlOris, formattedYAxisAndData.categories, formattedYAxisAndData.data);
     // todo ne pas formatter les données et utiliser { yAxis: { uniqueNames: true } }
 
+  console.warn("highChartConfig", JSON.stringify(highChartConfig));
+
 
     chartObj = Highcharts.ganttChart(CONTAINER_ID, highChartConfig);
   }
@@ -774,10 +781,24 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     let formattedYAxisAndData = formatYAxisAndTasks(rawTaskDatas);
     LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
 
+    console.log("yCategories", formattedYAxisAndData.categories);
+    console.log("series", [new Series(formattedYAxisAndData.data)]);
+    console.error("https://jsfiddle.net/BlackLabel/h32zxu5a",
+      "https://jsfiddle.net/a2v8fj41/11/");
+
     chartObj.update({
-      yAxis: {
+      /*
+      yAxis: [{
         categories: formattedYAxisAndData.categories  // no need quand &uniqueNames
-      }, //*/
+      }], //*/
+      yAxis: {
+        labels: {
+          useHTML: true,
+          formatter: function() {
+            return yAxisCatergoryMinMaxValueFormatter.bind(this)();
+          }
+        }
+      },
       series: [new Series(formattedYAxisAndData.data)]
     });
     LoggerModule.info("Done updating");
@@ -821,6 +842,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     while (l--) {
       resultat.data[l]["y"] = resultat.categories.indexOf(resultat.data[l]["category"]);
     }
+    console.log("resultat.categories", resultat.categories);
     return resultat;
   }
 
@@ -852,6 +874,52 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
       TOAST.getDragInfoToast().element.classList.add("is-milestone");
     }
   }
+
+  /**
+   * Formatte le label d'une categorie Y pour afficher les valeurs min/max qu'il recouvre
+   *
+   * /!\ Risque de perte de performances car, initialement
+   * /!\ (et lors que les dimensions de la page changent, bref... quand TOUT le graphique est dessiné)
+   * /!\ 4 redraws se produisent + appelé par chaque catégorie ... (ici 14)
+   * @returns {string|*}
+   */
+  function yAxisCatergoryMinMaxValueFormatter() {
+    let series = this.chart.series[0].userOptions;
+    let data = series.data;
+    let dataLength = data.length;
+
+    // console.log("formatter -> [series[0].data | options.series[0].data]",
+    // "[" + this.chart.series[0].data.length + " | " + this.chart.options.series[0].data.length + "]");
+
+    let min, max;
+
+    while (dataLength--) {
+      let currentData = data[dataLength];
+      // The data is on this category
+      if (this.value === currentData.name) {
+        // check if data defines new min/max
+        if ( currentData.start && !(min < currentData.start) )
+          min = currentData.start;
+        if ( currentData.end )
+          max = (!(max > currentData.end)) ? currentData.end : max;
+        else	// cas milestone
+          max = (!(max > currentData.start)) ? currentData.start : max;
+      }
+    }
+
+
+    if (!(min && max))
+      return this.value;
+
+    return ""+ this.value + "<br><small>" + toDdMmDateFormat(new Date(min)) + "&nbsp;—&nbsp;" + toDdMmDateFormat(new Date(max))  + "</small>" ;
+  }
+
+  function toDdMmDateFormat(date) {
+    let day = ((date.getUTCDate() < 10) ? "0" : "") + date.getUTCDate();
+    let month = ((date.getUTCMonth()+1 < 10) ? "0" : "") + (date.getUTCMonth()+1);
+    return day + "/" + month;
+  }
+
 
   return {
     getConfig: function () {
