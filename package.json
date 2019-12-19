@@ -13,9 +13,18 @@
     "test-UI": "npm run webdriver-update && npm run webdriver-start && npm run contractor-start",
     "lazy": "npm run node-server-start && npm run webdriver-update && npm run webdriver-start && npm run contractor-start",
     "ci": "start-server-and-test node-server-start 8080 test-UI",
-    "not_a_command": "https://stackoverflow.com/questions/36066695/running-protractor-when-webdriver-masornager-start-finishes"
+    "not_a_command": "https://stackoverflow.com/questions/36066695/running-protractor-when-webdriver-masornager-start-finishes",
+    "uglifyjs-lib-highcharts": "uglifyjs-folder src/lib/highcharts --pattern \"*.js,!*min.js\"",
+    "uglifyjs-js": "uglifyjs-folder src/js --pattern '**/*.js,!**/*min.js'",
+    "uglify-all": "npm run uglifyjs-lib-highcharts && npm run uglifyjs-js"
   },
   "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "babel-minify": "^0.5.1",
+    "grunt": "^1.0.4",
+    "grunt-cli": "^1.3.2",
+    "grunt-contrib-uglify": "^4.0.1",
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.4.0",
@@ -31,10 +40,12 @@
     "karma-jasmine": "^2.0.1",
     "karma-jasmine-ajax": "^0.1.13",
     "karma-verbose-reporter": "0.0.6",
+    "minify": "^4.1.3",
     "start-server-and-test": "^1.9.1"
   },
   "dependencies": {
     "bootstrap-colorpicker": "^3.1.2",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "popper.js": "^1.14.7"
   }
 }

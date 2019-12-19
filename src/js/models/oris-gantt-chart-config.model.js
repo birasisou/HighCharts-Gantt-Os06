@@ -168,7 +168,10 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         delete: document.getElementById("task-delete-navbar-button"),
         destroy: document.getElementById("chart-destroy-button")
       }
-    };
+    },
+    localeCategoryLabelShortDateString = navigator.language;
+
+  console.error("localeCategoryLabelShortDateString", localeCategoryLabelShortDateString);
 
   // Afficher le modal d'édition vide
   DOM_REF.editButtons["add"].addEventListener("click", function () {
@@ -401,6 +404,8 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     if (arguments.length < 3)
       throw new EXCEPTIONS.MissingArgumentException("[initOrisGanttChartConfigModel constructor]");
 
+    localeCategoryLabelShortDateString =  getLocaleCategoryLabelShortDateString(APP_MODULE.getPreferedLanguage());
+
     /**
      * @TEMPALTE Gantt
      */
@@ -447,8 +452,15 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         }
       },
       yAxis: {
-        type: 'category',
-        categories: []
+        uniqueNames: true,
+
+        //*
+        labels: {
+          useHTML: true,
+          formatter: function() {
+            return yAxisCatergoryMinMaxValueFormatter.bind(this)();
+          }
+        }, //*/
       },
       xAxis: [{
         dateTimeLabelFormats: {
@@ -472,13 +484,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         tickInterval: (parametreUrlOris.asRaw["xinterval"] || 1) * 24 * 3600 * 1000 // 1 Day === 24 * 3600 * 1000 en ms
       }, { // Le 2e axe X est la ligne des "semaines"
         labels: {
-          /*formatter: function () {
-            console.info("labels this", this);
-            if (!parametreUrlOris.asRaw["xlabel"])
-              return (APP_MODULE.getPreferedLanguage() === "fr" ? 'Semaine' : 'Week') + ' {value:%W}';
-            else
-              return "{value:%" + parametreUrlOris.asArray["_xlabel"].join('}{value:%') + "}";
-          }, //*/
           /**
            * @Issue #38
            **/
@@ -546,13 +551,13 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     };
 
     // set CATEGORIES
-    BASE_CONFIG.yAxis.categories = yCategories;
+    //BASE_CONFIG.yAxis.categories = yCategories;
     // if (parametreUrlOris.asRaw["uniquenames"] === "true")
       // BASE_CONFIG.yAxis =  { uniqueNames: true };
     /**
      * Détecter ("calculer") yAxis.uniqueNames
      */
-    BASE_CONFIG.yAxis =  { uniqueNames: true };
+    // BASE_CONFIG.yAxis =  ;
 
     // set SERIES
     //LoggerModule.warn(new Series(tasks));
@@ -754,8 +759,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
 
     // Init config
     let highChartConfig = new initOrisGanttChartConfigModel(parametreUrlOris, formattedYAxisAndData.categories, formattedYAxisAndData.data);
-    // todo ne pas formatter les données et utiliser { yAxis: { uniqueNames: true } }
-
 
     chartObj = Highcharts.ganttChart(CONTAINER_ID, highChartConfig);
   }
@@ -775,9 +778,18 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     LoggerModule.info("[INDEX.WorkerMessageHandler] Ready to use yAxis and Data:", formattedYAxisAndData);
 
     chartObj.update({
-      yAxis: {
+      /*
+      yAxis: [{
         categories: formattedYAxisAndData.categories  // no need quand &uniqueNames
-      }, //*/
+      }], //*/
+      yAxis: {
+        labels: {
+          useHTML: true,
+          formatter: function() {
+            return yAxisCatergoryMinMaxValueFormatter.bind(this)();
+          }
+        }
+      },
       series: [new Series(formattedYAxisAndData.data)]
     });
     LoggerModule.info("Done updating");
@@ -852,6 +864,285 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
       TOAST.getDragInfoToast().element.classList.add("is-milestone");
     }
   }
+
+  /**
+   * Formatte le label d'une categorie Y pour afficher les valeurs min/max qu'il recouvre
+   *
+   * /!\ Risque de perte de performances car, initialement
+   * /!\ (et lors que les dimensions de la page changent, bref... quand TOUT le graphique est dessiné)
+   * /!\ 4 redraws se produisent + appelé par chaque catégorie ... (ici 14)
+   * @returns {string|*}
+   */
+  function yAxisCatergoryMinMaxValueFormatter() {
+    let series = this.chart.series[0].userOptions;
+    let data = series.data;
+    let dataLength = data.length;
+
+    // console.log("formatter -> [series[0].data | options.series[0].data]",
+    // "[" + this.chart.series[0].data.length + " | " + this.chart.options.series[0].data.length + "]");
+
+    let min, max;
+
+    while (dataLength--) {
+      let currentData = data[dataLength];
+      // The data is on this category
+      if (this.value === currentData.name) {
+        // check if data defines new min/max
+        if ( currentData.start && !(min < currentData.start) )
+          min = currentData.start;
+        if ( currentData.end )
+          max = (!(max > currentData.end)) ? currentData.end : max;
+        else	// cas milestone
+          max = (!(max > currentData.start)) ? currentData.start : max;
+      }
+    }
+
+
+    if (!(min && max))
+      return this.value;
+
+    return ""+ this.value + "<br><small>" + toDdMmDateFormat(new Date(min)) + "&nbsp;—&nbsp;" + toDdMmDateFormat(new Date(max))  + "</small>" ;
+  }
+
+  function toDdMmDateFormat(date) {
+    let day = ((date.getUTCDate() < 10) ? "0" : "") + date.getUTCDate();
+    let month = ((date.getUTCMonth()+1 < 10) ? "0" : "") + (date.getUTCMonth()+1);
+
+    if (localeCategoryLabelShortDateString[0] === "d")
+      return day + localeCategoryLabelShortDateString[1] + month;
+    else
+      return month + localeCategoryLabelShortDateString[1] + day;
+  }
+
+  function getLocaleCategoryLabelShortDateString(lang){
+    let formats = {
+      "d/m": [
+        "ar-SA",
+        "bg-BG",
+        "ca-ES",
+        "da-DK",
+        "de-DE",
+        "el-GR",
+        "fi-FI",
+        "fr-FR",
+        "cs-CZ",
+        "he-IL",
+        "is-IS",
+        "it-IT",
+        "nb-NO",
+        "pt-BR",
+        "dsb-DE",
+        "ig-NG",
+        "lb-LU",
+        "ba-RU",
+        "quz-BO",
+        "yo-NG",
+        "ha-Latn-NG",
+        "ps-AF",
+        "se-NO",
+        "iu-Cans-CA",
+        "sr-Latn-RS",
+        "sr-Cyrl-RS",
+        "lo-LA",
+        "cy-GB",
+        "sms-FI",
+        "tk-TM",
+        "bs-Latn-BA",
+        "mt-MT",
+        "sr-Cyrl-ME",
+        "se-FI",
+        "hsb-DE",
+        "bs-Cyrl-BA",
+        "tg-Cyrl-TJ",
+        "sr-Latn-BA",
+        "smj-NO",
+        "rm-CH",
+        "quz-EC",
+        "quz-PE",
+        "hr-BA",
+        "sr-Latn-ME",
+        "en-SG",
+        "sr-Cyrl-BA",
+        "ro-RO",
+        "ru-RU",
+        "hr-HR",
+        "sk-SK",
+        "th-TH",
+        "tr-TR",
+        "ur-PK",
+        "id-ID",
+        "uk-UA",
+        "be-BY",
+        "sl-SI",
+        "et-EE",
+        "fa-IR",
+        "vi-VN",
+        "hy-AM",
+        "mk-MK",
+        "ka-GE",
+        "fo-FO",
+        "ms-MY",
+        "kk-KZ",
+        "ky-KG",
+        "uz-Latn-UZ",
+        "tt-RU",
+        "gl-ES",
+        "syr-SY",
+        "dv-MV",
+        "ar-IQ",
+        "de-CH",
+        "en-GB",
+        "es-MX",
+        "fr-BE",
+        "it-CH",
+        "nl-BE",
+        "nn-NO",
+        "sr-Latn-CS",
+        "sv-FI",
+        "az-Cyrl-AZ",
+        "ms-BN",
+        "uz-Cyrl-UZ",
+        "ar-EG",
+        "zh-HK",
+        "de-AT",
+        "en-AU",
+        "es-ES",
+        "sr-Cyrl-CS",
+        "ar-LY",
+        "zh-SG",
+        "de-LU",
+        "en-CA",
+        "es-GT",
+        "fr-CH",
+        "zh-MO",
+        "de-LI",
+        "en-NZ",
+        "es-CR",
+        "fr-LU",
+        "en-IE",
+        "fr-MC",
+        "es-DO",
+        "ar-OM",
+        "en-JM",
+        "es-VE",
+        "ar-YE",
+        "es-CO",
+        "ar-SY",
+        "en-BZ",
+        "es-PE",
+        "ar-JO",
+        "en-TT",
+        "es-AR",
+        "ar-LB",
+        "es-EC",
+        "ar-KW",
+        "ar-AE",
+        "es-UY",
+        "ar-BH",
+        "es-PY",
+        "ar-QA",
+        "es-BO",
+        "es-SV",
+        "es-HN",
+        "es-NI",
+        "es-PR",
+        "am-ET",
+        "iu-Latn-CA",
+        "sma-NO",
+        "gd-GB",
+        "en-MY",
+        "prs-AF",
+        "wo-SN",
+        "qut-GT",
+        "gsw-FR",
+        "co-FR",
+        "oc-FR",
+        "mi-NZ",
+        "ga-IE",
+        "br-FR",
+        "smn-FI"
+      ],
+      "d-m": [
+        "hi-IN",
+        "nl-NL",
+        "pa-IN",
+        "gu-IN",
+        "ta-IN",
+        "te-IN",
+        "kn-IN",
+        "mr-IN",
+        "sa-IN",
+        "kok-IN",
+        "pt-PT",
+        "ar-MA",
+        "ar-DZ",
+        "ar-TN",
+        "es-CL",
+        "tzm-Latn-DZ",
+        "bn-BD",
+        "arn-CL",
+        "kl-GL",
+        "fy-NL",
+        "as-IN",
+        "ml-IN",
+        "en-IN",
+        "or-IN",
+        "bn-IN"
+      ],
+      "m/d": [
+        "zh-TW",
+        "hu-HU",
+        "en-US",
+        "ja-JP",
+        "lv-LV",
+        "lt-LT",
+        "eu-ES",
+        "af-ZA",
+        "sw-KE",
+        "mn-MN",
+        "es-PA",
+        "en-ZA",
+        "zh-CN",
+        "en-029",
+        "mn-Mong-CN",
+        "en-ZW",
+        "en-PH",
+        "rw-RW",
+        "sah-RU",
+        "moh-CA",
+        "ii-CN",
+        "nso-ZA",
+        "fil-PH",
+        "ne-NP",
+        "bo-CN",
+        "zu-ZA",
+        "xh-ZA",
+        "tn-ZA",
+        "es-US"
+      ],
+      "m-d": [
+        "fr-CA",
+        "se-SE",
+        "si-LK",
+        "km-KH",
+        "smj-SE",
+        "sma-SE",
+        "ug-CN",
+        "ko-KR",
+        "pl-PL",
+        "sq-AL",
+        "sv-SE"
+      ]
+    };
+
+    for (let key in formats) {
+      if (formats[key].indexOf(lang) > -1)
+        return key;
+    }
+    // default value
+    return 'd/M';
+  }
+
 
   return {
     getConfig: function () {

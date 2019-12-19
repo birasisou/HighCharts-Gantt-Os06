@@ -84,7 +84,7 @@ function autoUpdateData(url) {
       fakeFinally(arg);
     });
   // TODO rendre infini
-  // mais je pense plutôt attendre que le main "confirme" le monde infini
+  // mais je pense plutôt attendre que le main "confirme" le mode infini
 }
 
 /**

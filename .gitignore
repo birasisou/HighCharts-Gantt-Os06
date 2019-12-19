@@ -1,6 +1,12 @@
-node_modules/
+# IDE
 .idea/
+
+# dependencies
+/node_modules
+
+# testing
+src/js/dist/
+/coverage
 hidden/
 test/utils/prototype-performance-test.js
-src/js/dist/
 test/dist/
