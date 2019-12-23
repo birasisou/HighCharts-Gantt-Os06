@@ -453,7 +453,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
           // todo pas suffisant,
           || isStartIdSameAsEndId) {
           INPUTS["start"].classList.add("isAdd");
-          INPUTS["end"].parentElement.parentElement.hidden = true;
+          if (isStartIdSameAsEndId)
+            INPUTS["end"].parentElement.parentElement.hidden = true;
           INPUTS["end"].disabled = true;
         } else
           INPUTS["start"].classList.remove("isAdd");

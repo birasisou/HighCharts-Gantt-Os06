@@ -10,7 +10,8 @@ let ORIS_TASKS_BY_ID = {};      // Row by ID, dictionnaire/hashmap des tâches (
 // TODO implémenter côté main page
 let ALLOW_INVALID = false,
   IS_MONITORING = true,
-  MONITORING_DELAY = 10000; // delay entre deux mise à jours (en ms)
+  MONITORING_DELAY = 10000, // delay entre deux mise à jours (en ms)
+  MONITORING_TIMEOUT_REF = null;
 
 //Début du worker
 self.onmessage = function(event) {
@@ -32,6 +33,13 @@ self.onmessage = function(event) {
   if (event.data.STOP_AUTO) {
     LoggerModule.info("[WORKER.ONMESSAGE] event.data.STOP_AUTO received.", "Stopping monitoring after current loop");
     IS_MONITORING = false;
+  }
+  /**
+   * @Issue #59 Fast Forward le setTimeout()
+   */
+  if (event.data.ORDER_66) {
+    clearTimeout(MONITORING_TIMEOUT_REF);
+    autoUpdateData(WORKER_CONFIG.webserviceUrl);
   }
 
   // TODO utiliser pour autoriser, côté main page, à recevoir des valeurs "invalides" (imaginons un popup signalant '3 valeurs étaient invalident et ont été ignorées'
@@ -97,7 +105,7 @@ function fakeFinally(arg) {
   postMessage({done: true}, "*"); // Pour débug
 
   if (IS_MONITORING)
-    setTimeout(function () {
+    MONITORING_TIMEOUT_REF = setTimeout(function () {
       autoUpdateData(WORKER_CONFIG.webserviceUrl);
     }, MONITORING_DELAY);
 }
@@ -283,7 +291,7 @@ function clearParentIds(tasks) {
        * Créer un "faux" Point afin de garder le concept de groupes
        */
       if (WORKER_CONFIG.asRaw["fakeparent"] === "true") { // TODO /!\ Ceci est async
-        console.error("Création de faux parents...");
+        // console.error("Création de faux parents...");
         let fakeParentId = tasks[key]["parent"];
         // Ne créer un faux groupe que s'il y a une valeur valide à
         if (typeof fakeParentId !== "undefined" && typeof fakeParentId !== "object") {

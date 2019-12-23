@@ -183,10 +183,10 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       chemin_ini = lowerCasePath.substring(0, lowerCasePath.lastIndexOf(this.CONSTANTS.ROOT_NAME_IDENTIFIER) + offset), //+12, car ".ini" = 4 caractères
       //Nom de la base AVEC "_gestion.ini"
       base_ini = chemin_ini.substring(chemin_ini.lastIndexOf("/") + 1);
-      //Nom de la base SANS "_gestion.ini" et AVEC un "s" en plus
-      this.rootName = base_ini.replace(this.CONSTANTS.ROOT_NAME_IDENTIFIER, "") + "s";
+    //Nom de la base SANS "_gestion.ini" et AVEC un "s" en plus
+    this.rootName = base_ini.replace(this.CONSTANTS.ROOT_NAME_IDENTIFIER, "") + "s";
     return this.rootName;
-    };
+  };
 
   /**
    * Génère l'URL du webservice Oris permettant de communiquer avec la base
@@ -269,10 +269,13 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
   };
 
   /**
+   * (AllInOne) Tente d'éditer/ajouter un Point de la BD
+   *  Effectue la requête appropriée en fonction des paramètres
+   *  Gère la réponse
+   *  Informe l'utilisateur via des notification (UI/UX)
    *
    * @param {Object} formattedData
    * @param {boolean} isAddRequest
-   *  @default false
    */
   this.tryAddOrEditPoint = function (formattedData, isAddRequest) {
     let self = this,  // Pas nécessaire mais bonne pratique ???
@@ -295,8 +298,8 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       //   hideLoading
       //   ? hideModal ?
       //   error notification
-      
-      
+
+
       // Generate & encode URI
       let url = self.generateWebserviceAddOrEditUrl(formattedData, isAddRequest);
 
@@ -318,7 +321,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           // on souhaite donc en extraire le message (<body>)
           LoggerModule.error("Tried to parse:", response);
           let response_content = /<body[^>]*>((.|[\n\r])*)<\/body>/.exec(response);
-          LoggerModule.warn("But got Error", e);
+          LoggerModule.warn("But got Error", e); // GLHF
           throw Error("Unable to parse response to JSON.\n\n"
             + (response_content && response_content[1] // s'il y a un match, [0] est TOUT le body (`outerHTML`), [1] est le contenu du body (`innerText`)
               ? response_content[1]
@@ -373,7 +376,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           } // valeur différentes
           else if (SHARED.decodeHTML(currentPosted) !== SHARED.decodeHTML(currentActual)
             // mais pas parce qu'une valeur est vide et que la seule façon de push une valeur vide au serveur c'est d'envoyer SHARED.ORIS_EMPTY_VALUE
-          && !(SHARED.decodeHTML(currentPosted) === "" && currentActual === SHARED.ORIS_EMPTY_VALUE) ) {
+            && !(SHARED.decodeHTML(currentPosted) === "" && currentActual === SHARED.ORIS_EMPTY_VALUE) ) {
             errorOccured = true;
             errorMessage += "\nLa valeur ('" + flippedDataKeys[attr] + "'->'"+ SHARED.decodeHTML(currentPosted) + "') envoyée différentes de celle récupérée depuis le serveur(->'" + SHARED.decodeHTML(currentActual) + "').";
             //throw "Mise à jour du Point échouée ou incomplète." +
@@ -387,6 +390,12 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
         TOAST.turnSuccess(initToast, {
           header: "Task " + (isAddRequest ? " created" : "#" + formattedData.id + " successfuly updated") + "."
         });
+
+        /**
+         * @Issue #59 Instant update after Edit
+         */
+        APP_MODULE.getWorker().postMessage({ORDER_66: true});
+
         return true;
       })
       .catch(function (err) {
@@ -450,11 +459,11 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
    */
   this.tryDeletePoint = function (userOptions) {
     let self = this,  // Pas nécessaire mais bonne pratique ???
-    initToast = TOAST.info({
-      header: "Trying to detelete task #" + userOptions.vline,
-      delay: 10000  // Il y a peut-être un risque que le Toast ne se masque pas si la réponse du Worker arrive trop vite (très improbable)
-      // autoHide: false
-    });
+      initToast = TOAST.info({
+        header: "Trying to detelete task #" + userOptions.vline,
+        delay: 10000  // Il y a peut-être un risque que le Toast ne se masque pas si la réponse du Worker arrive trop vite (très improbable)
+        // autoHide: false
+      });
 
     new Promise(function (resolve) {
       resolve(self.generateWebserviceDeleteUrl(userOptions));
@@ -515,7 +524,8 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
         // Prépare le Toast initial pour destruction automatique (ne sera détruit qu'une fois que le Worker renvoie
         initToast.setAttribute("outdated", true);
-      })
+        APP_MODULE.getWorker().postMessage({ORDER_66: true})
+      });
   };
 
 
