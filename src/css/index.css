@@ -335,7 +335,7 @@ div.ajs-content {
  * Ne pas cliquer sur les labels
  * (ce qui peut parfois empêcher de cliquer sur la tâche derrière)
  */
-.highcharts-label .highcharts-data-label {
-    cursor: default;
-    pointer-events: none;
+.highcharts-data-label {
+    cursor: default !important;
+    pointer-events: none !important;
 }

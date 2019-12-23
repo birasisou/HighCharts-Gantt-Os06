@@ -171,8 +171,6 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     },
     localeCategoryLabelShortDateString = navigator.language;
 
-  console.error("localeCategoryLabelShortDateString", localeCategoryLabelShortDateString);
-
   // Afficher le modal d'édition vide
   DOM_REF.editButtons["add"].addEventListener("click", function () {
     APP_MODULE.getTaskEditor().initAndShow({}, true)

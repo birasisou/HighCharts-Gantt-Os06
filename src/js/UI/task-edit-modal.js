@@ -29,6 +29,10 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     // userOptions de la Tâche actuellement modifiée (ou dernièrement modifiée)
     currentTaskOptions = null,
     isAddEditor = false,
+    /**
+     * @Issue #53
+     */
+    isStartIdSameAsEndId = asRawParams["start"] === asRawParams["end"],
     currentYAxisCategories = [],
     currentDataIds = [],
 
@@ -75,16 +79,34 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     locale: moment.locale() || 'fr',
     // format: 'L' // que la date, pas les heures
   });
-  $(INPUTS["end"]).datetimepicker({
-    useCurrent: false,
-    showTodayButton: true,
-    locale: moment.locale() || 'fr',
-    widgetPositioning: {
-      vertical: "auto",
-      horizontal: "right"
-    }
-    // format: 'L LT' Date + Heure:Secondes --> format par défaut
-  });
+  /**
+   * @Issue #53 Ne pas instancier / afficher l'END input si l'ID `&start` === `&end`
+   */
+  if (!isStartIdSameAsEndId) {
+    $(INPUTS["end"]).datetimepicker({
+      useCurrent: false,
+      showTodayButton: true,
+      locale: moment.locale() || 'fr',
+      widgetPositioning: {
+        vertical: "auto",
+        horizontal: "right"
+      }
+      // format: 'L LT' Date + Heure:Secondes --> format par défaut
+    });
+
+    $(INPUTS["end"]).on("dp.change", function (e) {
+      // Enlever le style "valeur calculée"
+      if (INSTANCE.hasClass("show"))
+        INPUTS["end"].classList.remove("border-warning");
+
+      $(INPUTS["start"]).data("DateTimePicker").maxDate(e.date);
+    });
+    $(INPUTS["end"]).on("dp.show", function () {
+      $(INPUTS["end"]).data("DateTimePicker").minDate($(INPUTS["start"]).data("DateTimePicker").date());
+    });
+  } else
+    INPUTS["end"].hidden = true;
+
   $(INPUTS["start"]).on("dp.change", function (e) {
     // Enlever le style "valeur calculée" si visible && date modifiée (pour de vrai ==> plus d'une minute d'écart)
     if (INSTANCE.hasClass("show")
@@ -94,9 +116,10 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     )
       INPUTS["start"].classList.remove("border-warning");
 
-    $(INPUTS["end"]).data("DateTimePicker").minDate(e.date);
+    if (!isStartIdSameAsEndId)
+      $(INPUTS["end"]).data("DateTimePicker").minDate(e.date);
     // Cas particulier Add Request
-    if (isAddEditor) {
+    if (isAddEditor && !isStartIdSameAsEndId) {
       // Désactiver &end si &start n'a pas de valeur
       INPUTS["end"].disabled = !e.date;
       $(INPUTS["end"]).data("DateTimePicker").clear();
@@ -104,25 +127,15 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
   });
   $(INPUTS["start"]).on("dp.show", function () {
     // cas milestone
-    $(INPUTS["start"]).data("DateTimePicker").maxDate( INPUTS["end"].value ? $(INPUTS["end"]).data("DateTimePicker").date() : false);
+    $(INPUTS["start"]).data("DateTimePicker").maxDate( !isStartIdSameAsEndId && INPUTS["end"].value ? $(INPUTS["end"]).data("DateTimePicker").date() : false);
   });
 
-  $(INPUTS["end"]).on("dp.change", function (e) {
-    // Enlever le style "valeur calculée"
-    if (INSTANCE.hasClass("show"))
-      INPUTS["end"].classList.remove("border-warning");
-
-    $(INPUTS["start"]).data("DateTimePicker").maxDate(e.date);
-  });
-  $(INPUTS["end"]).on("dp.show", function () {
-    $(INPUTS["end"]).data("DateTimePicker").minDate($(INPUTS["start"]).data("DateTimePicker").date());
-  });
 
   // Les sélecteurs sont vides par défaut, on n'a qu'à les update
   initSelectPicker(INPUTS["category"]);
 
   // Les inputs customisés
-  initCustomInputs(parametresUrlOrisNoFunctions.asArray);
+  initCustomInputs(paramUrlOris.asArray);
   // Obliger de refresh ici sinon les largeurs sont mal calculées
   $(DOM_REFERENCES.modal).on("shown.bs.modal", function (event) {
     $(INPUTS["category"]).selectpicker('refresh');
@@ -331,7 +344,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
 
     // Les inputs obligatoires
     for (let input in INPUTS) {
-      if (!INPUTS[input])
+      if (!INPUTS[input] || (input === "end" && isStartIdSameAsEndId) )
         continue;
 
       if (typeof taskOptions[input] !== "object"              // null
@@ -340,6 +353,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       {
         // CAS INPUTS dates
         if (input === "start" || input === "end") {
+          // if (input === "end" && asRawParams["end"] === )
+
           LoggerModule.info(input, taskOptions[input]);
           LoggerModule.info("raw-" + input, taskOptions["raw-" + input]);
           // todo si "raw-"+input n'a pas de valeur (alors que input oui) c'est que les dates sont auto calculées
@@ -422,7 +437,7 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
         LoggerModule.warn("Pas de valeur pour INPUTS["+input+"]");
         INPUTS[input].value = "";
         /**
-         * @Github #9 Issue update de/vers une milestone cause un bug graphique
+         * @Issue #9 Issue update de/vers une milestone cause un bug graphique
          * donc on désactive les inputs si les dates sont invalides initialement
          * OU
          * si on n'a pas l'ID de la colonne (!asRaw[input])
@@ -431,14 +446,20 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
           || input === "end"
           || !APP_MODULE.getParametresUrlOrisNoFunction().asRaw[APP_MODULE.getParametresUrlOrisNoFunction().CONSTANTS.HC_CONFIG_KEYS.data[input].url_param]);
         // Pour le comportement dynamique (désactiver &end si &start n'a pas de valeur) du cas particulier Add Request
-        if (isAddEditor) {
+        if (isAddEditor
+          /**
+           * @Issue #53, désactiver/masquer l'input END si `&start` et `&end` ont le même ID
+           */
+          // todo pas suffisant,
+          || isStartIdSameAsEndId) {
           INPUTS["start"].classList.add("isAdd");
+          INPUTS["end"].parentElement.parentElement.hidden = true;
           INPUTS["end"].disabled = true;
         } else
           INPUTS["start"].classList.remove("isAdd");
       }
       /**
-       * @Github #9
+       * @Issue #9
        * On n'autorise la suppression d'une date que lorsque l'on est en mode création car ça ne posera jamais de problème
        */
       if (input === "start" || input === "end") {

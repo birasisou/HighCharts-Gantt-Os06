@@ -220,10 +220,8 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     if (!act || (act !== "modif" && act !== "newvalid" && act !== "kill"))
       throw new EXCEPTIONS.InvalidArgumentException("[generateWebserviceActionUrl] Le paramètre &act=" + act + " n'est pas valide.");
 
-    let url = this.webserviceUrl.slice(0, this.webserviceUrl.indexOf("?"))
+    return this.webserviceUrl.slice(0, this.webserviceUrl.indexOf("?"))
       + "?json=true&act=" + act;
-
-    return url;
   };
 
   /**
@@ -241,7 +239,10 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     if (typeof userOptions !== "object")
       throw new EXCEPTIONS.InvalidArgumentException("[generateWebserviceUpdateUrl] Le paramètre doit être un Objet contenant les attributs du Point à modifier " + userOptions);
 
+
+
     let url = this.generateWebserviceActionUrl(isAddRequest ? "newvalid" : "modif");
+
     // ajouter les clé/valeurs à modifier AU FORMAT DE LA BASE ORIS (Date DD/MM/YYYY mais on perd les heures...)
     for (let option in userOptions) {
       LoggerModule.log("userOptions["+option+"]", userOptions[option]);
