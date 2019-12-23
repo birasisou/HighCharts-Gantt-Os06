@@ -141,7 +141,7 @@ new Promise(function (resolve, reject) {
       TASK_SEARCH_WIDGET.classList.add("active"); // TODO ne l'afficher qu'à la fin de l'initialisation globale ?
       // &fil=
       TASK_SEARCH_WIDGET.addEventListener("submit", function () {
-        let newUrl = SHARED.addOrReplaceUrlParam(location.href, 'fil', document.getElementById("task-search-input").value);
+        let newUrl = SHARED.addOrReplaceUrlParam(location.href, 'fil', encodeURIComponent(document.getElementById("task-search-input").value) );
         LoggerModule.warn("Changement d'URL", newUrl);
         window.location.replace(newUrl);
         return false;
