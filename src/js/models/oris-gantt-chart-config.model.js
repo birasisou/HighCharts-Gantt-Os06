@@ -533,7 +533,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
             if ((this.point[customInput] || this.point[customInput] === "" ) && (customInput !== paramUrlOrisNoFunctions.asRaw["icon-left"] && customInput !== paramUrlOrisNoFunctions.asRaw["icon-right"])) {
               str += "<br><small>";
               // Si l'input custom a un label, afficher "<label>: "
-              let customLabel = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel[customInput];
+              let customLabel = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS.dataLabel[customInput].label;
               // N'ajouter le ": " que s'il y a un label
               if (customLabel)
                 str += customLabel + ": ";

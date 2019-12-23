@@ -42,6 +42,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
       },
       /**
        * @Issue #19 Inputs customisés
+       * Doivent être présents ici également pour apparaître dans l'éditeur
        */
       dataLabel: {
         iconLeft: {
@@ -68,7 +69,7 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
         id: { // {unique string} id de la tâche @MANDATORY
           url_param: 'id',    //paramètre URL contenant la colonne correspondante
-          format: 'asString'  //fonction de formatage de OrisDataModel TODO @share ? @RepositoryPattern
+          format: 'asString'  //fonction de formatage de OrisDataModel
         },
         start: {  // {date} date de début de la tâche @MANDATORY
           url_param: 'start',
@@ -108,7 +109,9 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
           url_param: 'parent',
           format: 'asString'
         },
-        // TODO bonus
+
+        // doivent également être présents ici pour proprement instancier les Points
+        // todo refactor tout avoir dans .dataLabel
         iconLeft: {   // image sur la task à gauche (panneau danger, etc...)
           url_param: 'icon-left',
           format: 'asString'
@@ -602,7 +605,10 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
     for (let optionalInput in self.CONSTANTS.HC_CONFIG_KEYS.dataLabel) {
       let colId = self.CONSTANTS.HC_CONFIG_KEYS.dataLabel[optionalInput]["url_param"];
       if (self.asRaw[colId]) {
-        customLabelsAsObject[self.asRaw[colId]] = self.CONSTANTS.HC_CONFIG_KEYS.dataLabel[optionalInput]["input_label"];
+        customLabelsAsObject[self.asRaw[colId]] = {
+          label: self.CONSTANTS.HC_CONFIG_KEYS.dataLabel[optionalInput]["input_label"],
+          readonly: false
+        };
       }
     }
 
@@ -612,13 +618,24 @@ function ParametresUrlOris (pageUri, isEmptyAllowed, isAlreadyDecoded) {
 
     let inputsId = self.asArray["_inputs-id"],
       inputsLabel = self.asArray["_inputs-label"],
+      /**
+       * @Issue #48 Certains inputs customs peuvent être readonly
+       *
+       *
+       */
+      inputsReadonly = self.asArray["_inputs-ro"],
       i = 0,
       idLength = inputsId.length;
 
     for (i; i<idLength; ++i) {
       // Ignorer les ID vides, tout en autorisant "0", "false", etc...
       if (inputsId[i]) {
-        customLabelsAsObject[inputsId[i]] = decodeURIComponent(inputsLabel[i]) || ""; // Autoriser les labels vides
+        customLabelsAsObject[inputsId[i]] = {
+          label: decodeURIComponent(inputsLabel[i]) || "",
+          disabled: !!(inputsReadonly && !inputsReadonly[i]),
+          // Readonly === valeur autre que "" (vide)
+          readonly: !!(inputsReadonly && inputsReadonly[i])
+        }; // Autoriser les labels vides
       }
     }
 

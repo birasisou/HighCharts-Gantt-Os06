@@ -222,6 +222,9 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     /**
      * @GitIssue #24
      * Permettre de changer de parent/sous-groupe
+     *
+     * todo créer une nouvelle catégorie dynamiquement
+     *  + ne pas devenir sont propre parent (se retirer de la liste)
      */
     if (asRawParams[HC_CONFIG_KEYS.data.parent.url_param]) {
       // Afficher un "offset-2" si on est à droite (i.e. #task-completed-input est visible)
@@ -253,12 +256,15 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
       return false;
 
     // Les id-labels customs sont formattés lors de l'instanciation lors de l'instanciation de ParametresUrlOris
+    LoggerModule.warn("HC_CONFIG_KEYS.dataLabel", HC_CONFIG_KEYS.dataLabel);
     for (let customInputKey in HC_CONFIG_KEYS.dataLabel) {
+      // console.log("is " + customInputKey + " a custom label ?", paramAsArray[])
       let formGroup = null;
       try {
         formGroup = new FormGroupInput({
           id: customInputKey,
-          label: HC_CONFIG_KEYS.dataLabel[customInputKey] // || ""
+          label: HC_CONFIG_KEYS.dataLabel[customInputKey].label, // || ""
+          readonly: HC_CONFIG_KEYS.dataLabel[customInputKey].readonly
         });
       } catch(e) {
         // do nothing
@@ -313,6 +319,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     input.setAttribute("placeholder", config.label);
     input.setAttribute("data-id", config.id);
     input.setAttribute("onclick", "this.setSelectionRange(0, this.value.length); ");
+    if (config.readonly)
+      input.setAttribute("readonly", true);
 
     // Assembler
     formGroup.appendChild(label);
@@ -717,7 +725,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
     for (let input in INPUTS) {
       let current = asRawParams[HC_CONFIG_KEYS.data[input].url_param];
       if (current
-        && !INPUTS[input].disabled) { // ne pas MàJ les paramètres disabled (notamment les catégories en mode &uniqueNames, enfin &parent, et ID car ultra important)
+        // ne pas MàJ les paramètres disabled (notamment les catégories en mode &uniqueNames, enfin &parent, et ID car ultra important)
+        && !INPUTS[input].disabled) {
         if ((input === "start" || input === "end") && INPUTS[input].value) {
           // FORMAT COURT
           if ($(INPUTS[input]).data("DateTimePicker").options().format === "L") {
@@ -742,8 +751,8 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
          *  Push des valeurs vides via la valeur réservée SHARED.ORIS_EMPTY_VALUE, déclarée dans SHARED.ORIS_EMPTY_VALUE
          */
         // MAIS SEULEMENT SI ELLES N'ÉTAIENT PAS DÉJÀ VIDES
-        if (formattedData[current] === "" && currentTaskOptions[HC_CONFIG_KEYS.flippedData[input]])
-          formattedData[current] = SHARED.ORIS_EMPTY_VALUE;
+         if (formattedData[current] === "" && currentTaskOptions[HC_CONFIG_KEYS.flippedData[input]])
+           formattedData[current] = SHARED.ORIS_EMPTY_VALUE;
       }
     }
     /**
@@ -751,7 +760,12 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
      * Ajouter les paramètres customisés à la requête
      */
     for (let customInput in CUSTOM_GROUP_INPUTS) {
-      let current = CUSTOM_GROUP_INPUTS[customInput].children[1].value;
+      let input = CUSTOM_GROUP_INPUTS[customInput].children[1],
+        isReadonly = input.readOnly,
+        current = input.value;
+
+      if (isReadonly)
+        continue;
 
       formattedData[customInput] = current || "";
 
@@ -760,15 +774,14 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
        *  Push des valeurs vides via la valeur réservée SHARED.ORIS_EMPTY_VALUE
        */
       // MAIS SEULEMENT SI ELLES N'ÉTAIENT PAS DÉJÀ VIDES
-      if (formattedData[customInput] === "" && currentTaskOptions[customInput])
-        formattedData[customInput] = SHARED.ORIS_EMPTY_VALUE;
+       if (formattedData[customInput] === "" && currentTaskOptions[customInput])
+         formattedData[customInput] = SHARED.ORIS_EMPTY_VALUE;
     }
 
 
     // Forcer l'ajout de l'attribut vline car faire une requête avec &id=vline causait une erreur
     if (!isAddRequest)
       formattedData["vline"] = INPUTS["vline"].value;
-
 
     LoggerModule.warn("[ONOK_HANDLER] formattedData", formattedData);
 
@@ -797,8 +810,9 @@ function TASK_EDITOR_MODAL_FACTORY (parametresUrlOrisNoFunctions) {
   }
   function appendNewOption(value) {
     document.getElementById('task-category-input').innerHTML += '<option value="' + value + '">' + value + '</option>';
-    $('#task-category-input').selectpicker('val', value);
-    $('#task-category-input').selectpicker('refresh');
+    let categoryInput = $('#task-category-input');
+    categoryInput.selectpicker('val', value);
+    categoryInput.selectpicker('refresh');
   }
 
   return {

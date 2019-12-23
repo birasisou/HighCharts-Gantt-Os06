@@ -5,7 +5,7 @@ function SHARED_FACTORY() {
      * Valeur réservée par Oris pou signifier qu'une valeur est "vide"
      * (on ne peut pas push une valeur vide via une requête GET)
      */
-    ORIS_EMPTY_VALUE: "null",
+    ORIS_EMPTY_VALUE: "", // todo ne marche pas, faute du service: marche avec l'URL &mchX, mais pas la mienne, où j'utilise les vrais ID des colonnes, et pas leur index
 
     /**
      * Parse un string en un objet Location (on peut alors utiliser les attributs host/protocol/...)
