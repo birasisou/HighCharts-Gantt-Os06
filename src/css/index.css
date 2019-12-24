@@ -193,7 +193,6 @@ input[readonly],
     margin-top: .2em;
 }
 #widget-area-toggler:not(.collapsed) {
-    border-radius: 0 0 .25em 0 !important;
     margin-top: 0;
 }
 #widget-area-toggler[aria-expanded=true] {
@@ -216,13 +215,13 @@ input[readonly],
 }
 
 
-#widget-area-toggler.collapsed .fa-caret-square-o-up,
-#widget-area-toggler .fa-cogs,
+#widget-area-toggler.collapsed #collapse-icon,
+#widget-area-toggler #show-icon,
 #task-edit-widget.collaped {
     display: none;
 }
-#widget-area-toggler.collapsed .fa-cogs,
-#widget-area-toggler .fa-caret-square-o-up {
+#widget-area-toggler.collapsed #show-icon,
+#widget-area-toggler #collapse-icon {
     display: inline-block;
 }
 

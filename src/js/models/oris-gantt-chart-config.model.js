@@ -5,7 +5,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
   /**
    * @Variables
    */
-  // PRIVATE
+    // PRIVATE
   let paramUrlOrisNoFunctions = PARAMETRES_URL_ORIS_NO_FUNCTIONS,
     hcConfigKeys = paramUrlOrisNoFunctions.CONSTANTS.HC_CONFIG_KEYS,
     // utilisé pour créer l'event Double Click
@@ -123,11 +123,11 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           //  (HC version 7.1.2)
           //  https://github.com/highcharts/highcharts/issues/11486
           if (paramUrlOrisNoFunctions.asRaw["parent"]
-              // MàJ un Point juste en le "resizant" ne change pas son Y donc event.newPoint.y n'existe pas
-              && (event.newPoint["y"] || event.newPoint["y"] === 0)
-              // && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]]
-              && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes
-              && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes[0]) {
+            // MàJ un Point juste en le "resizant" ne change pas son Y donc event.newPoint.y n'existe pas
+            && (event.newPoint["y"] || event.newPoint["y"] === 0)
+            // && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]]
+            && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes
+            && this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes[0]) {
             cloneOptions.parent = this.series.yAxis.mapOfPosToGridNode[event.newPoint["y"]].nodes[0].parent || "";
             LoggerModule.info("newOptions.parent", cloneOptions.parent);
           }
@@ -467,9 +467,9 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
           minute: '%H:%M',
           hour: '%H:%M',
           // day: '%a %e %b',
-                            day: {
-                                list: ['%A %e %B', '%a %e %b', '%e %b', '%E']    // enlever les caractères inutiles
-                            },
+          day: {
+            list: ['%A %e %B', '%a %e %b', '%e %b', '%E']    // enlever les caractères inutiles
+          },
           week: '%e %b',
           month: '%b \'%y',
           year: '%Y'
@@ -479,9 +479,23 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
         minPadding: 0.01,
         maxPadding: 0.01,
         // minTickInterval: (parametreUrlOris.asRaw["xinterval"] || 1) * 24 * 3600 * 1000 // 1 Day === 24 * 3600 * 1000 en ms
-        tickInterval: (parametreUrlOris.asRaw["xinterval"] || 1) * 24 * 3600 * 1000 // 1 Day === 24 * 3600 * 1000 en ms
+        tickInterval: (parametreUrlOris.asRaw["xinterval"]) * 24 * 3600 * 1000 || undefined, // 1 Day === 24 * 3600 * 1000 en ms
+
+        labels: {
+          events: {
+            dblclick: function () {
+              xAxisLabelInteractionHandler.bind(this)();
+            }
+          }
+        }
+
       }, { // Le 2e axe X est la ligne des "semaines"
         labels: {
+          events: {
+            dblclick: function () {
+              xAxisLabelInteractionHandler.bind(this)();
+            }
+          },
           /**
            * @Issue #38
            **/
@@ -551,7 +565,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     // set CATEGORIES
     //BASE_CONFIG.yAxis.categories = yCategories;
     // if (parametreUrlOris.asRaw["uniquenames"] === "true")
-      // BASE_CONFIG.yAxis =  { uniqueNames: true };
+    // BASE_CONFIG.yAxis =  { uniqueNames: true };
     /**
      * Détecter ("calculer") yAxis.uniqueNames
      */
@@ -567,15 +581,15 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     if (parametreUrlOris.asRaw[hcConfigKeys.chart.title.url_param]) // version moins "couplée"
       BASE_CONFIG.title = {
         text: decodeURIComponent(parametreUrlOris.asRaw[hcConfigKeys.chart.title.url_param])
-    };
+      };
 
     // set SUBTITLE
     // if (parametreUrlOris.asRaw["subtitle"])
     //  BASE_CONFIG.subtitle = { text: parametreUrlOris.asRaw["subtitle"] };
     if (parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param]) // version moins "couplée"
       BASE_CONFIG.subtitle = {
-      text: decodeURIComponent(parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param])
-    };
+        text: decodeURIComponent(parametreUrlOris.asRaw[hcConfigKeys.chart.subtitle.url_param])
+      };
 
     // TODO pas recommandé
     // set NAVIGATOR
@@ -607,9 +621,9 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     // set RANGE SELECTOR
     if (parametreUrlOris.asRaw["selector"] === "true")
       BASE_CONFIG.rangeSelector = {
-          enabled: true,
-          // selected: 0,
-          buttons: []
+        enabled: true,
+        // selected: 0,
+        buttons: []
       };
 
 
@@ -636,7 +650,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
 
     /**
      * minHeight ne marhe pas...
-    if (parametreUrlOris.asRaw["minheight"]) {
+     if (parametreUrlOris.asRaw["minheight"]) {
       let numberValue = new OrisData(parametreUrlOris.asRaw["minheight"]).asNumber();
       if (numberValue) {
         // Ne pas écraser l'objet "scrollablePlotArea" s'il existe déjà
@@ -744,7 +758,22 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     return currentConfig = BASE_CONFIG;
   }
 
+  /**
+   * @Issue #56 Double cliquer sur un label de l'axe X pour zoomer
+   */
+  function xAxisLabelInteractionHandler() {
+    // Clicked xAxis
+    let xaxis = this.axis,
+      chart = xaxis.chart,
+      // Main xAxis is always xAxis[0], [1] is just the years... (unless
+      xaxis0 = chart.xAxis[0],
+      // Clicked tick's timestamp value (ms)
+      targetTickPos = this.pos,
+      tickInterval = xaxis0.tickInterval;
 
+    xaxis0.setExtremes(targetTickPos - (tickInterval*0.1), targetTickPos + tickInterval + (tickInterval *0.1));
+    this.chart.showResetZoom();
+  }
 
   function drawChart (parametreUrlOris, rawTaskDatas) {
     // TODO check param integrity/type/etc...
@@ -819,13 +848,13 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
     resultat.categories = resultat.data.map(function (current) {
       return current.category;
     })
-      // valeurs uniques
+    // valeurs uniques
       .filter(function (val, i, self) {
-      return self.indexOf(val) === i;
-    });
+        return self.indexOf(val) === i;
+      });
     // remplacer la catégorie (string) par son index (int) dans 'resultat.categories'
     // resultat.data = data.map(function (val) {
-      // return resultat.categories.indexOf(val);
+    // return resultat.categories.indexOf(val);
     // }); //pas besoin de filter
     let l = resultat.data.length;
     while (l--) {

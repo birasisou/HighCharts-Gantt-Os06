@@ -37,17 +37,17 @@
       <div class="multi-collapse collapse" style="">
         <nav id="navbar" class="navbar navbar-expand bg-dark">
           <!-- Edit buttons -->
-          <div class="py-2">
-            <button id="task-add-button" class="rounded-0 btn btn-success mr-1" title="Create new task">
+          <div class="">
+            <button id="task-add-button" class="rounded-0 btn btn-success mr-1 btn-sm" title="Create new task">
               <i class="fa fa-plus"></i><span class="d-none d-sm-inline">&nbsp;Add</span>
             </button>
 
-            <button id="task-edit-button" class="rounded-0 btn btn-primary mr-1" disabled
+            <button id="task-edit-button" class="rounded-0 btn btn-primary mr-1 btn-sm" disabled
                     title="Edit selected task">
               <i class="fa fa-pencil"></i><span class="d-none d-sm-inline">&nbsp;Edit</span>
             </button>
 
-            <button id="task-delete-navbar-button" class="rounded-0 btn btn-danger" disabled title="Delete selected task" data-toggle="modal" data-target="#delete-point-modal">
+            <button id="task-delete-navbar-button" class="rounded-0 btn btn-danger btn-sm" disabled title="Delete selected task" data-toggle="modal" data-target="#delete-point-modal">
               <i class="fa fa-trash"></i><span class="d-none d-sm-inline">&nbsp;Delete</span>
             </button>
           </div>
@@ -55,7 +55,7 @@
           <!-- &fil= -->
           <form id="task-search-widget" class="form-inline active mx-auto justify-content-center col-5 col-sm-4 text-center" onsubmit="return false;">
             <div class="d-inline w-100">
-              <div class="input-group">
+              <div class="input-group input-group-sm">
                 <input id="task-search-input" type="text" class="form-control" placeholder="Search" autocomplete="true" onclick="this.setSelectionRange(0, this.value.length)">
                 <div class="input-group-append">
                   <button class="input-group-text text-success"><i class="fa fa-search"></i></button>
@@ -63,17 +63,17 @@
               </div>
             </div>
           </form>
-          <div class="p-2">
-            <button id="chart-destroy-button" class="btn btn-warning rounded-0" title="Reinitialize chart">
+          <div class="">
+            <button id="chart-destroy-button" class="btn btn-warning btn-sm rounded-0" title="Reinitialize chart">
               <i class="fa fa-refresh"></i><span class="d-none d-sm-inline">&nbsp;Redraw</span>
             </button>
           </div>
         </nav>
       </div>
 
-      <button id="widget-area-toggler" class="btn btn-dark rounded-0 collapsed" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" title="Show/Hide editing buttons">
-        <i class="fa fa-cogs"></i>
-        <i class="fa fa-caret-square-o-up"></i>
+      <button id="widget-area-toggler" class="btn btn-dark btn-sm rounded-0 collapsed" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" title="Show/Hide editing buttons">
+        <i class="fa fa-cogs" id="show-icon"></i>
+        <i class="fa fa-eye-slash" id="collapse-icon"></i>
       </button>
 
     </div>
@@ -367,6 +367,7 @@
   <script src="/img/gantt/src/lib/highcharts/highcharts-gantt.min.js"></script>
   <script src="/img/gantt/src/lib/highcharts/modules/no-data-to-display.js"></script>
   <script src="/img/gantt/src/lib/highcharts/modules/draggable-points.js"></script>
+  <script src="/img/gantt/src/lib/highcharts/modules/custom-events.min.js"></script>
   <script src="/img/gantt/src/lib/popper/popper.min.js"></script>
   <script src="/img/gantt/src/lib/bootstrap/js/bootstrap.min.js"></script>
   <script src="/img/gantt/src/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
