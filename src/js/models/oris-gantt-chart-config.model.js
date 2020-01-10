@@ -1,4 +1,27 @@
 /**
+ * @workaround zoomKey était ignorée
+ * (la doc n'était pas clair
+ * et il semblerait que son unique but soit de permettre de Drag-Drop sur un Point afin de zoomer
+ * et non de bouger le Point)
+ * @Issue https://github.com/highcharts/highcharts/issues/12669
+ *
+ */
+(function(H) {
+  H.wrap(
+    H.Pointer.prototype,
+    'dragStart',
+    function(proceed, event) {
+      const zoomKey = this.chart.options.chart.zoomKey && this.chart.options.chart.zoomKey + 'Key';
+      const panKey = this.chart.options.chart.panKey && this.chart.options.chart.panKey + 'Key';
+
+      if (event[zoomKey] || event[panKey]) {
+        proceed.call(this, event);
+      }
+    }
+  );
+})(Highcharts); // */
+
+/**
  * Module used to draw / update the Gantt Chart
  */
 function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
@@ -415,6 +438,7 @@ function GanttRenderingModule (PARAMETRES_URL_ORIS_NO_FUNCTIONS) {
          * @Issue #41 Rendre le zoom activable
          */
         zoomType: parametreUrlOris.asRaw["zoom"] === "true" ? 'x' : undefined,
+        zoomKey: 'ctrl',
         panning: true,
         panKey: 'shift',
         events: {
